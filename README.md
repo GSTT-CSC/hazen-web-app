@@ -10,6 +10,8 @@ Setup:
 - Clone repo
 - `cd hazen-web-app`
 - `pip install -r requirements.txt`
+  - Reminder for Tom: currently using `req_hazen-web-app.txt`
+  - `requirements.txt` is old file associated with old hazen package built on Python 3.6 and other older packages
 
 To run locally:
 - `python hazen.py`
