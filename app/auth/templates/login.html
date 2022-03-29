@@ -4,7 +4,7 @@
 
     <div class="row">
 
-    <div class="col-lg-4 col-md-6 ml-auto mr-auto">
+    <div class="col-lg-4 col-md-6 col-lg-offset-4 col-md-offset-3">
 
         <div class="card card-login">
 
@@ -16,8 +16,8 @@
 
                 <div class="card-body">
                     <span class="bmd-form-group">
-                        <div class="input-group">
-                            {{ form.username(size=32, class="form-control", placeholder="Username") }}
+                        <div class="input-group center-block">
+                            {{ form.username(class="form-control", placeholder="Username") }}
                             <br>
                             {% for error in form.username.errors %}
                                 <span style="color: red;">[{{ error }}]</span>
@@ -26,8 +26,8 @@
                     </span>
 
                     <span class="bmd-form-group">
-                        <div class="input-group">
-                            {{ form.password(size=32, id="inputPassword", class="form-control", placeholder="Password") }}
+                        <div class="input-group center-block">
+                            {{ form.password(id="inputPassword", class="form-control", placeholder="Password") }}
                             <br>
                             {% for error in form.password.errors %}
                                 <span style="color: red;">[{{ error }}]</span>
