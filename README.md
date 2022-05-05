@@ -22,6 +22,7 @@ In Terminal:
 brew update
 brew install postgresql
 ```
+*Confirm PostgreSQL is running before moving onto the next step.*
 
 Download [Postico](https://eggerapps.at/postico/).
 - Create a **New Favourite** with:
