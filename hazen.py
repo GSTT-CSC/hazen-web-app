@@ -17,6 +17,8 @@ def register_tasks_in_db():
     tasks = {f'{modname}': importlib.import_module(f'hazenlib.{modname}') for importer, modname, ispkg in pkgutil.iter_modules(hazenlib.__path__)}
 
     with app.app_context():
+        # Create databases
+        db.create_all(app=app)
         stored_tasks = ProcessTask.query.all()
 
         for stored_task in stored_tasks:
