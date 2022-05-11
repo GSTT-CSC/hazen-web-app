@@ -121,7 +121,7 @@ Open a web browser and use the hazen-web-app at the provided address, typically:
 *Note: [If you are using macOS Monterey](https://progressstory.com/tech/port-5000-already-in-use-macos-monterey-issue/), you will need go to **System Preferences > Sharing** and untick **AirPlay Receiver** in order to use port 5000.*
 
 <p align="center" width="100%">
-    <img width="663" alt="image" src="https://user-images.githubusercontent.com/67117138/167834187-5f2dbe3f-df48-411b-9252-1e20c2d9fc0b.png">
+    <img width="663" alt="image" src="<img width="663" alt="image" src="https://user-images.githubusercontent.com/67117138/167840022-25d838b9-950d-44cd-a30b-a916bd3c7eb0.png">">
 </p>
 
 
