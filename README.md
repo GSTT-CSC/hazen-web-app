@@ -22,6 +22,7 @@ In Terminal:
 brew update
 brew install postgresql
 ```
+*Confirm PostgreSQL is running before moving onto the next step.*
 
 Download [Postico](https://eggerapps.at/postico/).
 - Create a **New Favourite** with:
@@ -116,6 +117,13 @@ python hazen.py
 ```
 
 Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000](http://localhost:5000).
+
+*Note: [If you are using macOS Monterey](https://progressstory.com/tech/port-5000-already-in-use-macos-monterey-issue/), you will need go to **System Preferences > Sharing** and untick **AirPlay Receiver** in order to use port 5000.*
+
+<p align="center" width="100%">
+     <img width="663" alt="image" src="https://user-images.githubusercontent.com/67117138/167840022-25d838b9-950d-44cd-a30b-a916bd3c7eb0.png">
+</p>
+
 
 ## Deployment on Heroku
 
