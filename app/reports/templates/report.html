@@ -2,7 +2,6 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-
     {% if pending %}
         <table class="table table-striped"></table>
     {% endif %}
@@ -17,28 +16,32 @@
     {% else %}
         {% for fact in facts %}
             <table class="table table-striped">
+
                 <caption>
                     Status: {{ fact.status }}<br>
                     Task: {{ fact.task.name }}<br>
                     Variables: {{ fact.process_task_variables }}<br>
                     Created: {{ moment(fact.created_at.naive).fromNow() }}<br>
                 </caption>
+
                 <thead>
-                <tr>
-                    <th>Measurement</th>
-                    <th>Value</th>
-                </tr>
+                    <tr>
+                        <th>Measurement</th>
+                        <th>Value</th>
+                    </tr>
                 </thead>
+
                 <tbody>
-                <tr>
-                {% for key, value in fact.data.items() %}
-                    {% for key, value in value.items() %}
-                        <td>{{ key }}</td>
-                        <td>{{ value }}</td>
+                    {% for key, value in fact.data.items() %}
+                        {% for key, value in value.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
-                </tr>
                 </tbody>
+
             </table>
 
         {% endfor %}
