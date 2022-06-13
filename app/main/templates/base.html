@@ -1,11 +1,24 @@
-{% extends 'bootstrap/base.html' %}
-{% block head %}
-    {{ super() }}
-{{ moment.include_moment() }}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>hazen-web-app</title>
 
-<title>{% if title %}{{ title }} - Hazen{% else %}Welcome to Hazen{% endif %}</title>
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            {{ bootstrap.load_css() }}
+        {% endblock %}
 
+        {{ moment.include_moment() }}
+
+    {% endblock %}
+</head>
+
+<body>
+<!-- Your page content -->
 {% block navbar %}
     <nav class="navbar navbar-default">
         <div class="container">
@@ -26,25 +39,25 @@
                 <ul class="nav navbar-nav">
 
                     {% if not current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
+                        </li>
                     {% endif %}
 
                     {% if not current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
+                        </li>
                     {% endif %}
 
                     {% if current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </li>
                     {% endif %}
 
                 </ul>
@@ -59,7 +72,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
+                    <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -69,3 +82,12 @@
         {% endblock %}
     </div>
 {% endblock %}
+
+{% block scripts %}
+    <!-- Optional JavaScript -->
+    {{ bootstrap.load_js() }}
+{% endblock %}
+</body>
+</html>
+
+
