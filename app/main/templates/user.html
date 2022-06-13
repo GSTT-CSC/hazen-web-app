@@ -7,9 +7,9 @@
     <div class="col-3">
         {% set active_tab = "snr-tab" %}
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            {%  for task in tasks %}
-                <a data-toggle="pill" id="{{ task.name }}-tab"
-                   {% if id == active_tab %}class="nav-link active" {% else %}class="nav-link" {% endif %}
+            {% for task in tasks %}
+                <a data-bs-toggle="pill" id="{{ task.name }}-tab"
+                   {% if id == active_tab %} class="nav-link active" {% else %} class="nav-link" {% endif %}
                    href="#{{ task.name }}" role="tab">{{ task.name }}</a>
             {% endfor %}
         </div>
