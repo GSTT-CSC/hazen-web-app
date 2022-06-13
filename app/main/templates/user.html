@@ -43,10 +43,11 @@
                     <th>Uploader</th>
                     <th>Description</th>
                     <th>Files</th>
+                    <th>Delete</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for acquisition in acquisitions%}
+                {% for acquisition in acquisitions %}
                     <tr>
                         <td>
                             <a href="{{ url_for('reports.report', acquisition_uuid=acquisition.id) }}">
@@ -57,6 +58,7 @@
                         <td>{{ acquisition.author.username }}</td>
                         <td>{{ acquisition.description }}</td>
                         <td>{{ acquisition.files }}</td>
+                        <td><img src="../../static/trash.svg" /></td>
                     </tr>
                 {% endfor %}
                 </tbody>
