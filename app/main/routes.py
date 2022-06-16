@@ -1,3 +1,5 @@
+import os
+import shutil
 from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, current_app
@@ -97,6 +99,10 @@ def explore():
 def delete_acq(username, acquisition_uuid):
     user = User.query.get(current_user.get_id())
     acquisition = Acquisition.query.filter_by(id=acquisition_uuid, user_id=user.id)
+
+    # delete files
+    directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key, acquisition.first().filesystem_key)
+    shutil.rmtree(directory)
 
     # remove db entry
     acquisition.delete()
