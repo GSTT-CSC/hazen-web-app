@@ -90,3 +90,16 @@ def explore():
 
     return render_template("index.html", title='Explore', acquisitions=acquisitions.items, next_url=next_url,
                            prev_url=prev_url)
+
+
+@bp.route('/user/<username>/<acquisition_uuid>/')
+@login_required
+def delete_acq(username, acquisition_uuid):
+    user = User.query.get(current_user.get_id())
+    acquisition = Acquisition.query.filter_by(id=acquisition_uuid, user_id=user.id)
+
+    # remove db entry
+    acquisition.delete()
+    db.session.commit()
+
+    return redirect(request.referrer)
