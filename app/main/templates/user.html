@@ -58,7 +58,11 @@
                         <td>{{ acquisition.author.username }}</td>
                         <td>{{ acquisition.description }}</td>
                         <td>{{ acquisition.files }}</td>
-                        <td><img src="../../static/trash.svg" /></td>
+                        <td>
+                            <a href="{{ url_for('main.delete_acq', acquisition_uuid=acquisition.id, username=acquisition.author.username) }}">
+                                <img src="../../static/trash.svg">
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
