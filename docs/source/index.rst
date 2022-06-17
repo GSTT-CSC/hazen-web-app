@@ -29,7 +29,7 @@ The hazen-web-app requires manual installation of the following software:
 - `RabbitMQ <https://www.rabbitmq.com/>`_
 - `hazen-web-app <https://github.com/GSTT-CSC/hazen-web-app>`_
 
-We use PostgreSQL as the underlying database software, RabbitMQ as the message broker (used in conjunction with `Celery <https://docs.celeryq.dev/en/stable/>`_ for communication between the app and browser), and Postico recommended for easy viewing of the databases.
+We use PostgreSQL as the underlying database software, RabbitMQ as the message broker (used in conjunction with `Celery <https://docs.celeryq.dev/en/stable/>`_ for communication between the app and browser), and Postico for easy viewing of the databases.
 
 
 Getting Started
