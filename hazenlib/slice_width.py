@@ -850,14 +850,6 @@ def main(data: list, report_path=False) -> dict:
 
     """
     results = {}
-
-    import pydicom
-    data = [pydicom.read_file(x, force=True) for x in data]
-
-    print("INSIDE HAZEN - data:", data)
-    print("INSIDE HAZEN - len(data):", len(data))
-    print("INSIDE HAZEN - data[0].SeriesDescription:", data[0].SeriesDescription)
-
     for dcm in data:
         try:
             key = f"{dcm.SeriesDescription}_{dcm.SeriesNumber}_{dcm.InstanceNumber}"
