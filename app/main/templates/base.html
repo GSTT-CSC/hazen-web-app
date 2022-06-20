@@ -1,50 +1,56 @@
-{% extends 'bootstrap/base.html' %}
-{% block head %}
-    {{ super() }}
-{{ moment.include_moment() }}
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>hazen-web-app</title>
 
-<title>{% if title %}{{ title }} - Hazen{% else %}Welcome to Hazen{% endif %}</title>
+        {% block styles %}
+            <!-- Bootstrap CSS -->
+            {{ bootstrap.load_css() }}
+        {% endblock %}
 
+        {{ moment.include_moment() }}
+
+    {% endblock %}
+</head>
+
+<body>
+<!-- Your page content -->
 {% block navbar %}
-    <nav class="navbar navbar-default">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
 
             <!-- Brand and toggle button for mobile view -->
-            <div class="navbar-header">
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">Hazen</a>
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-            </div>
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Hazen</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
 
             <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="nav navbar-nav">
 
                     {% if not current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
-                    </li>
-                    {% endif %}
-
-                    {% if not current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
+                        </li>
                     {% endif %}
 
                     {% if current_user.is_anonymous %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                    </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        </li>
                     {% endif %}
 
                 </ul>
@@ -59,7 +65,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
+                    <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -69,3 +75,12 @@
         {% endblock %}
     </div>
 {% endblock %}
+
+{% block scripts %}
+    <!-- Optional JavaScript -->
+    {{ bootstrap.load_js() }}
+{% endblock %}
+</body>
+</html>
+
+

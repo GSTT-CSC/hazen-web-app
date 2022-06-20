@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+{% import "bootstrap5/form.html" as wtf %}
 
 {% block app_content %}
     {% if pending %}
@@ -9,7 +9,7 @@
     {% if not facts %}
         <h3>Generate reports</h3>
         {% if form %}
-            {{ wtf.quick_form(form) }}
+            {{ wtf.render_form(form) }}
             <br>
         {% endif %}
 
