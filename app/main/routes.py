@@ -20,6 +20,10 @@ def before_request():
 @bp.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
+
+    from config import Config
+    print(Config.SQLALCHEMY_DATABASE_URI)
+
     form = AcquisitionForm()
     if form.validate_on_submit():
         acquisition = Acquisition(body=form.acquisition.data, author=current_user)

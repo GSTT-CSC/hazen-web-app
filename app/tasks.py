@@ -18,12 +18,18 @@ def produce_report(self, fn, acquisition):
 
     dcms = [os.path.join(filesystem_folder, f) for f in os.listdir(filesystem_folder)]
 
+    print("TAR DEBUG – filesystem_folder:", filesystem_folder)
+    print("TAR DEBUG – os.listdir(filesystem_folder):", os.listdir(filesystem_folder))
+
     if len(dcms) != acquisition['files']:
         raise Exception('Number of dicoms in directory not equal to expected!')
 
     self.update_state(state='IN PROGRESS')
     self.acquisition_id = acquisition['hex']
     res = task.main(data=dcms)
+
+    print("TAR DEBUG – res:", res)
+
     self.update_state(state='STORING RESULTS')
     fact = Fact(user_id=acquisition['author_id'],
                 acquisition_id=acquisition['id'],
