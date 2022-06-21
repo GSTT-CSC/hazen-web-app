@@ -60,15 +60,6 @@ export PATH=$PATH:/usr/local/sbin
 source ~/.bashrc
 ```
 
-## Setup on Ubuntu (Linux)
-
-The hazen-web-app **requires** manual installation of the following software:
-- Postgres: database software for storing user data, acquisition data, etc.
-
-Official PostgreSQL installation instructions for Ubuntu-based Linux distros: [PostgreSQL installation](https://www.postgresql.org/download/linux/ubuntu/).
-A default superuser is created during the installation. To create and access databases, additional users can be created by following the steps outlined [here](https://kb.objectrocket.com/postgresql/how-to-create-a-role-in-postgres-1454).
-Create a new database called `hazen`.
-
 ### hazen-web-app
 
 Clone this repository, create new venv and install:
@@ -84,6 +75,18 @@ source hazen-web-app/bin/activate
 cd hazen-web-app
 pip install -r requirements.txt
 ```
+
+## Setup on Ubuntu (Linux)
+
+The hazen-web-app **requires** manual installation of the following software:
+- Postgres: database software for storing user data, acquisition data, etc.
+- hazen-web-app (i.e.: this repo) - requires Python3.8 or above and `pip`
+
+Official PostgreSQL installation instructions for Ubuntu-based Linux distros: [PostgreSQL installation](https://www.postgresql.org/download/linux/ubuntu/).
+A default superuser is created during the installation. To create and access databases, additional users can be created by following the steps outlined [here](https://kb.objectrocket.com/postgresql/how-to-create-a-role-in-postgres-1454).
+Create a new database called `hazen`.
+
+Follow instructions above to clone the hazen-web-app repo and install required packages.
 
 #### Troubleshooting tips
 If any of the required packages error out, try installing the problematic packages one by one.
