@@ -2,16 +2,16 @@
 
 The hazen-web-app is an interactive web-based implementation of [hazen](https://github.com/GSTT-CSC/hazen).
 
-**These guidelines are written for developers to install hazen-web-app on MacOS and are a work in progress!**
+**These guidelines are written for developers to install hazen-web-app on MacOS or Ubuntu and are a work in progress!**
 
 
-## Setup
+## Setup on MacOS
 
 The hazen-web-app **requires** manual installation of the following software:
 - Postgres: database software for storing user data, acquisition data, etc.
   - Postico recommended for viewing databases
 - RabbitMQ: message broker used in conjunction with Celery to communicate between the app and web browser
-- hazen-web-app (i.e.: this repo)
+- hazen-web-app (i.e.: this repo) - requires Python3.8 or above and `pip`
 
 ### Postgres & Postico
 
@@ -60,7 +60,6 @@ export PATH=$PATH:/usr/local/sbin
 source ~/.bashrc
 ```
 
-
 ### hazen-web-app
 
 Clone this repository, create new venv and install:
@@ -76,6 +75,22 @@ source hazen-web-app/bin/activate
 cd hazen-web-app
 pip install -r requirements.txt
 ```
+
+## Setup on Ubuntu (Linux)
+
+The hazen-web-app **requires** manual installation of the following software:
+- Postgres: database software for storing user data, acquisition data, etc.
+- hazen-web-app (i.e.: this repo) - requires Python3.8 or above and `pip`
+
+Official PostgreSQL installation instructions for Ubuntu-based Linux distros: [PostgreSQL installation](https://www.postgresql.org/download/linux/ubuntu/).
+A default superuser is created during the installation. To create and access databases, additional users can be created by following the steps outlined [here](https://kb.objectrocket.com/postgresql/how-to-create-a-role-in-postgres-1454).
+Create a new database called `hazen`.
+
+Follow instructions above to clone the hazen-web-app repo and install required packages.
+
+#### Troubleshooting tips
+If any of the required packages error out, try installing the problematic packages one by one.
+On Linux, the `psycopg2` package should be renamed to `psycopg2-binary` to be installed.
 
 ## Run
 
@@ -115,6 +130,8 @@ Open a new terminal window. Ensure you are running your `hazen-web-app` venv and
 ```shell 
 python hazen.py
 ```
+
+For development purposes on Linux, only Postgres and the hazen.py need to run. The username and password for the Postgres user created at installation may be added to the config.py on L7 in the following format: `postgresql://username:password@localhost:5432/hazen`
 
 Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000](http://localhost:5000).
 
