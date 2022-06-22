@@ -54,7 +54,7 @@
                             {{ acquisition.id.hex}}
                             </a>
                         </td>
-                        <td>{{ moment(acquisition.created_at.naive).fromNow()}}</td>
+                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                         <td>{{ acquisition.author.username }}</td>
                         <td>{{ acquisition.description }}</td>
                         <td>{{ acquisition.files }}</td>
