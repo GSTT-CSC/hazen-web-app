@@ -25,4 +25,5 @@ class Config:
     DROPZONE_ALLOWED_FILE_TYPE = 'application/dicom, .IMA'
     DROPZONE_ALLOWED_FILE_CUSTOM = True
 
-
+    CELERY_BROKER_URL = 'amqp://localhost'  # for RabbitMQ or 'redis://localhost:6379/0' for Redis
+    CELERY_RESULT_BACKEND = 'rpc://'  # for RabbitMQ or 'redis://localhost:6379/0' for Redis
