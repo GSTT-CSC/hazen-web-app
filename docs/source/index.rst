@@ -16,37 +16,46 @@ It provides automatic quantitative analysis for the following measurements of MR
 - Ghosting
 - MR Relaxometry
 
-The hazen-web-app is an interactive web-based implementation of `hazen <https://github.com/GSTT-CSC/hazen/>`_.
+The |hazen-web-app|_ is an interactive web-based implementation of |hazen|_.
 
-.. attention:: These guidelines are written for developers to install hazen-web-app on MacOS and are a work in progress!
+.. _hazen: https://github.com/GSTT-CSC/hazen/
 
-Install
-~~~~~~~~~~~~
-The hazen-web-app requires manual installation of the following software:
+.. |hazen| replace:: *hazen*
+
+.. _hazen-web-app: https://github.com/GSTT-CSC/hazen-web-app
+
+.. |hazen-web-app| replace:: *hazen-web-app*
+
+Currently, the |hazen-web-app|_ requires manual installation of the following software:
 
 - `PostgreSQL <https://www.postgresql.org/download/>`_
-- `Postico <https://eggerapps.at/postico/>`_
+- `Postico <https://eggerapps.at/postico/>`_ (MacOS) or  `Beekeeper Studio <https://www.beekeeperstudio.io/>`_ (Linux)
 - `RabbitMQ <https://www.rabbitmq.com/>`_
 - `hazen-web-app <https://github.com/GSTT-CSC/hazen-web-app>`_
 
-We use PostgreSQL as the underlying database software, RabbitMQ as the message broker (used in conjunction with `Celery <https://docs.celeryq.dev/en/stable/>`_ for communication between the app and browser), and Postico for easy viewing of the databases.
+We use PostgreSQL as the underlying database software, RabbitMQ as the message broker (used in conjunction with `Celery <https://docs.celeryq.dev/en/stable/>`_ for communication between the app and browser), and Postico/Beekeeper Studio for easy viewing of the databases. For a step-by-step guide, please refer to the Install page.
 
+We are currently working on migrating the |hazen-web-app|_ to be hosted on `Heroku <https://www.heroku.com/>`_, which will remove the need for users to install the application on their local machines.
 
-Getting Started
-~~~~~~~~~~~~~~~~
-
-Roadmap
-~~~~~~~~~~~~
+Table of Contents
+=================
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Getting Started
 
-   modules
+   install
+   tasks
 
-Indices and tables
-==================
+.. toctree::
+   :maxdepth: 1
+   :caption: Modules
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   web/modules.rst
+   library/modules.rst
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Get Involved
+
+   contributors
