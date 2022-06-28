@@ -1,4 +1,7 @@
 """
+Introduction
+============
+
 SNR(Im)
 
 Calculates the SNR for a single-slice image of a uniform MRI phantom

@@ -1,5 +1,9 @@
 """
-Assumptions:
+Introduction
+============
+
+Assumptions
+============
 Square voxels, no multi-frame support
 """
 
@@ -8,15 +12,14 @@ import sys
 import traceback
 from copy import copy
 from copy import deepcopy
+import pydicom
 from hazenlib.logger import logger
-
 import numpy as np
 from scipy import ndimage
 from scipy.interpolate import interp1d
 import scipy.optimize as opt
 from skimage.measure import regionprops
 from matplotlib import pyplot as plt
-
 import hazenlib
 
 class Rod:
@@ -850,6 +853,8 @@ def main(data: list, report_path=False) -> dict:
 
     """
     results = {}
+    # data = [pydicom.read_file(x, force=True) for x in data]
+
     for dcm in data:
         try:
             key = f"{dcm.SeriesDescription}_{dcm.SeriesNumber}_{dcm.InstanceNumber}"
@@ -859,6 +864,7 @@ def main(data: list, report_path=False) -> dict:
             logger.info(e)
             key = f"{dcm.SeriesDescription}_{dcm.SeriesNumber}"
         try:
+
             result = get_slice_width(dcm, report_path)
         except Exception as e:
             print(f"Could not calculate the slice_width for {key} because of : {e}")

@@ -5,6 +5,7 @@
 
 Welcome to hazen's documentation!
 =================================
+
 *hazen* is a software framework for performing automated analysis of magnetic resonance imaging (MRI) Quality Assurance data.
 
 It provides automatic quantitative analysis for the following measurements of MRI phantom data:

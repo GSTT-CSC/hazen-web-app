@@ -1,4 +1,10 @@
-""" Application-specific errors"""
+"""
+Introduction
+============
+
+Application-specific errors
+
+"""
 
 
 class ShapeError(Exception):

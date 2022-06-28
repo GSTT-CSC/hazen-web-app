@@ -1,25 +1,20 @@
 """
+Introduction
+============
+
 Spatial Resolution
 
-Contributors:
-Haris Shuaib, haris.shuaib@gstt.nhs.uk
-Neil Heraghty, neil.heraghty@nhs.net, 16/05/2018
-
-.. todo::
-    Replace shape finding functions with hazenlib.tools equivalents
+.. note::
+    TODO: Replace shape finding functions with ``hazenlib.tools`` equivalents
     
 """
 import copy
 import sys
 import traceback
 from hazenlib.logger import logger
-
-
-
 import cv2 as cv
 import numpy as np
 from numpy.fft import fftfreq
-
 import hazenlib
 
 def deri(a):

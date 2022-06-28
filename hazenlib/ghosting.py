@@ -1,10 +1,18 @@
+"""
+Introduction
+============
+
+Ghosting is a type of structured noise appearing as repeated versions of the main object (or parts thereof) in the image. They occur because of signal instability between pulse cycle repetitions. Ghosts are usually blurred, smeared, and shifted and are most commonly seen along the phase encode direction. One of the most famous of these is the so-called Nyquist N/2 ghost..
+
+Ghosts most commonly arise because of physical motion during imaging (including vibration of the phantom, gross patient motion, blood flow, respiratory, and cardiac effects). For QC purposes we seek machine-related causes of ghosting which may be caused by eddy currents or a wide range of other problems in the transmit, receive, or gradient sub-systems.
+
+Source: https://mriquestions.com/ghosting.html
+"""
 import os
 import sys
 import traceback
-
 import numpy as np
 import cv2 as cv
-
 import hazenlib
 
 

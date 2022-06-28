@@ -1,4 +1,6 @@
 """
+Introduction
+============
 
 Local Otsu thresholding
 http://scikit-image.org/docs/0.11.x/auto_examples/plot_local_otsu.html
