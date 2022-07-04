@@ -121,11 +121,13 @@ import pydicom
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 import os.path
 import skimage.morphology
 import scipy.ndimage
 import scipy.optimize
 from scipy.interpolate import UnivariateSpline
+
 import hazenlib.exceptions
 
 # Use dict to store template and reference information

@@ -34,9 +34,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
+
 import skimage.morphology
 from scipy import ndimage
 from skimage import filters
+
 from hazenlib.logger import logger
 
 

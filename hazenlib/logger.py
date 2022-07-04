@@ -1,17 +1,10 @@
-"""
-Introduction
-============
-
-Configures log format
-
-"""
-
 import logging
 import colorlog
 import sys
 
 
 def configure_logger():
+
     # make log formatters
     stream_formatter = colorlog.ColoredFormatter('%(log_color)s%(asctime)-15s %(levelname).1s '
                                                  '[%(filename)s:%(funcName)s:%(lineno)d] %(message)s',
@@ -32,6 +25,8 @@ def configure_logger():
     # add handlers
     logger.addHandler(stream_handler)
     logger.addHandler(file_handler)
+
+
 
 
 logger = logging.getLogger(__name__)
