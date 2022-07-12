@@ -1,5 +1,15 @@
 """
-Spatial Resolution
+Spatial Resolution:
+Finds the modulation transfer function of MRI images using the slanted edge method as reported on IPEM112.
+
+Step 1: Find the in the image
+Step 2: Find the coordinates of the edge
+Step 3: Use the coordinates of the edge to find the angle of the edge
+Step 4: Project every point, this is the ESF
+Step 5: Take the derivative of the ESF to find the LSF
+Step 6: Take the fft of the LSF to get the MTF
+
+
 
 Contributors:
 Haris Shuaib, haris.shuaib@gstt.nhs.uk
