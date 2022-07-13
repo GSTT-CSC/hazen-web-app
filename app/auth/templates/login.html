@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block app_content %}
+<head>
+    <style>
+        body
+        {
+        background-image:url({{url_for('static',filename ='hazen_logo.jpeg') }})
+        }
+    </style>
+</head>
+
 
     <div class="row">
 
@@ -52,6 +61,7 @@
 
 
     </div>
+
 
 
 {% endblock %}
