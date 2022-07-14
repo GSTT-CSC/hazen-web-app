@@ -1,31 +1,33 @@
 {% extends "base.html" %}
 {% import "bootstrap5/form.html" as wtf %}
 
+{% block title %}{{title}}{% endblock %}
+
 {% block app_content %}
-    <h2 class="text-capitalize">Hi, {{ current_user.username }}!</h2>
-    {% if form %}
-    {{ wtf.render_form(form) }}
-    <br>
-    {% endif %}
+    <div class="row justify-content-center"><h2 class="text-center">Process Tasks</h2></div>
 
-  <div class="card-columns text-center">
-    {% for acquisition in acquisitions %}
-        {% include '_acquisition.html' %}
-    {% endfor %}
-  </div>
+    <div class="row">
+        <div class="col-3">
+            {% set active_tab = "relaxometry-tab" %}
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                {% for task in tasks %}
+                    <a data-bs-toggle="pill" id="{{ task.name }}-tab"
+                    {% if id == active_tab %} class="nav-link active" {% else %} class="nav-link" {% endif %}
+                    href="#{{ task.name }}" role="tab">{{ task.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
 
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
-                    <span aria-hidden="true">&larr;</span> Newer acquisitions
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ next_url or '#' }}">
-                    Older acquisitions <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+        <div class="col-9">
+            <div class="tab-content" id="v-pills-tabContent">
+                {%  for task in tasks %}
+                <div class="tab-pane fade" id="{{ task.name }}" role="tabpanel">
+                    {% autoescape false %}
+                    {{ task.docstring | replace("\\n", "<br/>") }}
+                    {% endautoescape %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
