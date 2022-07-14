@@ -1,16 +1,18 @@
-from datetime import datetime
-from hashlib import md5
-from time import time
-import inspect
-
-import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.ext.hybrid import hybrid_property
-from flask_login import UserMixin
-from flask import current_app
+"""Models module, including the SQLAlchemy database model object and db table-related utilities."""
 
 from app import db, login
 from app.database import Model, SurrogatePK, CreatedTimestampMixin, UUID, JSONB
+
+from flask import current_app
+from flask_login import UserMixin
+from sqlalchemy.ext.hybrid import hybrid_property
+
+from datetime import datetime
+from time import time
+
+import jwt
+from hashlib import md5
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 @login.user_loader
@@ -71,6 +73,7 @@ class Acquisition(Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
     series_instance_uid = db.Column(db.String(140))
     description = db.Column(db.String(200))
+    filename = db.Column(db.String(200))
     files = db.Column(db.Integer)
     user_id = db.Column(db.ForeignKey('user.id'))
 
