@@ -1,7 +1,13 @@
+"""Main script to set up the web app
+
+"""
+# Import necessary packages, modules and scripts
+import os
 import logging
 from logging.handlers import SMTPHandler
 from logging.handlers import RotatingFileHandler
-import os
+
+from config import Config
 
 from flask import Flask, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -13,9 +19,9 @@ from flask_moment import Moment
 from flask_dropzone import Dropzone
 from flask_heroku import Heroku
 from celery import Celery
-from config import Config
 
 
+# Alias common variables
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
@@ -27,13 +33,16 @@ dropzone = Dropzone()
 heroku = Heroku()
 
 
+# Set up a Flask app
 def create_app(config_class=Config):
     app = Flask(__name__)
+    # with information specified in the config.py
     app.config.from_object(config_class)
-
+    # connect to the database
     db.init_app(app)
     migrate.init_app(app, db)
     db.create_all(app=app)
+    # Initialise additional functionality
     login.init_app(app)
     mail.init_app(app)
     bootstrap.init_app(app)
@@ -41,23 +50,26 @@ def create_app(config_class=Config):
     dropzone.init_app(app)
     heroku.init_app(app)
 
+    # Add project-specific functionality
+    # Main page - Dashboard
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
+    # Upload directory to hold files
+    os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
+
+    # Reports page for viewing Hazen output
     from app.reports import bp as reports_bp
     app.register_blueprint(reports_bp)
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
+    # Authentication pages to login, logout, change password
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
-
-    from app.uploader import bp as uploader_bp
-    app.register_blueprint(uploader_bp)
-
-    os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
-
+    # Actions in production mode
     if not app.debug:
+        # Set up the mail server
         if app.config['MAIL_SERVER']:
             auth = None
             if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
@@ -73,10 +85,11 @@ def create_app(config_class=Config):
             mail_handler.setLevel(logging.ERROR)
             app.logger.addHandler(mail_handler)
 
+        # Set up logging
         if not os.path.exists('logs'):
             os.mkdir('logs')
         file_handler = RotatingFileHandler('logs/hazen.log', maxBytes=10240,
-                                           backupCount=10)
+                                            backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
         file_handler.setLevel(logging.INFO)
@@ -103,6 +116,3 @@ def create_celery_app(app=None):
 
     celery.Task = ContextTask
     return celery
-
-
-from app import models
