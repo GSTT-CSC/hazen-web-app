@@ -32,55 +32,53 @@ def index():
     return render_template('index.html', title='Home', tasks=tasks)
 
 
-@bp.route('/user/<username>')
+# Dashboard
+# authenticated users can overview and perform tasks/analysis on files they uploaded
+@bp.route('/dashboard/', methods=['GET', 'POST'])
 @login_required
-def user(username):
-    user = User.query.filter_by(username=username).first_or_404()
-    tasks = ProcessTask.query.all()
-    page = request.args.get('page', 1, type=int)
+def dashboard():
+    # locate user in db by username
+    user = User.query.filter_by(username=current_user.username).first_or_404()
+    # # list available tasks that can be performed
+    # tasks = ProcessTask.query.all()
 
+    if request.method == 'POST': # form.validate_on_submit()
+        for key, file in request.files.items():
+            """
+            for file in files:
+                if file and allowed_file(file.filename):
+            """
+
+            if key.startswith('file'):
+                filename = secure_filename(file.filename)
+                secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+                file.save(secure_path)
+
+                try:
+                    filesystem_dir = ingest(secure_path)
+                except SeriesExistsError:
+                    os.remove(secure_path)
+                    flash('SeriesInstanceUID already exists!')
+                    return redirect(url_for('main.dashboard'))
+
+                permanent_path = os.path.join(filesystem_dir, filename)
+
+                shutil.move(secure_path, permanent_path)
+                flash('Upload success!')
+
+        return redirect(url_for('main.dashboard'))
+
+    # Display list of available acquisitions
+    page = request.args.get('page', 1, type=int)
     acquisitions = user.acquisitions.order_by(Acquisition.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-
-    next_url = url_for('main.user', username=user.username, page=acquisitions.next_num) \
+    next_url = url_for('main.dashboard', page=acquisitions.next_num) \
         if acquisitions.has_next else None
-    prev_url = url_for('main.user', username=user.username, page=acquisitions.prev_num) \
+    prev_url = url_for('main.dashboard', page=acquisitions.prev_num) \
         if acquisitions.has_prev else None
 
-    return render_template('user.html', user=user, acquisitions=acquisitions.items,
-                           next_url=next_url, prev_url=prev_url, tasks=tasks)
-
-
-@bp.route('/edit_profile', methods=['GET', 'POST'])
-@login_required
-def edit_profile():
-    form = EditProfileForm(current_user.username)
-    if form.validate_on_submit():
-        current_user.username = form.username.data
-        current_user.about_me = form.about_me.data
-        db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('main.edit_profile'))
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.about_me.data = current_user.about_me
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
-
-
-@bp.route('/explore')
-@login_required
-def explore():
-    page = request.args.get('page', 1, type=int)
-    acquisitions = Acquisition.query.order_by(Acquisition.created_at.desc()).paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-
-    next_url = url_for('main.explore', page=acquisitions.next_num) \
-        if acquisitions.has_next else None
-    prev_url = url_for('main.explore', page=acquisitions.prev_num) \
-        if acquisitions.has_prev else None
-
-    return render_template("index.html", title='Explore', acquisitions=acquisitions.items, next_url=next_url,
-                           prev_url=prev_url)
+    return render_template('user.html', title='Acquisitions', # , tasks=tasks
+        acquisitions=acquisitions.items, next_url=next_url, prev_url=prev_url)
 
 
 @bp.route('/user/<username>/<acquisition_uuid>/')
