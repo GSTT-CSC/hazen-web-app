@@ -32,6 +32,9 @@ def index():
     return render_template('index.html', title='Home', tasks=tasks)
 
 
+class SeriesExistsError(Exception): pass
+
+
 # Dashboard
 # authenticated users can overview and perform tasks/analysis on files they uploaded
 @bp.route('/dashboard/', methods=['GET', 'POST'])
@@ -80,6 +83,40 @@ def dashboard():
     return render_template('user.html', title='Acquisitions', # , tasks=tasks
         acquisitions=acquisitions.items, next_url=next_url, prev_url=prev_url)
 
+
+# Upload acquisitions and parse metadata from DICOM header
+def ingest(file_path):
+    try:
+        dcm: pydicom.Dataset = pydicom.read_file(file_path)
+        # TODO: parse additional fields from DICOM 
+        series_instance_uid = dcm.SeriesInstanceUID
+        description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
+        filename = os.path.basename(file_path)
+        files = 1
+
+        # TODO: allow multiple files with the same series ID
+        if Acquisition.query.filter_by(series_instance_uid=series_instance_uid).first():
+            current_app.logger.info('series exists')
+            raise SeriesExistsError(f"UID: {series_instance_uid}")
+
+        # Create new row in Acquisitions table
+        acq = Acquisition(series_instance_uid=series_instance_uid,
+                          files=files,
+                          description=description,
+                          filename=filename,
+                          user_id=current_user.get_id())
+        acq.save()
+
+        # Maybe change location allocation of where uploaded files are stored
+        user = User.query.get(current_user.get_id())
+        directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key, acq.filesystem_key)
+        os.makedirs(directory, exist_ok=True)
+        flash('File(s) successfully uploaded')
+
+        return directory
+
+    except Exception as e:
+        raise
 
 @bp.route('/user/<username>/<acquisition_uuid>/')
 @login_required
