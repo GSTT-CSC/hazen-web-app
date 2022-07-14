@@ -118,9 +118,11 @@ def ingest(file_path):
     except Exception as e:
         raise
 
-@bp.route('/user/<username>/<acquisition_uuid>/')
+
+# Delete acquisitions
+@bp.route('/user/<acquisition_uuid>/')
 @login_required
-def delete_acq(username, acquisition_uuid):
+def delete_acq(acquisition_uuid):
     user = User.query.get(current_user.get_id())
     acquisition = Acquisition.query.filter_by(id=acquisition_uuid, user_id=user.id)
 
