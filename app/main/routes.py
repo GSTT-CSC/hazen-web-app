@@ -4,10 +4,12 @@ from datetime import datetime
 
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
+import pydicom.errors
 
-from app.main import bp
 from app import db
-from app.main.forms import EditProfileForm, AcquisitionForm
+from app.main import bp
+from app.main.forms import AcquisitionForm
 from app.models import User, Acquisition, ProcessTask
 
 
