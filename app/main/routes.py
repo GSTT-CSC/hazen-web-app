@@ -20,29 +20,16 @@ def before_request():
         db.session.commit()
 
 
+# Homepage
+# Overview of process tasks that can be performed
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    form = AcquisitionForm()
-    if form.validate_on_submit():
-        acquisition = Acquisition(body=form.acquisition.data, author=current_user)
-        db.session.add(acquisition)
-        db.session.commit()
-        flash('Your post is now live!')
-        return redirect(url_for('main.index'))
+    # list available tasks that can be performed
+    tasks = ProcessTask.query.all()
 
-    page = request.args.get('page', 1, type=int)
-    acquisitions = current_user.acquisitions.paginate(page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-
-    next_url = url_for('main.index', page=acquisitions.next_num) \
-        if acquisitions.has_next else None
-    prev_url = url_for('main.index', page=acquisitions.prev_num) \
-        if acquisitions.has_prev else None
-    print([x for x in acquisitions.items])
-
-    return render_template('index.html', title='Home', form=form, acquisitions=acquisitions.items, next_url=next_url,
-                           prev_url=prev_url)
+    return render_template('index.html', title='Home', tasks=tasks)
 
 
 @bp.route('/user/<username>')
