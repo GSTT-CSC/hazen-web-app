@@ -1,8 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<head>
+<style>
+
+
+h1 {
+text-align: center;
+
+  padding: 64px;
+  background: linear-gradient(to right, hsl(0, 0%, 30%) 0, hsl(0, 0%, 100%) 10%, hsl(0, 0%, 30%) 20%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s infinite linear;
+
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0;
+  }
+  90% {
+    background-position: 900px;
+  }
+  100% {
+    background-position: 900px;
+  }
+}
+
+
+body {
+text-align: center;
+
+}
+
+</style>
+</head>
 {% extends "base.html" %}
 {% import "bootstrap5/form.html" as wtf %}
 
 {% block app_content %}
-    <h2 class="text-capitalize">Hi, {{ current_user.username }}!</h2>
+<body style="background: #FFFFFF">
+   <h1 data-text = "Welcome to Hazen" >Welcome to Hazen, automated MRI QA</h1>
+</body>
     {% if form %}
     {{ wtf.render_form(form) }}
     <br>
@@ -13,6 +53,7 @@
         {% include '_acquisition.html' %}
     {% endfor %}
   </div>
+
 
     <nav aria-label="...">
         <ul class="pagination justify-content-center">
@@ -29,3 +70,4 @@
         </ul>
     </nav>
 {% endblock %}
+</html>
