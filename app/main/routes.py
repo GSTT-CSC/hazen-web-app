@@ -1,3 +1,6 @@
+from app.uploader.routes import ingest
+from flask import current_app
+from flask import Flask, render_template
 from flask_wtf import FlaskForm
 from wtforms import FileField, SubmitField
 from werkzeug.utils import secure_filename
@@ -14,9 +17,12 @@ from app.main import bp
 from app import db
 from app.main.forms import EditProfileForm, AcquisitionForm
 from app.models import User, Acquisition, ProcessTask
+from os.path import join, dirname, realpath
+from app.uploader.routes import SeriesExistsError
 
-from app.uploader.routes import ingest, SeriesExistsError
-
+class UploadFileForm(FlaskForm):
+    file = FileField("File", validators=[InputRequired()])
+    submit = SubmitField("Upload File")
 
 @bp.before_request
 def before_request():
@@ -49,55 +55,36 @@ def index():
     return render_template('index.html', title='Home', form=form, acquisitions=acquisitions.items, next_url=next_url,
                            prev_url=prev_url)
 
-class UploadFileForm(FlaskForm):
-    file = FileField("File", validators=[InputRequired()])
-    submit = SubmitField("Upload File")
 
-
-def _get_acquisitions(user, page):
-    acquisitions = user.acquisitions.order_by(Acquisition.created_at.desc()).paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-
-    return acquisitions
-
-@bp.route('/user/<username>', methods=["GET", "POST"])
+@bp.route('/user/<username>',methods=['GET', 'POST'])
 @login_required
 def user(username):
     user = User.query.filter_by(username=username).first_or_404()
     tasks = ProcessTask.query.all()
     page = request.args.get('page', 1, type=int)
-    acquisitions = _get_acquisitions(user, page)
-
     form = UploadFileForm()
+
     if form.validate_on_submit():
-        file = form.file.data  # First grab the file
-        secure_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "uploads",
-                               secure_filename(file.filename))
-        file.save(secure_path)  # Then save the file
-        # flash("Form was submitted successfully")
+        file = form.file.data # First grab the file
+        secure_path=os.path.join(os.path.abspath(os.path.dirname(__file__)),secure_filename(file.filename)) # Then save the file
+        file.save(secure_path)
 
         try:
+            #import ipdb; ipdb.set_trace()
             filesystem_dir = ingest(secure_path)
         except SeriesExistsError:
             os.remove(secure_path)
             flash('SeriesInstanceUID already exists!')
-            next_url = url_for('main.user', username=user.username, page=acquisitions.next_num) \
-                if acquisitions.has_next else None
-            prev_url = url_for('main.user', username=user.username, page=acquisitions.prev_num) \
-                if acquisitions.has_prev else None
-            return render_template('user.html', user=user, acquisitions=acquisitions.items,
-                                   next_url=next_url, prev_url=prev_url, tasks=tasks, form=form)
 
-        permanent_path = os.path.join(filesystem_dir, secure_filename(file.filename))
 
-        shutil.move(secure_path, permanent_path)
-        flash('Upload success!')
+    acquisitions = user.acquisitions.order_by(Acquisition.created_at.desc()).paginate(
+        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
 
-    acquisitions = _get_acquisitions(user, page)
     next_url = url_for('main.user', username=user.username, page=acquisitions.next_num) \
         if acquisitions.has_next else None
     prev_url = url_for('main.user', username=user.username, page=acquisitions.prev_num) \
         if acquisitions.has_prev else None
+
     return render_template('user.html', user=user, acquisitions=acquisitions.items,
                            next_url=next_url, prev_url=prev_url, tasks=tasks, form=form)
 
