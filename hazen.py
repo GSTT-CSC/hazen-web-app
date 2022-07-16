@@ -17,7 +17,13 @@ def register_tasks_in_db():
     tasks = {f'{modname}': importlib.import_module(f'hazenlib.{modname}') for importer, modname, ispkg in pkgutil.iter_modules(hazenlib.__path__)}
 
     with app.app_context():
-        stored_tasks = ProcessTask.query.delete()
+        stored_tasks = ProcessTask.query.all()
+
+        for stored_task in stored_tasks:
+
+            if stored_task.name in tasks.keys():
+                _ = tasks.pop(stored_task.name)
+                current_app.logger.info(f'{stored_task.name} already exists in db')
 
 
 
