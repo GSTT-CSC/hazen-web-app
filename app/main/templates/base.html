@@ -38,9 +38,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
-                        </li>
+
                     {% endif %}
 
                     {% if current_user.is_anonymous %}
