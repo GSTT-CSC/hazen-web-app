@@ -38,9 +38,10 @@ def index():
     prev_url = url_for('main.index', page=acquisitions.prev_num) \
         if acquisitions.has_prev else None
     print([x for x in acquisitions.items])
+    tasks = ProcessTask.query.all()
 
     return render_template('index.html', title='Home', form=form, acquisitions=acquisitions.items, next_url=next_url,
-                           prev_url=prev_url)
+                           prev_url=prev_url, tasks=tasks)
 
 
 @bp.route('/user/<username>')
