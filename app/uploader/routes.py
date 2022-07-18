@@ -40,7 +40,7 @@ def upload():
 
         return redirect(url_for('main.user', username=current_user.username))
 
-    return render_template('upload.html')
+    return render_template('upload.html', display_page='upload')
 
 
 def ingest(f):

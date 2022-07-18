@@ -53,7 +53,7 @@ def user(username):
         if acquisitions.has_prev else None
 
     return render_template('user.html', user=user, acquisitions=acquisitions.items,
-                           next_url=next_url, prev_url=prev_url, tasks=tasks)
+                           next_url=next_url, prev_url=prev_url, tasks=tasks, display_page='index')
 
 
 @bp.route('/edit_profile', methods=['GET', 'POST'])
