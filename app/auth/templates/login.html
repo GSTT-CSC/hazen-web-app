@@ -10,7 +10,56 @@ div.size {
 }
 
 div.size {text-align: center;}
+
+h1 {
+text-align: center;
+
+  padding: 64px;
+  background: linear-gradient(to right, hsl(0, 0%, 30%) 0, hsl(0, 0%, 100%) 10%, hsl(0, 0%, 30%) 20%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear ;
+
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0;
+  }
+  90% {
+    background-position: 900px;
+  }
+  100% {
+    background-position: 900px;
+  }
+}
+
+
+body {
+text-align: center;
+
+}
+
+div.b-container {
+
+  padding-top: 2em;
+  margin-top: 10px;
+  }
+
+
+div.b-container div.b {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+
+  margin-bottom: 2em;
+}
 </style>
+
+    <body style="background: #FFFFFF">
+   <h1 data-text = "Welcome to Hazen" >Welcome to Hazen, automated MRI QA</h1>
+</body>
+
 
 <div class="size">Hazen is an automated quality assurance and analytics tool for the purpose of assessing performance of MRI systems and their related hardware and software.</div>
 
