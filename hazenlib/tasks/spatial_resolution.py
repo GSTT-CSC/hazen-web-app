@@ -12,7 +12,7 @@ Neil Heraghty, neil.heraghty@nhs.net, 16/05/2018
 import copy
 import sys
 import traceback
-from hazenlib.utils.logger import logger
+from hazenlib.logger import logger
 from hazenlib.HazenTask import HazenTask
 import cv2 as cv
 import numpy as np
@@ -37,7 +37,7 @@ class SpatialResolution(HazenTask):
                 logger.info(e)
                 key = f"{dcm.SeriesDescription}_{dcm.SeriesNumber}"
             try:
-                results[key] = self.calculate_mtf(dcm, self.report_path)
+                results[key] = self.calculate_mtf(dcm)
 
             except Exception as e:
                 print(f"Could not calculate the spatial resolution for {key} because of : {e}")
@@ -379,7 +379,7 @@ class SpatialResolution(HazenTask):
 
         return u, esf
 
-    def calculate_mtf_for_edge(self, dicom, edge, report_path=False):
+    def calculate_mtf_for_edge(self, dicom, edge):
         pixels = dicom.pixel_array
         pe = dicom.InPlanePhaseEncodingDirection
 
@@ -413,7 +413,7 @@ class SpatialResolution(HazenTask):
         mtf_frequency = 10.0 * mtf_50 / profile_length
         res = 10 / (2 * mtf_frequency)
 
-        if report_path:
+        if self.report:
             import matplotlib.pyplot as plt
             fig, axes = plt.subplots(11, 1)
             fig.set_size_inches(5, 36)
@@ -447,18 +447,19 @@ class SpatialResolution(HazenTask):
             axes[10].set_title('normalised MTF')
             axes[10].plot(freqs[mask], norm_mtf[mask])
             axes[10].set_xlabel('lp/mm')
-            fig.savefig(f'{report_path}_{pe}_{edge}.png')
+            fig.savefig(f'{self.report_path}_{pe}_{edge}.png')
+            logger.info(f'Writing report image: {self.report_path}_{pe}_{edge}.png')
         return res
 
-    def calculate_mtf(self, dicom, report_path=False):
+    def calculate_mtf(self, dicom):
         pe = dicom.InPlanePhaseEncodingDirection
         pe_result, fe_result = None, None
 
         if pe == 'COL':
-            pe_result = self.calculate_mtf_for_edge(dicom, 'top', report_path)
-            fe_result = self.calculate_mtf_for_edge(dicom, 'right', report_path)
+            pe_result = self.calculate_mtf_for_edge(dicom, 'top')
+            fe_result = self.calculate_mtf_for_edge(dicom, 'right')
         elif pe == 'ROW':
-            pe_result = self.calculate_mtf_for_edge(dicom, 'right', report_path)
-            fe_result = self.calculate_mtf_for_edge(dicom, 'top', report_path)
+            pe_result = self.calculate_mtf_for_edge(dicom, 'right')
+            fe_result = self.calculate_mtf_for_edge(dicom, 'top')
 
         return {'phase_encoding_direction': pe_result, 'frequency_encoding_direction': fe_result}

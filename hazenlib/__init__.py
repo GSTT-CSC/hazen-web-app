@@ -361,7 +361,7 @@ def main():
     class_list = [cls for _, cls in inspect.getmembers(task_module, inspect.isclass) if cls not in [HazenTask]]
     if len(class_list) > 1:
         raise Exception(f'Task {task_module} has multiple class definitions: {class_list}')
-    task = getattr(task_module, class_list[0].__name__)(data_paths=files)
+    task = getattr(task_module, class_list[0].__name__)(data_paths=files, report=report)
 
     if not arguments['<task>'] == 'snr' and arguments['--measured_slice_width']:
         raise Exception("the (--measured_slice_width) option can only be used with snr")
