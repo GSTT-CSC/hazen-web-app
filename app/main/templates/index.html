@@ -1,33 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<head>
+<style>
+
+
+h1 {
+text-align: center;
+
+  padding: 64px;
+  background: linear-gradient(to right, hsl(0, 0%, 30%) 0, hsl(0, 0%, 100%) 10%, hsl(0, 0%, 30%) 20%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear ;
+
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0;
+  }
+  90% {
+    background-position: 900px;
+  }
+  100% {
+    background-position: 900px;
+  }
+}
+
+
+body {
+text-align: center;
+
+}
+
+div.b-container {
+
+  padding-top: 2em;
+  margin-top: 10px;
+}
+
+
+div.b-container div.b {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+
+  margin-bottom: 2em;
+}
+</style>
+</head>
 {% extends "base.html" %}
+
+
 {% import "bootstrap5/form.html" as wtf %}
 
-{% block title %}{{title}}{% endblock %}
-
 {% block app_content %}
-    <div class="row justify-content-center"><h2 class="text-center">Process Tasks</h2></div>
+<body style="background: #FFFFFF">
+   <h1 data-text = "Welcome to Hazen" >Welcome to Hazen, automated MRI QA</h1>
+</body>
 
+<div class="row justify-content-center"><h2 >MR Tests</h2></div>
+<div>Below you can find an up to date list of functions that you can apply to perform QA on MRI images. Click on each function to see its functionality.</div>
+<div class="b-container">
+    <div class="b">
     <div class="row">
-        <div class="col-3">
-            {% set active_tab = "relaxometry-tab" %}
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                {% for task in tasks %}
-                    <a data-bs-toggle="pill" id="{{ task.name }}-tab"
-                    {% if id == active_tab %} class="nav-link active" {% else %} class="nav-link" {% endif %}
-                    href="#{{ task.name }}" role="tab">{{ task.name }}</a>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div class="col-9">
-            <div class="tab-content" id="v-pills-tabContent">
-                {%  for task in tasks %}
-                <div class="tab-pane fade" id="{{ task.name }}" role="tabpanel">
-                    {% autoescape false %}
-                    {{ task.docstring | replace("\\n", "<br/>") }}
-                    {% endautoescape %}
-                </div>
-                {% endfor %}
-            </div>
+    <div class="col-3">
+        {% set active_tab = "snr-tab" %}
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            {% for task in tasks %}
+                <a style="text-center"  data-bs-toggle="pill" id="{{ task.name }}-tab"
+                   {% if id == active_tab %} class="nav-link active" {% else %} class="nav-link" {% endif %}
+                   href="#{{ task.name }}" role="tab">{{ task.name }}</a>
+            {% endfor %}
         </div>
     </div>
+
+    <div class="col-9">
+
+        <div class="tab-content" id="v-pills-tabContent">
+            {%  for task in tasks %}
+            <div class="tab-pane fade" id="{{ task.name }}" role="tabpanel">
+                {% autoescape false %}
+                {{ task.docstring | replace("\\n", "<br/>") }}
+                {% endautoescape %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    </div>
+    </div>
+</div>
+
+
+
 {% endblock %}
+</html>
