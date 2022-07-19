@@ -85,20 +85,20 @@ Options:
 
 
 """
+import importlib
+import inspect
 import logging
 import os
 import pprint
-import importlib
 
+import numpy as np
 import pydicom
 from docopt import docopt
-import numpy as np
-import cv2
+
+from hazenlib.HazenTask import HazenTask
 from hazenlib.tools import is_dicom_file
 
-
 __version__ = '0.5.2'
-
 
 
 import hazenlib.exceptions
@@ -330,7 +330,8 @@ def parse_relaxometry_data(task, arguments, dicom_objects, report):   #def parse
 
 def main():
     arguments = docopt(__doc__, version=__version__)
-    task = importlib.import_module(f"hazenlib.{arguments['<task>']}")
+    task_module = importlib.import_module(f"hazenlib.tasks.{arguments['<task>']}")
+
     folder = arguments['<folder>']
     files = [os.path.join(folder, x) for x in os.listdir(folder) if x not in EXCLUDED_FILES]
     dicom_objects = [pydicom.read_file(x, force=True) for x in files if is_dicom_file(x)]
@@ -356,6 +357,12 @@ def main():
         # logging.basicConfig()
         logging.getLogger().setLevel(logging.INFO)
 
+    #  create task object
+    class_list = [cls for _, cls in inspect.getmembers(task_module, inspect.isclass) if cls not in [HazenTask]]
+    if len(class_list) > 1:
+        raise Exception(f'Task {task_module} has multiple class definitions: {class_list}')
+    task = getattr(task_module, class_list[0].__name__)(data_paths=files)
+
     if not arguments['<task>'] == 'snr' and arguments['--measured_slice_width']:
         raise Exception("the (--measured_slice_width) option can only be used with snr")
     elif arguments['<task>'] == 'snr' and arguments['--measured_slice_width']:
@@ -364,7 +371,8 @@ def main():
     elif arguments['<task>'] == 'relaxometry':
         result = parse_relaxometry_data(task, arguments, dicom_objects, report)
     else:
-        result = task.main(dicom_objects, report_path=report)
+        # result = task.main(dicom_objects, report_path=report)
+        result = task.run()
 
     return pp.pformat(result)
 
@@ -372,3 +380,8 @@ def main():
 def entry_point():
     result = main()
     print(result)
+
+
+if __name__ == "__main__":
+    entry_point()
+
