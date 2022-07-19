@@ -4,7 +4,7 @@ HazenTask.py
 from pydicom import dcmread
 
 
-class HazenTask(object):
+class HazenTask:
 
     def __init__(self, data_paths: list, report: bool = False, report_path: str = 'report.txt'):
         self.data_paths = data_paths
