@@ -30,12 +30,13 @@ release = '0.6.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinxcontrib.bibtex'
+              'sphinx.ext.coverage', 'sphinx.ext.ifconfig',
+              #'sphinxcontrib.bibtex'
               ]
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True
-bibtex_bibfiles = ['references.bib']
+#bibtex_bibfiles = ['references.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
