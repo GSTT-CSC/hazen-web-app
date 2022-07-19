@@ -1,10 +1,8 @@
 import os
 import shutil
 from datetime import datetime
-
 from flask import render_template, flash, redirect, url_for, request, current_app
 from flask_login import current_user, login_required
-
 from app.main import bp
 from app import db
 from app.main.forms import EditProfileForm, AcquisitionForm
@@ -101,7 +99,8 @@ def delete_acq(username, acquisition_uuid):
     acquisition = Acquisition.query.filter_by(id=acquisition_uuid, user_id=user.id)
 
     # delete files
-    directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key, acquisition.first().filesystem_key)
+    directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key,
+                             acquisition.first().filesystem_key)
     shutil.rmtree(directory)
 
     # remove db entry

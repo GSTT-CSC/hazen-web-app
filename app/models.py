@@ -2,13 +2,11 @@ from datetime import datetime
 from hashlib import md5
 from time import time
 import inspect
-
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.ext.hybrid import hybrid_property
 from flask_login import UserMixin
 from flask import current_app
-
 from app import db, login
 from app.database import Model, SurrogatePK, CreatedTimestampMixin, UUID, JSONB
 
@@ -75,7 +73,7 @@ class Acquisition(Model, SurrogatePK, CreatedTimestampMixin):
     user_id = db.Column(db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '<Acquistion {}>'.format(self.description)
+        return '<Acquisition {}>'.format(self.description)
 
     @hybrid_property
     def filesystem_key(self):

@@ -1,11 +1,9 @@
 import os
 import shutil
-
 from flask import request, render_template, url_for, redirect, flash, current_app
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import pydicom.errors
-
 from app.uploader import bp
 from app.models import Acquisition, User
 
@@ -68,4 +66,3 @@ def ingest(f):
 
     except Exception as e:
         raise
-

@@ -1,9 +1,6 @@
 import os
-
 from flask import current_app, flash, jsonify
-
 from app.models import ProcessTask, Fact
-
 from hazen import worker
 
 

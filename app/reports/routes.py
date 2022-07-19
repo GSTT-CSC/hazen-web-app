@@ -1,11 +1,8 @@
 import os
 import sys
 import importlib
-
 from flask import render_template, flash, request, jsonify, url_for, current_app
 from flask_login import login_required
-
-
 from app.reports import bp
 from app.reports.forms import ProcessTaskForm
 from app.models import Acquisition, Fact, ProcessTask
@@ -57,9 +54,3 @@ def report(acquisition_uuid, pending_id=None):
         flash(f'Starting process: {fn}', 'info')
 
         return url_for('reports.report', acquisition_uuid=acquisition.id, pending=res.id)
-
-
-
-
-
-

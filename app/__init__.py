@@ -2,7 +2,6 @@ import logging
 from logging.handlers import SMTPHandler
 from logging.handlers import RotatingFileHandler
 import os
-
 from flask import Flask, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -14,7 +13,7 @@ from flask_dropzone import Dropzone
 from flask_heroku import Heroku
 from celery import Celery
 from config import Config
-
+from app import models
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -103,6 +102,3 @@ def create_celery_app(app=None):
 
     celery.Task = ContextTask
     return celery
-
-
-from app import models
