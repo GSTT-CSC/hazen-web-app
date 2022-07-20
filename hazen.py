@@ -5,7 +5,7 @@ import importlib
 from flask import current_app
 
 from app import db, create_app, create_celery_app
-from app.models import User, Image, Series, Study, Task, Institution, Report
+from app.models import User, Image, Series, Study, Device, Institution, Task, Report
 
 __version__ = '0.1.dev0'
 __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
@@ -14,8 +14,9 @@ __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
 def register_tasks_in_db():
     import hazenlib
     # TODO: Change to read from hazenlib classes
-    tasks = {f'{modname}': importlib.import_module(f'hazenlib.{modname}') for importer, modname, ispkg in
-             pkgutil.iter_modules(hazenlib.__path__)}
+    tasks = {f'{modname}': importlib.import_module(
+        f'hazenlib.{modname}') for importer, modname, ispkg in
+        pkgutil.iter_modules(hazenlib.__path__)}
 
     with app.app_context():
         stored_tasks = Task.query.all()
@@ -37,8 +38,9 @@ register_tasks_in_db()
 
 @app.shell_context_processor
 def make_shell_context():
-    return {'db': db, 'User': User, 'Image': Image, 'Series': Series, 'Study': Study, 'Task': Task,
-            'Institution': Institution, 'Report': Report}
+    return {'db': db, 'User': User, 'Institution': Institution,
+            'Image': Image, 'Series': Series, 'Study': Study, 'Device': Device,
+            'Task': Task, 'Report': Report}
 
 
 if __name__ == "__main__":
