@@ -5,7 +5,7 @@ from flask import render_template, flash, request, jsonify, url_for, current_app
 from flask_login import login_required
 from app.reports import bp
 from app.reports.forms import ProcessTaskForm
-from app.models import Acquisition, Fact, ProcessTask
+from app.models import Image, Series, Study, Task, Report
 
 
 @bp.route('/report/<acquisition_uuid>',  methods=['GET', 'POST'])

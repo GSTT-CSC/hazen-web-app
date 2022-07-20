@@ -1,57 +1,50 @@
 {% extends "base.html" %}
+{% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
 
     <div class="row">
+        <div class="col-md-6 offset-md-3 pt-5">
+            <div class="card card-login">
 
-    <div class="col-md-6 offset-md-3 pt-5">
+                <form class="form" method="post" action="" novalidate>
+                    {{ form.hidden_tag() }}
+                    <div class="card-header card-header-success text-center">
+                        <h4 class="card-title">Please sign in</h4>
+                    </div>
 
-        <div class="card card-login">
+                    <div class="card-body">
+                        <span class="bmd-form-group">
+                            <div class="input-group center-block">
+                                {{ form.username(class="form-control", placeholder="Username") }}
+                                <br>
+                                {% for error in form.username.errors %}
+                                    <span style="color: red;">[{{ error }}]</span>
+                                {% endfor %}
+                            </div>
+                        </span>
 
-            <form class="form" method="post" action="" novalidate>
-                {{ form.hidden_tag() }}
-                <div class="card-header card-header-success text-center">
-                    <h4 class="card-title">Please sign in</h4>
-                </div>
+                        <span class="bmd-form-group">
+                            <div class="input-group center-block">
+                                {{ form.password(id="inputPassword", class="form-control", placeholder="Password") }}
+                                <br>
+                                {% for error in form.password.errors %}
+                                    <span style="color: red;">[{{ error }}]</span>
+                                {% endfor %}
+                            </div>
+                        </span>
+                    </div>
 
-                <div class="card-body">
-                    <span class="bmd-form-group">
-                        <div class="input-group center-block">
-                            {{ form.username(class="form-control", placeholder="Username") }}
-                            <br>
-                            {% for error in form.username.errors %}
-                                <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                    </span>
+                    <div class="footer text-center">
+                        <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                        <p>{{ form.submit(class="btn btn-primary bg-success") }}</p>
+                        <p>New User? <a href="{{ url_for('auth.register') }}">Click to Register!</a></p>
+                        <p>Forgot Your Password? <a href="{{ url_for('auth.reset_password_request') }}">Click to Reset It</a></p>
+                    </div>
 
-                    <span class="bmd-form-group">
-                        <div class="input-group center-block">
-                            {{ form.password(id="inputPassword", class="form-control", placeholder="Password") }}
-                            <br>
-                            {% for error in form.password.errors %}
-                                <span style="color: red;">[{{ error }}]</span>
-                            {% endfor %}
-                        </div>
-                    </span>
-
-                </div>
-
-                <div class="footer text-center">
-                    <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-                    <p>{{ form.submit(class="btn btn-primary bg-success") }}</p>
-                    <p>New User? <a href="{{ url_for('auth.register') }}">Click to Register!</a></p>
-                    <p>Forgot Your Password? <a href="{{ url_for('auth.reset_password_request') }}">Click to Reset It</a></p>
-                </div>
-
-            </form>
-
-          </div>
-
+                </form>
+            </div>
+        </div>
     </div>
-
-
-    </div>
-
 
 {% endblock %}

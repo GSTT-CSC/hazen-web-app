@@ -11,7 +11,7 @@ from pydicom import dcmread
 from app import db
 from app.main import bp
 from app.main.forms import AcquisitionForm
-from app.models import User, Acquisition, ProcessTask
+from app.models import User, Image, Series, Study, Device, Institution, Task, Report
 
 
 @bp.before_request
@@ -28,7 +28,7 @@ def before_request():
 @login_required
 def index():
     # list available tasks that can be performed
-    tasks = ProcessTask.query.all()
+    tasks = Task.query.all()
 
     return render_template('index.html', title='Home', tasks=tasks)
 
@@ -36,15 +36,24 @@ def index():
 class SeriesExistsError(Exception): pass
 
 
-# Dashboard
-# authenticated users can overview and perform tasks/analysis on files they uploaded
+# Dashboard/workbench?
+# authenticated users can overview and perform tasks/analysis on uploaded files 
 @bp.route('/dashboard/', methods=['GET', 'POST'])
 @login_required
 def dashboard():
     # locate user in db by username
     user = User.query.filter_by(username=current_user.username).first_or_404()
-    # # list available tasks that can be performed
-    # tasks = ProcessTask.query.all()
+    # list available tasks that can be performed
+    tasks = Task.query.all()
+
+    # Display list of available image Series
+    page = request.args.get('page', 1, type=int)
+    acquisitions = user.acquisitions.order_by(Series.created_at.desc()).paginate(
+        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+    next_url = url_for('main.dashboard', page=acquisitions.next_num) \
+        if acquisitions.has_next else None
+    prev_url = url_for('main.dashboard', page=acquisitions.prev_num) \
+        if acquisitions.has_prev else None
 
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
@@ -71,15 +80,6 @@ def dashboard():
                 flash('Upload success!')
 
         return redirect(url_for('main.dashboard'))
-
-    # Display list of available acquisitions
-    page = request.args.get('page', 1, type=int)
-    acquisitions = user.acquisitions.order_by(Acquisition.created_at.desc()).paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-    next_url = url_for('main.dashboard', page=acquisitions.next_num) \
-        if acquisitions.has_next else None
-    prev_url = url_for('main.dashboard', page=acquisitions.prev_num) \
-        if acquisitions.has_prev else None
 
     return render_template('user.html', title='Acquisitions', # , tasks=tasks
         acquisitions=acquisitions.items, next_url=next_url, prev_url=prev_url)
