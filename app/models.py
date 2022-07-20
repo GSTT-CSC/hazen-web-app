@@ -28,9 +28,10 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
-    username = db.Column(db.String(64), index=True, unique=True)  # why do we need index?
     firstname = db.Column(db.String(64))
     lastname = db.Column(db.String(64))
+    institution = db.Column(db.String(64))
+    username = db.Column(db.String(64), index=True, unique=True)  # why do we need index?
     email = db.Column(db.String(320), index=True, unique=True)  # why do we need index?
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
