@@ -4,6 +4,9 @@ from app.email import send_email
 
 
 def send_password_reset_email(user):
+    """
+    Send the user an email in order to reset their password.
+    """
     token = user.get_reset_password_token()
     send_email('[Hazen] Reset Your Password',
                sender=current_app.config['ADMINS'][0],

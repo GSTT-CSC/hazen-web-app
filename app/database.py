@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-
-"""Database module, including the SQLAlchemy database object and DB-related utilities."""
+"""
+Database module, including the SQLAlchemy database object and DB-related utilities.
+"""
 
 import uuid
 from typing import Sequence, Tuple, Union
-
 import sqlalchemy.types as types
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
-
 from app import db
 from sqlalchemy_utils.types.arrow import ArrowType
-#
 # from backend.extensions import db
 from app.util.utils import base62_decode, base62_encode
 
@@ -23,47 +20,63 @@ JSONB = postgresql.JSONB
 
 
 class CRUDMixin(object):
-    """Mixin that adds convenience methods for CRUD (create, read, update, delete) operations."""
+    """
+    Mixin that adds convenience methods for CRUD (create, read, update, delete) operations.
+    """
 
     @classmethod
     def create(cls, **kwargs):
-        """Create a new record and save it the database."""
+        """
+        Create a new record and save it the database.
+        """
         instance = cls(**kwargs)
         return instance.save()
 
     def update(self, commit=True, **kwargs):
-        """Update specific fields of a record."""
+        """
+        Update specific fields of a record.
+        """
         for attr, value in kwargs.items():
             setattr(self, attr, value)
         return commit and self.save() or self
 
     def save(self, commit=True):
-        """Save the record."""
+        """
+        Save the record.
+        """
         db.session.add(self)
         if commit:
             db.session.commit()
         return self
 
     def delete(self, commit=True):
-        """Remove the record from the database."""
+        """
+        Remove the record from the database.
+        """
         db.session.delete(self)
         return commit and db.session.commit()
 
 
 class Model(CRUDMixin, db.Model):
-    """Base model class that includes CRUD convenience methods."""
+    """
+    Base model class that includes CRUD convenience methods.
+    """
 
     __abstract__ = True
 
     def __getitem__(self, item):
-        """Convenience method that shortcuts `obj['foo']` to `obj.foo`."""
+        """
+        Convenience method that shortcuts `obj['foo']` to `obj.foo`.
+        """
         return getattr(self, item)
 
 
 # From Mike Bayer's "Building the app" talk
 # https://speakerdeck.com/zzzeek/building-the-app
 class SurrogatePK(object):
-    """A mixin that adds a surrogate uuid 'primary key' column named ``id`` to any declarative-mapped class."""
+    """
+    A mixin that adds a surrogate uuid 'primary key' column named ``id`` to any declarative-mapped class.
+    """
 
     __table_args__ = {'extend_existing': True}
 
@@ -71,7 +84,9 @@ class SurrogatePK(object):
 
     @classmethod
     def get_by_id(cls, record_id: Union[uuid.UUID, str]):
-        """Get record by UUID."""
+        """
+        Get record by UUID.
+        """
         if isinstance(record_id, str):
             try:
                 record_id = uuid.UUID(record_id)
@@ -81,7 +96,9 @@ class SurrogatePK(object):
 
     @classmethod
     def get_by_id_or_hash(cls, identifier: Union[uuid.UUID, str]):
-        """Get record by UUID or base62-hash."""
+        """
+        Get record by UUID or base62-hash.
+        """
 
         if isinstance(identifier, str):
             try:
@@ -112,18 +129,23 @@ class SurrogatePK(object):
 
     @property
     def hash(self) -> str:
-        """Hash generated from primary key."""
+        """
+        Hash generated from primary key.
+        """
         if self.id:
             return base62_encode(self.id.int)
         return None
 
     def __repr__(self):
-        """Represent instance as a recognisable string."""
+        """
+        Represent instance as a recognisable string.
+        """
         return '<{}({:.6})>'.format(self.__class__.__name__, self.hash)
 
 
 def reference_col(tablename, nullable=False, pk_name='id', **kwargs):
-    """Column that adds primary key foreign key reference.
+    """
+    Column that adds primary key foreign key reference.
 
     Usage: ::
 
@@ -134,27 +156,37 @@ def reference_col(tablename, nullable=False, pk_name='id', **kwargs):
 
 
 class CreatedTimestampMixin:
-    """Add an `created_at` column that automatically populates at creation."""
+    """
+    Add an `created_at` column that automatically populates at creation.
+    """
 
     created_at = Column(ArrowType, nullable=False, default=db.func.now())
 
 
 # noinspection PyClassHasNoInit
 class Cube(types.UserDefinedType):
-    """Support for PostgreSQL's cube extension."""
+    """
+    Support for PostgreSQL's cube extension.
+    """
 
     @property
     def python_type(self):
-        """Python equivalent type."""
+        """
+        Python equivalent type.
+        """
         return Tuple[float]
 
     # noinspection PyMethodMayBeStatic
     def get_col_spec(self):
-        """PostgreSQL column type specification."""
+        """
+        PostgreSQL column type specification.
+        """
         return 'cube'
 
     def bind_processor(self, dialect):
-        """Convert python type to PostgreSQL."""
+        """
+        Convert python type to PostgreSQL.
+        """
         def process(values: Sequence[float]) -> str:
             if values:
                 return ','.join(map(str, values))
@@ -162,7 +194,9 @@ class Cube(types.UserDefinedType):
         return process
 
     def result_processor(self, dialect, coltype):
-        """Convert PostgreSQL type to python."""
+        """
+        Convert PostgreSQL type to python.
+        """
         def process(value: str) -> Tuple:
             if value:
                 return tuple(map(lambda x: float(x.strip()), value.lstrip('(').rstrip(')').split(',')))
