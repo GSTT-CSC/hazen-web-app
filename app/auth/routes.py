@@ -20,7 +20,7 @@ def register():
         return redirect(url_for('main.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(firstname=form.firstname.data, lastname=form.lastname.data, institution=form.institution.data, username=form.username.data, email=form.email.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -37,12 +37,9 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-
         user = User.query.filter_by(username=form.username.data).first()
-
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password', 'danger')
-
             return redirect(url_for('auth.login'))
 
         login_user(user, remember=form.remember_me.data)
@@ -59,15 +56,22 @@ def login():
 @login_required
 def edit_profile():
     form = EditProfileForm(current_user.username)
-    if form.validate_on_submit():
+
+    if form.validate_on_submit(): # if request.method == 'POST'
+        current_user.firstname = form.firstname.data
+        current_user.lastname = form.lastname.data
+        current_user.institution = form.institution.data
         current_user.username = form.username.data
-        current_user.about_me = form.about_me.data
         db.session.commit()
-        flash('Your changes have been saved.')
-        return redirect(url_for('auth.edit_profile'))
-    elif request.method == 'GET':
-        form.username.data = current_user.username
-        form.about_me.data = current_user.about_me
+        flash('Your changes have been saved.', 'success')
+        return redirect(url_for('main.index'))
+
+    # populate fields with current values from the User table
+    form.firstname.data = current_user.firstname
+    form.lastname.data = current_user.lastname
+    form.institution.data = current_user.institution
+    form.username.data = current_user.username
+
     return render_template('edit_profile.html', title='Edit Profile', form=form)
 
 
