@@ -5,7 +5,7 @@
         <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>hazen-web-app</title>
+        <title>{% block title %}hazen-web-app{% endblock %}</title>
 
         {% block styles %}
             <!-- Bootstrap CSS -->
@@ -18,69 +18,70 @@
 </head>
 
 <body>
-<!-- Your page content -->
-{% block navbar %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
+    <!-- Navigation bar -->
+    {% block navbar %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <!-- Brand and toggle button for mobile view -->
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">Hazen</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <!-- Brand and toggle button for mobile view -->
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">Hazen</a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="nav navbar-nav">
-
-                    {% if not current_user.is_anonymous %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.user', username=current_user.username) }}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('uploader.upload') }}">Upload</a>
-                        </li>
-                    {% endif %}
+                <!-- Navbar links -->
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
 
                     {% if current_user.is_anonymous %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                        </li>
+                        <ul class="navbar-nav w-100 justify-content-end">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                            </li>
+                        </ul>
+
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                        </li>
+                        <ul class="navbar-nav w-100 justify-content-start">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('main.dashboard') }}">Acquisitions</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('main.dashboard') }}">Reports</a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav w-100 justify-content-end">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.edit_profile') }}">Edit profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                            </li>
+                        </ul>
                     {% endif %}
 
-                </ul>
-            </div> <!-- /.navbar-collapse -->
-        </div> <!-- /.container -->
-    </nav>
-{% endblock %}
+                </div> <!-- /.navbar-collapse -->
+            </div> <!-- /.container -->
+        </nav>
+    {% endblock %}
 
+    <!-- Your page content -->
+    {% block content %}
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-{% block content %}
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} text-center" role="alert">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+            {# application content needs to be provided in the app_content block #}
+            {% block app_content %}
+            {% endblock %}
+        </div>
+    {% endblock %}
 
-        {# application content needs to be provided in the app_content block #}
-        {% block app_content %}
-        {% endblock %}
-    </div>
-{% endblock %}
-
-{% block scripts %}
-    <!-- Optional JavaScript -->
-    {{ bootstrap.load_js() }}
-{% endblock %}
+    {% block scripts %}
+        <!-- Optional JavaScript -->
+        {{ bootstrap.load_js() }}
+    {% endblock %}
 </body>
 </html>
-
-

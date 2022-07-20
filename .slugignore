@@ -1,0 +1,10 @@
+# .slugignore
+#
+# Heroku has a 500MB slug size limit, which prevents upload of more than 500MB data. This file tells Heroku which files
+# or folders to exclude from the upload.
+
+/upload
+/dist
+/build
+/.idea
+/.pytest_cache
