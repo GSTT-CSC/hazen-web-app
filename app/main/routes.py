@@ -6,6 +6,7 @@ from flask import render_template, flash, redirect, url_for, request, current_ap
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 import pydicom.errors
+from pydicom import dcmread
 
 from app import db
 from app.main import bp
@@ -87,7 +88,7 @@ def dashboard():
 # Upload acquisitions and parse metadata from DICOM header
 def ingest(file_path):
     try:
-        dcm: pydicom.Dataset = pydicom.read_file(file_path)
+        dcm: pydicom.Dataset = pydicom.read_file(file_path, stop_before_pixels=True)
         # TODO: parse additional fields from DICOM 
         series_instance_uid = dcm.SeriesInstanceUID
         description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
@@ -104,7 +105,10 @@ def ingest(file_path):
                           files=files,
                           description=description,
                           filename=filename,
-                          user_id=current_user.get_id())
+                          user_id=current_user.get_id(),
+                          dicom_metadata=dcm.to_json_dict()
+                          )
+
         acq.save()
 
         # Maybe change location allocation of where uploaded files are stored

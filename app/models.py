@@ -76,6 +76,7 @@ class Acquisition(Model, SurrogatePK, CreatedTimestampMixin):
     filename = db.Column(db.String(200))
     files = db.Column(db.Integer)
     user_id = db.Column(db.ForeignKey('user.id'))
+    dicom_metadata = db.Column(JSONB)
 
     def __repr__(self):
         return '<Acquistion {}>'.format(self.description)
