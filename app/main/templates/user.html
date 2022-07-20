@@ -9,12 +9,16 @@
         <h2>Acquisitions</h2>
 
         <div class="row">
-            {{ super() }}
-            {{ dropzone.load_css() }}
-            {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-            {{ dropzone.create(action=url_for('main.dashboard'))}}
-            {{ dropzone.load_js() }}
-            {{ dropzone.config(redirect_view='main.dashboard', id='uploader') }}
+            <form method="post" action="{{ url_for('main.dashboard') }}" enctype="multipart/form-data">
+                <dl>
+                    <p>
+                        <input type="file" name="files[]" multiple="true" autocomplete="off" required>
+                    </p>
+                </dl>
+                <p>
+                    <input type="submit" value="Submit">
+                </p>
+            </form>
         </div>
     <p></p>
         <div class="col-md-12 text-center">
