@@ -5,7 +5,7 @@ import pydicom
 
 from flask import current_app, flash, jsonify
 
-from app.models import ProcessTask, Fact
+from app.models import Task, Report
 
 from hazen import worker
 
