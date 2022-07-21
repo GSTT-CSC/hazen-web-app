@@ -1,33 +1,123 @@
 {% extends "base.html" %}
-{% import "bootstrap5/form.html" as wtf %}
-
-{% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-    <div class="row justify-content-center"><h2 class="text-center">Process Tasks</h2></div>
 
-    <div class="row">
-        <div class="col-3">
-            {% set active_tab = "relaxometry-tab" %}
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                {% for task in tasks %}
-                    <a data-bs-toggle="pill" id="{{ task.name }}-tab"
-                    {% if id == active_tab %} class="nav-link active" {% else %} class="nav-link" {% endif %}
-                    href="#{{ task.name }}" role="tab">{{ task.name }}</a>
-                {% endfor %}
-            </div>
-        </div>
+<head>
+<style>
 
-        <div class="col-9">
-            <div class="tab-content" id="v-pills-tabContent">
-                {%  for task in tasks %}
-                <div class="tab-pane fade" id="{{ task.name }}" role="tabpanel">
-                    {% autoescape false %}
-                    {{ task.docstring | replace("\\n", "<br/>") }}
-                    {% endautoescape %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+div.size {
+  font-size: 150%;
+}
+
+div.size {text-align: center;}
+
+h1 {
+text-align: center;
+
+  padding: 64px;
+  background: linear-gradient(to right, hsl(0, 0%, 30%) 0, hsl(0, 0%, 100%) 10%, hsl(0, 0%, 30%) 20%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear ;
+
+}
+
+
+
+body {
+text-align: center;
+
+}
+
+
+</style>
+
+    <body style="background: #FFFFFF">
+   <h1 data-text = "Welcome to Hazen" >Welcome to Hazen, automated MRI QA</h1>
+</body>
+
+<div class="container">
+<div class="size">Hazen is an automated quality assurance and analytics tool for the purpose of assessing performance of MRI systems and their related hardware and software.</div>
+
+<div class="container ">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'u.png') }}" class="card-img-top" alt="uniformity">
+  <div class="card-body">
+    <h5 class="card-title">Uniformity</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+       <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
     </div>
+       <div class="col-md-4">
+<div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'SNR.png') }}" class="card-img-top">
+  <div class="card-body">
+    <h5 class="card-title">SNR</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+    <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
+    </div>
+           <div class="col-md-4">
+<div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'ghosting.png') }}" class="card-img-top">
+  <div class="card-body">
+    <h5 class="card-title">Ghosting</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+    <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
+    </div>
+        <div class="col-md-4">
+<div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'spatial_resolution.png') }}" class="card-img-top">
+  <div class="card-body">
+    <h5 class="card-title">Spatial Resolution</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+    <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
+    </div>
+              <div class="col-md-4">
+<div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'geometric_d.png') }}" class="card-img-top">
+  <div class="card-body">
+    <h5 class="card-title">Geometric Distortion</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+    <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
+    </div>
+        <div class="col-md-4">
+<div class="card" style="width: 18rem;">
+  <img src="{{url_for('static', filename = 'slice_par.png') }}" class="card-img-top">
+  <div class="card-body">
+    <h5 class="card-title">Slice Parameters</h5>
+        <h6 class="card-subtitle mb-2 text-muted"></h6>
+    <p class="card-text"></p>
+    <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i> Docs</a>
+    <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i> Github</a>
+  </div>
+  </div>
+    </div>
+
+
+          <div class="col-md-4">
+<div class="header_menu">
+    <div class="links">
+
+
 {% endblock %}

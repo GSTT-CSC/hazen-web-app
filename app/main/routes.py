@@ -25,7 +25,7 @@ def before_request():
 # Overview of process tasks that can be performed
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
-@login_required
+
 def index():
     # list available tasks that can be performed
     tasks = Task.query.all()
