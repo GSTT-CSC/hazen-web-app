@@ -53,9 +53,10 @@ def report(acquisition_id, pending_id=None):
         if len(image_files) != series_files:
             raise Exception('Number of dicoms in directory not equal to expected!')
 
-        celery_job = produce_report.delay(task_name=task_name, user_id=current_user.id, image_files=image_files, series_id=series.id)
         flash(f'Starting process: {task_name}', 'info')
+        celery_job = produce_report.delay(task_name=task_name, user_id=current_user.id, image_files=image_files, series_id=series.id)
         current_app.logger.info(f"Task performed successfully!")
+        flash(f'Completed processing: {task_name}')
         current_app.logger.info(celery_job)
 
         return url_for('reports.report', acquisition_id=series.id, pending=celery_job.id)

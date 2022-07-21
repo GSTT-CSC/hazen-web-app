@@ -37,7 +37,7 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # One-to-many bidirectional relationship
-    images = db.relationship('Image', back_populates='user')
+    # images = db.relationship('Image', back_populates='user')
     series = db.relationship('Series', back_populates='user')
     reports = db.relationship('Report', back_populates='user')
 
@@ -83,7 +83,7 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     series_id = db.Column(db.ForeignKey('series.id'))
 
     # Many-to-one relationships
-    user = db.relationship('User', back_populates='images')
+    # user = db.relationship('User', back_populates='images')
     series = db.relationship('Series', back_populates='image')
     # studies = db.relationship('Study', back_populates='image')
 

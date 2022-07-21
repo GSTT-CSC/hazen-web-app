@@ -12,11 +12,11 @@ __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
 
 
 def register_tasks_in_db():
-    import hazenlib
+    from hazenlib import tasks as hazen_tasks
     # TODO: Change to read from hazenlib classes
     tasks = {f'{modname}': importlib.import_module(
-        f'hazenlib.{modname}') for importer, modname, ispkg in
-        pkgutil.iter_modules(hazenlib.__path__)}
+        f'hazenlib.tasks.{modname}') for importer, modname, ispkg in
+        pkgutil.iter_modules(hazen_tasks.__path__)}
 
     with app.app_context():
         stored_tasks = Task.query.all()
@@ -32,6 +32,7 @@ def register_tasks_in_db():
 
 
 app = create_app()
+# app.debug = True
 worker = create_celery_app(app)
 register_tasks_in_db()
 

@@ -2,31 +2,38 @@
 
 import os
 
-from flask import current_app, flash, jsonify
+from flask import current_app, flash, jsonify, make_response
 from app.models import Task, Report
 
 from hazen import worker
-from hazenlib import __version__
+import inspect
+import importlib
+import sys
+
+from importlib.metadata import version
 
 
 @worker.task(bind=True)
 def produce_report(self, task_name, image_files, user_id, series_id):
     # import Hazen functionality
-    task = __import__(f'hazenlib.{task_name}', globals(), locals(), [f'{task_name}'])
-    current_app.logger.info(f"Producing report from {task.__name__}")
+    task_module = importlib.import_module(f"hazenlib.tasks.{task_name}")
+    class_list = [cls for _, cls in inspect.getmembers(sys.modules[task_module.__name__], lambda x: inspect.isclass(x) and (x.__module__ == task_module.__name__))]
+    if len(class_list) > 1:
+        raise Exception(f'Task {task_module} has multiple class definitions: {class_list}')
+    task = getattr(task_module, class_list[0].__name__)(data_paths=image_files, report=True)
+
+    current_app.logger.info(f"Producing report from {task.__class__.__name__}")
 
     # Perform analysis/task
     self.update_state(state='IN PROGRESS')
     # Perform task and generate result
-    result = task.main(data=image_files)
-    print(result)
+    result = task.run()
     self.update_state(state='STORING RESULTS')
     # Store analysis result in database
     report = Report(
-        hazen_version=__version__ or "0.6.0", data=result,
+        hazen_version=version('hazen'), data=result,
         user_id=user_id, series_id=series_id,
         task_name=task_name)
     # Save information to database
     report.save()
-    flash(f'Completed processing: {task_name}')
-    return jsonify(report.data)
+    return make_response(jsonify(dict(report.data)), 200)
