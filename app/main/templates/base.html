@@ -15,6 +15,11 @@
         {{ moment.include_moment() }}
 
     {% endblock %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -33,9 +38,57 @@
 
                     {% if current_user.is_anonymous %}
                         <ul class="navbar-nav w-100 justify-content-end">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                            </li>
+                            <li class="nav-item dropdown" style="width: 300px;">
+      <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+        Log in/Sign up
+      </a>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" >  <div class="card card-login">
+
+            <form class="form" method="post" action="" novalidate>
+                {{ form.hidden_tag() }}
+                <div>
+                    <h4 class="card-title" align="center">Sign in</h4>
+                </div>
+
+                <div class="card-body">
+                    <span class="bmd-form-group">
+                        <div class="input-group center-block">
+                            {{ form.username(class="form-control", placeholder="Username") }}
+                            <br>
+                            {% for error in form.username.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                    </span>
+
+                    <span class="bmd-form-group">
+                        <div class="input-group center-block">
+                            {{ form.password(id="inputPassword", class="form-control", placeholder="Password") }}
+                            <br>
+                            {% for error in form.password.errors %}
+                                <span style="color: red;">[{{ error }}]</span>
+                            {% endfor %}
+                        </div>
+                    </span>
+
+                </div>
+
+                <div class="footer text-center">
+                    <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+                    <p>{{ form.submit(class="btn btn-primary bg-success") }}</p>
+                    <p>New User? <a href="{{ url_for('auth.register') }}">Click to Register!</a></p>
+                    <p>Forgot Your Password? <a href="{{ url_for('auth.reset_password_request') }}">Click to Reset It</a></p>
+                </div>
+
+            </form>
+
+          </div>
+
+    </a>
+
+      </div>
+    </li>
                         </ul>
 
                     {% else %}

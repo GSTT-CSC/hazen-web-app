@@ -9,6 +9,7 @@ from app.models import User
 from app.auth.email import send_password_reset_email
 
 
+
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -26,6 +27,7 @@ def register():
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
+
 
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -48,6 +50,8 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('main.index')
         return redirect(url_for('main.index'))
+
+
 
     return render_template('login.html', title='Sign In', form=form)
 
