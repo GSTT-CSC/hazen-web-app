@@ -87,9 +87,9 @@ def ingest(file_path):
         # Parse the relevant fields into variables
         series_uid = dcm.SeriesInstanceUID
         study_uid = dcm.StudyInstanceUID
+        image_uid = dcm.SOPInstanceUID
         description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
         filename = os.path.basename(file_path)
-        image_uid = dcm.SOPInstanceUID
 
         # Ensure that image is not yet in database
         image_exists = db.session.query(db.exists().where(Image.uid == image_uid)).scalar()
@@ -107,6 +107,7 @@ def ingest(file_path):
             new_study = Study(uid=study_uid, description=dcm.StudyDescription)
             new_study.save()
         study_id = Study.query.filter_by(uid=study_uid).first().id
+        #TODO remove in production
         print("study id:", study_id)
         
         # 2. Series:
@@ -117,11 +118,14 @@ def ingest(file_path):
             new_series = Series(uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(), study_id=study_id, series_datetime=series_datetime)
             new_series.save()
         series_id = Series.query.filter_by(uid=series_uid).first().id
+        #TODO remove in production
         print("series id:", series_id)
 
         # 3. Image:
         new_image = Image(uid=image_uid, series_id=series_id, filename=filename, header=dcm.to_json_dict())
         new_image.save()
+        #TODO remove in production
+        print("new image id:", new_image.id)
 
         # Commit all changes to the database
         db.session.commit()
