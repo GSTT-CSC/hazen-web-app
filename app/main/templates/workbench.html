@@ -6,51 +6,63 @@
 
     <div class="row justify-content-center">
 
-        <h2>Acquisitions</h2>
+        <h2>Upload new files</h2>
 
         <div class="row">
+            <!-- DropZone -->
             {{ super() }}
             {{ dropzone.load_css() }}
             {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-            {{ dropzone.create(action=url_for('main.dashboard'))}}
+            {{ dropzone.create(action=url_for('main.workbench'))}}
             {{ dropzone.load_js() }}
-            {{ dropzone.config(redirect_view='main.dashboard', id='uploader') }}
+            {{ dropzone.config(reload='main.workbench', id='uploader') }}
+
+            <!-- File selection -->
+            <form method="post" action="{{ url_for('main.workbench') }}" enctype="multipart/form-data">
+                <dl>
+                    <p>
+                        <input type="file" name="files[]" multiple="true" autocomplete="off" required>
+                    </p>
+                </dl>
+                <p>
+                    <input type="submit" value="Upload">
+                </p>
+            </form>
         </div>
-    <p></p>
-        <div class="col-md-12 text-center">
-            <!-- <form action="{{ url_for('main.dashboard', username=current_user.username) }}"> -->
-                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-            <!-- </form> Actions must be added to buttons using JavaScript or by associating the button with a form.-->
-        </div>
-    <p></p>
-        <hr>
+    </br><hr>
+    <h2>Available files</h2>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead><tr>
-                    <th>Folder</th>
-                    <th>Uploaded</th>
-                    <th>Uploader</th>
+                    <th>Select for processing</th>
                     <th>Description</th>
+                    <th>Acquisition Date</th>
+                    <th>Uploaded Date</th>
+                    <th>Uploaded by</th>
                     <th>Files</th>
+                    <th>Reports</th>
                     <th>Delete</th>
+                    <th>Archive</th>
                 </tr></thead>
                 <tbody>
                 {% for acquisition in acquisitions %}
                     <tr>
+                        <td>checkbox</td>
+                        <td>{{ acquisition.description }}</td>
+                        <td>{{ acquisition.series_datetime }}</td>
+                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                        <td>{{ acquisition.user.username }}</td>
+                        <td>num files</td>
                         <td>
                             <a href="{{ url_for('reports.report', acquisition_uuid=acquisition.id) }}">
-                            {{ acquisition.filename }}</a>
-                            <!-- </br>{{ acquisition.id.hex }} -->
+                            report</a>
                         </td>
-                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                        <td>{{ acquisition.author.username }}</td>
-                        <td>{{ acquisition.description }}</td>
-                        <td>{{ acquisition.files }}</td>
                         <td>
                             <a href="{{ url_for('main.delete_acq', acquisition_uuid=acquisition.id) }}">
                                 <img src="../../static/trash.svg">
                             </a>
                         </td>
+                        <td>meow</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -58,12 +70,6 @@
         </div>
     </div>
 
-    <!-- <div class="card-columns text-center">
-        {% for acquisition in acquisitions %}
-            {% include '_acquisition.html' %}
-        {% endfor %}
-    </div> -->
-    
     <nav aria-label="...">
         <ul class="pagination justify-content-center">
             <li class="page-item{% if not prev_url %} disabled{% endif %}">
