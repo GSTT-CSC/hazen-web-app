@@ -4,7 +4,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace("://", "ql://", 1) or 'postgresql://localhost:5432/hazen'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://localhost:5432/hazen' or os.environ.get('DATABASE_URL').replace("://", "ql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
@@ -32,5 +32,5 @@ class Config:
     # variables when running remotely
     # CELERY_BROKER_URL = 'redis://localhost:6379/0'  # for Redis
     # CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'  # for Redis
-    CELERY_BROKER_URL = os.environ.get('REDIS_URL')  # for Redis
-    CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')  # for Redis
+    CELERY_BROKER_URL = 'amqp://localhost' or os.environ.get('REDIS_URL')  # for Redis
+    CELERY_RESULT_BACKEND = 'rpc://' or os.environ.get('REDIS_URL')  # for Redis
