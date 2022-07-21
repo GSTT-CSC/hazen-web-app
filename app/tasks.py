@@ -1,48 +1,32 @@
 """Tasks module, specifying Hazen-related tasks and utilities."""
 
 import os
-import pydicom
 
 from flask import current_app, flash, jsonify
-
 from app.models import Task, Report
 
 from hazen import worker
+from hazenlib import __version__
 
 
 @worker.task(bind=True)
-def produce_report(self, function_name, acquisition):
+def produce_report(self, task_name, image_files, user_id, series_id):
     # import Hazen functionality
-    task = __import__(f'hazenlib.{function_name}', globals(), locals(), [f'{function_name}'])
+    task = __import__(f'hazenlib.{task_name}', globals(), locals(), [f'{task_name}'])
     current_app.logger.info(f"Producing report from {task.__name__}")
-    process = ProcessTask.query.filter_by(name=function_name).first()
-
-    # Select files to perform task on
-    filesystem_folder = os.path.join(current_app.config['UPLOADED_PATH'],
-                                    acquisition['author_hex'],
-                                    acquisition['hex'])
-    image_files = [os.path.join(filesystem_folder, file) for file in os.listdir(filesystem_folder)]
-    # Load images into DICOM dataset
-    dcms = [pydicom.read_file(x, force=True) for x in image_files]
-
-    # Ensure that appropriate number of files were selected
-    if len(dcms) != acquisition['files']:
-        raise Exception('Number of dicoms in directory not equal to expected!')
 
     # Perform analysis/task
     self.update_state(state='IN PROGRESS')
-    self.acquisition_id = acquisition['hex']
     # Perform task and generate result
-    result = task.main(data=dcms)
+    result = task.main(data=image_files)
+    print(result)
     self.update_state(state='STORING RESULTS')
     # Store analysis result in database
-    fact = Fact(user_id=acquisition['author_id'],
-                acquisition_id=acquisition['id'],
-                process_task=process.id,
-                process_task_variables={},
-                data=result,
-                status='Complete')
+    report = Report(
+        hazen_version=__version__ or "0.6.0", data=result,
+        user_id=user_id, series_id=series_id,
+        task_name=task_name)
     # Save information to database
-    fact.save()
-    flash(f'Completed process: {function_name}')
-    return jsonify(fact.data)
+    report.save()
+    flash(f'Completed processing: {task_name}')
+    return jsonify(report.data)
