@@ -25,6 +25,7 @@ import numpy as np
 
 import hazenlib.tools
 import hazenlib.exceptions as exc
+import pydicom
 
 
 def mode(a, axis=0):
@@ -129,7 +130,9 @@ def get_fractional_uniformity(dcm, report_path):
 def main(data: list, report_path=False) -> dict:
 
     results = {}
-    for dcm in data:
+    dcms = [pydicom.read_file(x, force=True) for x in data]
+
+    for dcm in dcms:
         try:
             key = f"{dcm.SeriesDescription}_{dcm.SeriesNumber}_{dcm.InstanceNumber}"
         except AttributeError as e:
