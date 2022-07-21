@@ -89,7 +89,7 @@ def ingest(file_path):
         study_uid = dcm.StudyInstanceUID
         description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
         filename = os.path.basename(file_path)
-        image_uid = filename
+        image_uid = dcm.SOPInstanceUID
 
         # Ensure that image is not yet in database
         image_exists = db.session.query(db.exists().where(Image.uid == image_uid)).scalar()
@@ -128,7 +128,7 @@ def ingest(file_path):
 
         # Store file in series/image folder
         series_folder = Series.query.filter_by(uid=series_uid).first().filesystem_key
-        directory = os.path.join(current_app.config['UPLOADED_PATH'], series_folder, new_image.filesystem_key)
+        directory = os.path.join(current_app.config['UPLOADED_PATH'], series_folder)
         os.makedirs(directory, exist_ok=True)
 
         return directory
