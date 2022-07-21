@@ -37,6 +37,7 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # One-to-many bidirectional relationship
+    images = db.relationship('Image', back_populates='user')
     series = db.relationship('Series', back_populates='user')
     reports = db.relationship('Report', back_populates='user')
 
@@ -76,12 +77,13 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
-    uid = db.Column(db.String(200))  # DICOM UID
+    uid = db.Column(db.String(100))  # DICOM SOP Instance UID (0008,0018)
     filename = db.Column(db.String(200))
     header = db.Column(JSONB)  # DICOM Header
     series_id = db.Column(db.ForeignKey('series.id'))
 
     # Many-to-one relationships
+    user = db.relationship('User', back_populates='images')
     series = db.relationship('Series', back_populates='image')
     # studies = db.relationship('Study', back_populates='image')
 
