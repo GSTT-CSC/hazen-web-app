@@ -6,6 +6,7 @@ from flask import current_app, flash, jsonify
 from app.models import Task, Report
 
 from hazen import worker
+from hazenlib import __version__
 
 
 @worker.task(bind=True)
@@ -22,7 +23,7 @@ def produce_report(self, task_name, image_files, user_id, series_id):
     self.update_state(state='STORING RESULTS')
     # Store analysis result in database
     report = Report(
-        hazen_version="1", data=result,
+        hazen_version=__version__ or "0.6.0", data=result,
         user_id=user_id, series_id=series_id,
         task_name=task_name)
     # Save information to database
