@@ -168,6 +168,7 @@ def delete_acq(acquisition_uuid):
 def task_selection(series_id):
     # Retrieve the Series that was selected
     series = Series.query.filter_by(id=series_id).first_or_404()
+    hazenlib_version = version('hazen')
 
     if request.method == 'GET':
         # Prepare the form to accept task selection
@@ -177,7 +178,8 @@ def task_selection(series_id):
         series_files = Image.query.filter_by(series_id=series_id).count()
         
         return render_template('task_selection.html', title='Select Task',
-                        form=form, series=series, series_files=series_files)
+                        form=form, series=series, series_files=series_files,
+                        hazenlib_version=hazenlib_version)
 
     if request.method == 'POST':
         # Set off task processing as a Celery job
