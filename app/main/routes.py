@@ -162,6 +162,74 @@ def delete_acq(acquisition_uuid):
     return redirect(request.referrer)
 
 
+# Select task to be run on (image) series
+@bp.route('/task_selection/<series_id>/', methods=['GET', 'POST'])
+@login_required
+def task_selection(series_id):
+    # Retrieve the Series that was selected
+    series = Series.query.filter_by(id=series_id).first_or_404()
+
+    if request.method == 'GET':
+        # Prepare the form to accept task selection
+        form = ProcessTaskForm()
+        # Provide list of available tasks that can be performed
+        form.task_name.choices = [(task.name, task.name) for task in Task.query.all()]
+        series_files = Image.query.filter_by(series_id=series_id).count()
+        
+        return render_template('task_selection.html', title='Select Task',
+                        form=form, series=series, series_files=series_files)
+
+    if request.method == 'POST':
+        # Set off task processing as a Celery job
+        from app.tasks import produce_report
+
+        # Unpack variables from session
+        task_name = request.form['task_name']
+        task_variable = request.form['task_variable']
+        user_id = session['current_user_id']
+
+        current_app.logger.info(f"Performing {task_name} task on {series.description}")
+
+        # Select files to perform task on
+        folder = os.path.join(current_app.config['UPLOADED_PATH'],
+                                        series.filesystem_key)
+        image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+
+        # Ensure that appropriate number of files were selected
+        series_files = Image.query.filter_by(series_id=series.id).count()
+        if len(image_files) != series_files:
+            raise Exception('Number of files in directory is not equal to expected!')
+
+        # Set off task processing as a Celery job
+        print("debug")
+        celery_job = produce_report.delay(task_name=task_name, image_files=image_files, task_variable=task_variable)
+
+        print("celery_job")
+        print(celery_job.__dict__)
+        current_app.logger.info(f"Task performed successfully! \n")
+            # Store analysis result in database
+        # report = Report( #version('hazen')
+        #     hazen_version="wrong", data={"measurement": "value"},
+        #     user_id=user_id, series_id=series_id,
+        #     task_name=task_name)
+        # # Save information to database
+        # report.save()
+        print(series.has_report)
+        
+        # Update has_report field for the series that is now processed
+        series.update(has_report=True)
+        print(series.id)
+        print(series.has_report)
+        flash(f'Completed {task_name} measurement!', 'info')
+
+        # Passing task and series information to next page via Session dict
+        session['task_name'] = task_name
+        session['series_id'] = series_id
+        session['report'] = {'horizontal': {'IPEM': 0.46875}, 'vertical': {'IPEM': 0.5125}}
+
+        return redirect(url_for('main.result'))
+
+
 # Reports dashboard
 # Trend monitoring and overview of reports
 @bp.route('/reports/', methods=['GET', 'POST'])
