@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% import "bootstrap5/form.html" as wtf %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block app_content %}
+    <h2 class="text-center">Results of the {{ task }} measurement</h2></br>
+    <h4>Selected DICOM Series</h4>
+    <table class="table table-striped"> <!-- Series information -->
+        <tr>
+            <th>Series description</th>
+            <td>{{ series.description }}</td>
+        </tr>
+        <tr>
+            <th>Acquisition date</th>
+            <td>{{ series.series_datetime }}</td>
+        </tr>
+        <tr>
+            <th>Uploaded date</th>
+            <td>{{ series.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+        </tr>
+        <tr>
+            <th>Files in series</th>
+            <td>{{ series_files}}</td>
+        </tr>
+        <tr>
+            <th>Reports made</th>
+            <td>{{ series.has_report }}</td>
+        </tr>
+    </table>
+    </br>
+
+    <h4>Measurement results</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Measurement</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, value in results.items() %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
