@@ -3,18 +3,18 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-    <style>
+<!--    <style>
     .scrollspy-example {
         position: relative;
         /*height: 200px;*/
         overflow: auto;
     }
     </style>
-
+-->
     <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
         <div class="col">
         <!-- Task list Scrollspy -->
-            <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
+            <!-- <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
         
                 <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
                 <h3 class="text-center pt-2">Available Tasks</h3>
@@ -24,10 +24,10 @@
                         </li>
                     {% endfor %}
                 </ul>
-            </div>
+            </div> -->
         </div>
-        <div class="col">
-            <h3 class="text-center pt-2">Upload new files</h3>
+    </div>
+    <h3 class="text-center pt-2">Upload new files</h3>
         </br>
             <div class="row">
                 <!-- DropZone -->
@@ -37,6 +37,10 @@
                 {{ dropzone.create(action=url_for('main.workbench'))}}
                 {{ dropzone.load_js() }}
                 {{ dropzone.config(reload='main.workbench', id='uploader') }}
+            </div>
+        </br>
+            <div class="text-center">
+                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
             </div>
         </br>
             <div class="row">
@@ -50,7 +54,6 @@
                     </p>
                 </form>
             </div>
-    </div>
 
     <hr>
     <div class="row">
@@ -58,22 +61,21 @@
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead><tr>
-                    <th>Select for processing</th>
                     <th>Series Description</th>
                     <th>Acquisition Date</th>
                     <th>Uploaded Date</th>
                     <th>Uploaded by</th>
                     <th>Files</th>
                     <th>Reports</th>
-                    <th>Delete</th>
-                    <th>Archive</th>
+                    <th>Remove</th>
                 </tr></thead>
                 <tbody>
-                {% for acquisition in acquisitions %}
+                    <!-- series is the db query result, essentially a list of series that are not archived -->
+                    <!-- acquisition is an instance/row of the Series table -->
+                {% for acquisition in series %}
                     <tr>
-                        <td>checkbox</td>
                         <td>
-                            <a href="{{ url_for('reports.report', acquisition_id=acquisition.id) }}">
+                            <a href="{{ url_for('main.task_selection', series_id=acquisition.id) }}">
                                 {{ acquisition.description }}</a>
                         </td>
                         <td>{{ acquisition.series_datetime }}</td>
@@ -81,15 +83,18 @@
                         <td>{{ acquisition.user.username }}</td>
                         <td>num files</td>
                         <td>
-                            <a href="{{ url_for('reports.report', acquisition_id=acquisition.id) }}">
-                            report</a>
+                            {% if acquisition.has_report %}
+                                <a href="{{ url_for('reports.report', acquisition_id=acquisition.id) }}">report</a>
+                            {% else %}
+                                None
+                            {% endif %}
+
                         </td>
                         <td>
                             <a href="{{ url_for('main.delete_acq', acquisition_uuid=acquisition.id) }}">
                                 <img src="../../static/trash.svg">
                             </a>
                         </td>
-                        <td>meow</td>
                     </tr>
                 {% endfor %}
                 </tbody>
