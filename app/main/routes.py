@@ -1,15 +1,17 @@
 import os
 import shutil
 from datetime import datetime
+from importlib.metadata import version
 
-import pydicom.errors
-from flask import render_template, flash, redirect, url_for, request, current_app
+from flask import current_app, render_template, redirect, url_for, request, session, flash
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
+import pydicom.errors
 
 from app import db
 from app.main import bp
-from app.models import User, Image, Series, Study, Task
+from app.main.forms import ImageUploadForm, ProcessTaskForm
+from app.models import User, Image, Series, Study, Device, Institution, Task, Report
 
 
 @bp.before_request
@@ -39,19 +41,22 @@ class ImageExistsError(Exception): pass
 @bp.route('/workbench/', methods=['GET', 'POST'])
 @login_required
 def workbench():
-    # Display available tasks that can be performed
-    tasks = Task.query.all()
+    # Save current user's ID to Session
+    session['current_user_id'] = current_user.id
 
     # Display available image Series
     page = request.args.get('page', 1, type=int)
-    acquisitions = Series.query.filter_by(user_id=current_user.id).paginate(
+    series = Series.query.filter_by(user_id=current_user.id).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-    # user.series.order_by(Series.created_at.desc()).paginate(
-    #     page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-    next_url = url_for('main.workbench', page=acquisitions.next_num) \
-        if acquisitions.has_next else None
-    prev_url = url_for('main.workbench', page=acquisitions.prev_num) \
-        if acquisitions.has_prev else None
+
+    next_url = url_for('main.workbench', page=series.next_num) \
+        if series.has_next else None
+    prev_url = url_for('main.workbench', page=series.prev_num) \
+        if series.has_prev else None
+
+    #TODO: for batch processing in the future, will need to have the list of
+    # available tasks that can be performed
+    tasks = Task.query.all()
 
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
@@ -72,8 +77,8 @@ def workbench():
                 flash('Files uploaded successfully!', 'success')
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', tasks=tasks,
-        acquisitions=acquisitions.items, next_url=next_url, prev_url=prev_url)
+    return render_template('workbench.html', title='Workbench', # tasks=tasks,
+        series=series.items, next_url=next_url, prev_url=prev_url)
 
 
 # Upload images one at a time and parse metadata from DICOM header
@@ -97,7 +102,7 @@ def ingest(file_path):
 
         # Save the image data into the corresponding tables:
         # 0. Device:
-        
+        #TODO parse device and manufacturer information from DICOM to db
         
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
@@ -139,12 +144,12 @@ def ingest(file_path):
         raise
 
 
-# Delete acquisitions
+# Delete image file(s)
 @bp.route('/user/<acquisition_uuid>/')
 @login_required
 def delete_acq(acquisition_uuid):
     user = User.query.get(current_user.get_id())
-    acquisition = Acquisition.query.filter_by(id=acquisition_uuid, user_id=user.id)
+    acquisition = Image.query.filter_by(id=acquisition_uuid, user_id=user.id)
 
     # delete files
     directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key, acquisition.first().filesystem_key)
