@@ -35,7 +35,7 @@ Flask-WTF==1.0.0
 fonttools==4.29.1
 greenlet==1.1.0
 gunicorn==20.1.0
-hazen @ git+https://github.com/GSTT-CSC/hazen@object-orientated-hazenlib
+hazen @ git+https://github.com/GSTT-CSC/hazen@webapp-core-tasks
 idna==3.3
 imageio==2.16.1
 imagesize==1.4.1
