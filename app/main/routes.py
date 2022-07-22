@@ -46,7 +46,7 @@ def workbench():
 
     # Display available image Series
     page = request.args.get('page', 1, type=int)
-    series = Series.query.filter_by(user_id=current_user.id).paginate(
+    series = db.session.query(Series).filter_by(user_id=current_user.id).order_by(Series.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
 
     next_url = url_for('main.workbench', page=series.next_num) \
@@ -188,8 +188,6 @@ def task_selection(series_id):
         task_variable = request.form['task_variable']
         user_id = session['current_user_id']
 
-        current_app.logger.info(f"Performing {task_name} task on {series.description}")
-
         # Select files to perform task on
         folder = os.path.join(current_app.config['UPLOADED_PATH'],
                                         series.filesystem_key)
@@ -201,31 +199,18 @@ def task_selection(series_id):
             raise Exception('Number of files in directory is not equal to expected!')
 
         # Set off task processing as a Celery job
+        current_app.logger.info(f"Performing {task_name} task on {series.description}")
         print("debug")
-        celery_job = produce_report.delay(task_name=task_name, image_files=image_files, task_variable=task_variable)
+        celery_job = produce_report.delay(
+            user_id=user_id, series_id=series.id, task_name=task_name,
+            image_files=image_files, slice_width=task_variable)
 
-        print("celery_job")
-        print(celery_job.__dict__)
         current_app.logger.info(f"Task performed successfully! \n")
-            # Store analysis result in database
-        # report = Report( #version('hazen')
-        #     hazen_version="wrong", data={"measurement": "value"},
-        #     user_id=user_id, series_id=series_id,
-        #     task_name=task_name)
-        # # Save information to database
-        # report.save()
-        print(series.has_report)
-        
-        # Update has_report field for the series that is now processed
-        series.update(has_report=True)
-        print(series.id)
-        print(series.has_report)
         flash(f'Completed {task_name} measurement!', 'info')
 
         # Passing task and series information to next page via Session dict
         session['task_name'] = task_name
         session['series_id'] = series_id
-        session['report'] = {'horizontal': {'IPEM': 0.46875}, 'vertical': {'IPEM': 0.5125}}
 
         return redirect(url_for('main.result'))
 
@@ -234,14 +219,18 @@ def task_selection(series_id):
 @bp.route('/result/', methods=['GET', 'POST'])
 @login_required
 def result():
-    # Retrieve the Task and Series that were selected
+    # Retrieve the Task and Series that were selected to create the report
     task_name = session['task_name']
     series_id = session['series_id']
     series = Series.query.filter_by(id=series_id).first_or_404()
     series_files = Image.query.filter_by(series_id=series.id).count()
-    report = session['report']
-    
-    return render_template('result.html', title='Result', results=report,
+
+    # Retrieve the report that was created
+    user_id = current_user.id
+    report = Report.query.filter_by(
+        user_id=user_id, series_id=series_id, task_name=task_name
+        ).first_or_404()
+    return render_template('result.html', title='Result', results=report.data,
                     task=task_name, series=series, series_files=series_files)
 
 
