@@ -1,16 +1,14 @@
 """Tasks module, specifying Hazen-related tasks and utilities."""
 
-import os
-
-from flask import current_app, flash, jsonify, make_response
-from app.models import Task, Report
-
-from hazen import worker
-import inspect
 import importlib
+import inspect
 import sys
-
 from importlib.metadata import version
+
+from flask import current_app, jsonify, make_response
+
+from app.models import Report
+from hazen import worker
 
 
 @worker.task(bind=True)
