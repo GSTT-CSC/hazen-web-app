@@ -242,4 +242,4 @@ def result():
 @bp.route('/reports/', methods=['GET', 'POST'])
 @login_required
 def reports():
-    return redirect(url_for('main.index'))
+    return render_template('report.html', title="Reports")
