@@ -6,7 +6,7 @@
         <table class="table table-striped"></table>
     {% endif %}
 
-    {% if not facts %}
+    {% if not reports %}
         <h3>Generate reports</h3>
         {% if form %}
             {{ wtf.render_form(form) }}
@@ -14,14 +14,14 @@
         {% endif %}
 
     {% else %}
-        {% for fact in facts %}
+        {% for report in reports %}
             <table class="table table-striped">
 
                 <caption>
-                    Status: {{ fact.status }}<br>
-                    Task: {{ fact.task.name }}<br>
-                    Variables: {{ fact.process_task_variables }}<br>
-                    Created: {{ moment(fact.created_at.naive).fromNow() }}<br>
+                    Status: {{ report.status }}<br>
+                    Task: {{ report.task.name }}<br>
+                    Variables: {{ report.process_task_variables }}<br>
+                    Created: {{ moment(report.created_at.naive).fromNow() }}<br>
                 </caption>
 
                 <thead>
@@ -32,7 +32,7 @@
                 </thead>
 
                 <tbody>
-                    {% for key, value in fact.data.items() %}
+                    {% for key, value in report.data.items() %}
                         {% for key, value in value.items() %}
                             <tr>
                                 <td>{{ key }}</td>
