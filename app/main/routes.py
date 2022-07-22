@@ -230,6 +230,22 @@ def task_selection(series_id):
         return redirect(url_for('main.result'))
 
 
+# Select task to be run on (image) series
+@bp.route('/result/', methods=['GET', 'POST'])
+@login_required
+def result():
+    # Retrieve the Task and Series that were selected
+    task_name = session['task_name']
+    series_id = session['series_id']
+    series = Series.query.filter_by(id=series_id).first_or_404()
+    series_files = Image.query.filter_by(series_id=series.id).count()
+    report = session['report']
+    
+    return render_template('result.html', title='Result', results=report,
+                    task=task_name, series=series, series_files=series_files)
+
+
+
 # Reports dashboard
 # Trend monitoring and overview of reports
 @bp.route('/reports/', methods=['GET', 'POST'])
