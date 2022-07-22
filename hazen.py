@@ -32,8 +32,8 @@ def register_tasks_in_db():
 
 
 app = create_app()
-# app.debug = True
-worker = create_celery_app(app)
+app.secret_key = app.config['SECRET_KEY']
+worker = create_celery_app(app) # a Celery object
 register_tasks_in_db()
 
 
