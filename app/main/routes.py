@@ -166,6 +166,20 @@ def delete_acq(acquisition_uuid):
     return redirect(request.referrer)
 
 
+# Delete report(s)
+@bp.route('/<report_id>/')
+@login_required
+def delete_report(report_id):
+    user = User.query.get(current_user.get_id())
+    report = Report.query.filter_by(id=report_id, user_id=user.id)
+
+    # remove db entry
+    report.delete()
+    db.session.commit()
+
+    return redirect(request.referrer)
+
+
 # Select task to be run on (image) series
 @bp.route('/task_selection/<series_id>/', methods=['GET', 'POST'])
 @login_required
@@ -240,10 +254,46 @@ def result():
                     task=task_name, series=series, series_files=series_files)
 
 
-
 # Reports dashboard
-# Trend monitoring and overview of reports
+# Overview of reports
+#TODO: Trend monitoring dashboards
 @bp.route('/reports/', methods=['GET', 'POST'])
 @login_required
-def reports(series_id):
-    return render_template('report.html', title="Reports")
+def reports(series_id=None):
+    series_dict = {}
+    # Display existing reports
+    if request.method == 'GET':
+        # If coming from the Workbench with a series_id specified,
+        # then display reports made for that series_id
+        if 'series_id' in request.args.keys():
+            # Get series_id from URL
+            series_id = request.args['series_id']
+            # Identify reports made for that series_id
+            reports = db.session.query(Report).filter_by(series_id=series_id).order_by(Report.created_at.desc())
+            # Store information about this series in a dict that can be passed to the html
+            series = Series.query.filter_by(id=series_id).first_or_404()
+            series_dict = {
+                'filtered': True,
+                'description': series.description,
+                'series_datetime': series.series_datetime,
+                'created_at': series.created_at,
+                'series_files': Image.query.filter_by(series_id=series_id).count()
+            }
+            
+        # Otherwise display all reports
+        else:
+            reports = db.session.query(Report).order_by(Report.created_at.desc())
+            series_dict['filtered'] = False
+
+        # Display reports in a table
+        page = request.args.get('page', 1, type=int)
+        reports_pages = reports.paginate(
+        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+        next_url = url_for('main.reports', page=reports_pages.next_num) \
+            if reports_pages.has_next else None
+        prev_url = url_for('main.reports', page=reports_pages.prev_num) \
+            if reports_pages.has_prev else None
+
+    return render_template('report.html', title="Reports", series=series_dict,
+        reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
+
