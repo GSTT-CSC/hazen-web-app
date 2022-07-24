@@ -30,7 +30,7 @@
     </table>
     </br>
 
-    <h4>Measurement results</h4>
+    <h4>Results</h4>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -40,6 +40,7 @@
         </thead>
         <tbody>
             {% for image, data in results.items() %}
+            <p>Description: {{ image }}</p>
                 {% for measurement, value in data.items() %}
                     <tr>
                         <td>{{ measurement }}</td>
