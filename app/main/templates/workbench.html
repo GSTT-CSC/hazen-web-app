@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "bootstrap5/form.html" as wtf %}
 
 {% block title %}{{title}}{% endblock %}
 
@@ -44,15 +45,10 @@
             </div>
         </br>
             <div class="row">
-                    <!-- File selection -->
-                <form method="post" action="{{ url_for('main.workbench') }}" enctype="multipart/form-data">
-                    <p>
-                        <input type="file" name="files[]" multiple="true" autocomplete="off" required>
-                    </p>
-                    <p>
-                        <input type="submit" value="Upload">
-                    </p>
-                </form>
+                <!-- File selection -->
+                {% if form %}
+                    {{ wtf.render_form(form) }}
+                {% endif %}
             </div>
 
     <hr>
@@ -84,7 +80,7 @@
                         <td>num files</td>
                         <td>
                             {% if acquisition.has_report %}
-                                <a href="{{ url_for('reports.report', acquisition_id=acquisition.id) }}">report</a>
+                                <a href="{{ url_for('main.reports', series_id=acquisition.id) }}">report</a>
                             {% else %}
                                 None
                             {% endif %}
