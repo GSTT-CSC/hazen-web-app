@@ -4,8 +4,8 @@ from wtforms.validators import ValidationError, DataRequired, Length
 
 # Upload files form
 class ImageUploadForm(FlaskForm):
-    images = MultipleFileField()
-    submit = SubmitField('Submit')
+    image_files = MultipleFileField()
+    submit = SubmitField('Upload')
 
 
 # Select task form
