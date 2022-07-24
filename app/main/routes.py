@@ -57,10 +57,13 @@ def workbench():
     #TODO: for batch processing in the future, will need to have the list of
     # available tasks that can be performed
     tasks = Task.query.all()
+    
+    form = ImageUploadForm()
 
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
-            if key.startswith('file'):
+            # Uploaded by DropZone       Uploaded by Choose File
+            if key.startswith('file') or key.startswith('image_file'):
                 filename = secure_filename(file.filename)
                 secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
                 file.save(secure_path)
@@ -69,7 +72,7 @@ def workbench():
                     filesystem_dir = ingest(secure_path)
                 except ImageExistsError:
                     os.remove(secure_path)
-                    flash('Images have already been uploaded!', 'danger')
+                    flash(f'{filename} file has already been uploaded!', 'danger')
                     return redirect(url_for('main.workbench'))
 
                 permanent_path = os.path.join(filesystem_dir, filename)
@@ -77,7 +80,7 @@ def workbench():
                 flash('Files uploaded successfully!', 'success')
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', # tasks=tasks,
+    return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
         series=series.items, next_url=next_url, prev_url=prev_url)
 
 
@@ -85,7 +88,8 @@ def workbench():
 def ingest(file_path):
     try:
         # Load in the DICOM header into a pydicom Dataset
-        dcm: pydicom.Dataset = pydicom.read_file(file_path, stop_before_pixels=True)
+        dcm = pydicom.read_file(file_path, force=True,
+                                                stop_before_pixels=True)
 
         # Parse the relevant fields into variables
         series_uid = dcm.SeriesInstanceUID
@@ -241,5 +245,5 @@ def result():
 # Trend monitoring and overview of reports
 @bp.route('/reports/', methods=['GET', 'POST'])
 @login_required
-def reports():
+def reports(series_id):
     return render_template('report.html', title="Reports")
