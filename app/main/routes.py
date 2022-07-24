@@ -36,7 +36,7 @@ def index():
 class ImageExistsError(Exception): pass
 
 
-# Workbench?
+# Workbench
 # authenticated users can overview and perform tasks/analysis on uploaded files 
 @bp.route('/workbench/', methods=['GET', 'POST'])
 @login_required
