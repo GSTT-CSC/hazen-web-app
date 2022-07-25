@@ -47,7 +47,7 @@ def workbench():
 
     # Display available image Series
     page = request.args.get('page', 1, type=int)
-    series = db.session.query(Series).filter_by(user_id=current_user.id).order_by(Series.created_at.desc()).paginate(
+    series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
     studies = db.session.query(Study).order_by(Study.created_at.desc())
 
@@ -151,34 +151,64 @@ def ingest(file_path):
         raise
 
 
-# Delete image file(s)
-@bp.route('/user/<acquisition_uuid>/')
+# Delete or archive series, delete reports
+@bp.route('/delete/')
 @login_required
-def delete_acq(acquisition_uuid):
-    user = User.query.get(current_user.get_id())
-    acquisition = Image.query.filter_by(id=acquisition_uuid, user_id=user.id)
+def delete(series_id=None, report_id=None):
+    """Generic delete function
 
-    # delete files
-    directory = os.path.join(current_app.config['UPLOADED_PATH'], user.filesystem_key, acquisition.first().filesystem_key)
-    shutil.rmtree(directory)
+    Args:
+        series_id (optional): Database ID of a Series row. Defaults to None.
+        report_id (optional): Database ID of a Reports row. Defaults to None.
 
-    # remove db entry
-    acquisition.delete()
-    db.session.commit()
+    Returns:
+        updates database table to reflect deletion
+    """
+    if 'series_id' in request.args.keys():
+        # Get series_id from URL, find series in Table
+        series_id = request.args['series_id']
+        series = Series.query.filter_by(id=series_id).first_or_404()
+        # Check whether reports were made for that series_id
+        if series.has_report:
+            # If series already has reports, archive series but don't delete
+            series.update(archived=True)
+            flash(f"Series {series.description} was archived as it already has reports.", 'info')
+        else:
+            # If there are no reports associated, then delete all files
+            # from filesystem
+            series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
+            shutil.rmtree(series_folder)
+            # from database
+            images = Image.query.filter_by(series_id=series_id).all()
+            for image in images:
+                image.delete()
+            # Check whether study has other series, delete if not
+            additional_series = Study.query.filter_by(id=series.study_id).count()
+            if additional_series == 1:  # study only had this series
+                study = Study.query.filter_by(id=series.study_id).first_or_404()
+                study.delete()
+            # Lastly, delete the series itself from the DB
+            series.delete()
+            flash(f"All files in series {series.description} were deleted as it has no reports.", 'info')
+        db.session.commit()
 
-    return redirect(request.referrer)
-
-
-# Delete report(s)
-@bp.route('/<report_id>/')
-@login_required
-def delete_report(report_id):
-    user = User.query.get(current_user.get_id())
-    report = Report.query.filter_by(id=report_id, user_id=user.id)
-
-    # remove db entry
-    report.delete()
-    db.session.commit()
+    if 'report_id' in request.args.keys():
+        # Get report_id from URL, find report in Table
+        report_id = request.args['report_id']
+        report = Report.query.filter_by(id=report_id).first_or_404()
+        # Check whether series has other reports or is this the only one
+        additional_reports = Report.query.filter_by(series_id=report.series_id).count()
+        if additional_reports > 1:  # series has other reports 
+            # delete selected one
+            report.delete()
+        else:  # series only had this report
+            # delete selected one
+            report.delete()
+            # and update has_report field of the series
+            series = Series.query.filter_by(id=report.series_id).first_or_404()
+            series.update(has_report=False)
+        db.session.commit()
+        flash(f"Report was deleted.", 'info')
 
     return redirect(request.referrer)
 
