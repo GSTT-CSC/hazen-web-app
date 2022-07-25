@@ -46,7 +46,7 @@ def workbench():
 
     # Display available image Series
     page = request.args.get('page', 1, type=int)
-    series = db.session.query(Series).filter_by(user_id=current_user.id).order_by(Series.created_at.desc()).paginate(
+    series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
 
     next_url = url_for('main.workbench', page=series.next_num) \
