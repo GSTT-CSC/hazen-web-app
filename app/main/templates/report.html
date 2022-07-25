@@ -4,5 +4,76 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-<h1>Placeholder for all Reports table</h1>
+    {% if series.filtered %}
+        <div class="row">
+            <h3 class="text-center pt-2">Available reports for DICOM Series</h3></br>
+            <table class="table table-striped"> <!-- Series information -->
+                <tr>
+                    <th>Series description</th>
+                    <td>{{ series.description }}</td>
+                </tr>
+                <tr>
+                    <th>Acquisition date</th>
+                    <td>{{ series.series_datetime }}</td>
+                </tr>
+                <tr>
+                    <th>Uploaded date</th>
+                    <td>{{ series.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                </tr>
+                <tr>
+                    <th>Files in series</th>
+                    <td>{{ series.series_files }}</td>
+                </tr>
+            </table>
+        </div>
+    {% endif %}
+
+    <h3 class="text-center pt-2">Reports</h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead><tr>
+                    <th>Series Description</th>
+                    <th>Measurement performed</th>
+                    <th>Measurement Date</th>
+                    <th>Performed by</th>
+                    <th>Result</th>
+                    <th>Remove</th>
+                </tr></thead>
+                <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('main.task_selection', series_id=report.series.id) }}">
+                            {{ report.series.description }}</a>
+                        </td>
+                        <td>{{report.task.name}}</td>
+                        <td>{{ report.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                        <td>{{ report.user.username }}</td>
+                        <td>{{ report.data }}</td>
+                        <td>
+                            <a href="{{ url_for('main.delete_report', report_id=report.id) }}">
+                                <img src="../../static/trash.svg">
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <nav aria-label="...">
+        <ul class="pagination justify-content-center">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
+                    <span aria-hidden="true">&larr;</span> Newer reports
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ next_url or '#' }}">
+                    Older reports <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 {% endblock %}
