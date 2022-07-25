@@ -1,11 +1,15 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, TextAreaField
+from wtforms import SelectField, StringField, MultipleFileField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Length
 
-from app.models import User
+# Upload files form
+class ImageUploadForm(FlaskForm):
+    image_files = MultipleFileField()
+    submit = SubmitField('Upload')
 
 
-class AcquisitionForm(FlaskForm):
-    acquisition = TextAreaField('Say something', validators=[
-        DataRequired(), Length(min=1, max=140)])
-    submit = SubmitField('Submit')
+# Select task form
+class ProcessTaskForm(FlaskForm):
+    task_name = SelectField('Process Task')
+    task_variable = StringField('Slice width for SNR measurement')
+    submit = SubmitField('Run task')

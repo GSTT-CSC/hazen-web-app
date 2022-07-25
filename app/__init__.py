@@ -57,10 +57,6 @@ def create_app(config_class=Config):
     # Upload directory to hold files
     os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
 
-    # Reports page for viewing Hazen output
-    from app.reports import bp as reports_bp
-    app.register_blueprint(reports_bp)
-
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
     # Authentication pages to login, logout, change password
