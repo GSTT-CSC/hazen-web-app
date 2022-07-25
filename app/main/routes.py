@@ -180,9 +180,9 @@ def delete(series_id=None, report_id=None):
             for image in images:
                 image.delete()
             # Check whether study has other series, delete if not
-            additional_series = Study.query.filter_by(series_id=series_id).count()
-            if additional_series == 1:  # study only had this series 
-                study = Study.query.filter_by(series_id=series_id).first_or_404()
+            additional_series = Study.query.filter_by(id=series.study_id).count()
+            if additional_series == 1:  # study only had this series
+                study = Study.query.filter_by(id=series.study_id).first_or_404()
                 study.delete()
             # Lastly, delete the series itself from the DB
             series.delete()
