@@ -16,7 +16,6 @@
         <div class="col">
         <!-- Task list Scrollspy -->
             <!-- <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-        
                 <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
                 <h3 class="text-center pt-2">Available Tasks</h3>
                     {% for task in tasks %}
@@ -51,9 +50,39 @@
                 {% endif %}
             </div>
 
-    <hr>
-    <div class="row">
-    <h3 class="text-center pt-2">Available files</h3>
+
+
+    <nav aria-label="...">
+        <ul class="pagination justify-content-center">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
+                    <span aria-hidden="true">&larr;</span> Newer acquisitions
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ next_url or '#' }}">
+                    Older acquisitions <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+
+         <h3 class="text-center pt-2">Available files</h3>
+
+<div class="accordion" id="accordionPanelsStayOpenExample">
+{% for study in studies %}
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
+        Accordion Item #1 {{ study.uid }}
+      </button>
+    </h2>
+    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+      <div class="accordion-body">
+
+         <div class="row">
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead><tr>
@@ -77,6 +106,7 @@
                         <td>{{ acquisition.series_datetime }}</td>
                         <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                         <td>{{ acquisition.user.username }}</td>
+                        <td>{{ acquisition.series }}</td>
                         <td>num files</td>
                         <td>
                             {% if acquisition.has_report %}
@@ -97,20 +127,15 @@
             </table>
         </div>
     </div>
+{% endfor %}
 
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
-                    <span aria-hidden="true">&larr;</span> Newer acquisitions
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ next_url or '#' }}">
-                    Older acquisitions <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
 
 {% endblock %}
