@@ -179,6 +179,12 @@ def delete(series_id=None, report_id=None):
             images = Image.query.filter_by(id=series_id).all()
             for image in images:
                 image.delete()
+            # Check whether study has other series, delete if not
+            additional_series = Study.query.filter_by(series_id=series_id).count()
+            if additional_series == 1:  # study only had this series 
+                study = Study.query.filter_by(series_id=series_id).first_or_404()
+                study.delete()
+            # Lastly, delete the series itself from the DB
             series.delete()
             flash(f"All files in series {series.description} were deleted as it has no reports.", 'info')
         db.session.commit()
