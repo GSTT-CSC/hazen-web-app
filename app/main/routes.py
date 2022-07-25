@@ -176,7 +176,7 @@ def delete(series_id=None, report_id=None):
             series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
             shutil.rmtree(series_folder)
             # from database
-            images = Image.query.filter_by(id=series_id).all()
+            images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
                 image.delete()
             # Check whether study has other series, delete if not
