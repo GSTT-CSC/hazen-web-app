@@ -174,7 +174,12 @@ def delete(series_id=None, report_id=None):
             # If there are no reports associated, then delete all files
             # from filesystem
             series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
-            shutil.rmtree(series_folder)
+            try:
+                shutil.rmtree(series_folder)
+            except Exception as e:
+                flash(f"Could not find files under this series_id folder")
+                print(e)
+                raise
             # from database
             images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
@@ -203,7 +208,8 @@ def delete(series_id=None, report_id=None):
             report.delete()
             # and update has_report field of the series
             series = Series.query.filter_by(id=report.series_id).first_or_404()
-            series.update(has_report=False)
+            # Reset series bool so it is displayed without a report on the workbench
+            series.update(has_report=False, archived=False)
         db.session.commit()
         flash(f"Report was deleted.", 'info')
 
