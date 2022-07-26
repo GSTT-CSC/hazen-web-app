@@ -50,54 +50,64 @@
                     {{ wtf.render_form(form) }}
                 {% endif %}
             </div>
+    <h3 class="text-center pt-2">Available files</h3></br>
 
-    <hr>
-    <div class="row">
-    <h3 class="text-center pt-2">Available files</h3>
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead><tr>
-                    <th>Series Description</th>
-                    <th>Acquisition Date</th>
-                    <th>Uploaded Date</th>
-                    <th>Uploaded by</th>
-                    <th>Files</th>
-                    <th>Reports</th>
-                    <th>Remove</th>
-                </tr></thead>
-                <tbody>
-                    <!-- series is the db query result, essentially a list of series that are not archived -->
-                    <!-- acquisition is an instance/row of the Series table -->
-                {% for acquisition in series %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('main.task_selection', series_id=acquisition.id) }}">
-                                {{ acquisition.description }}</a>
-                        </td>
-                        <td>{{ acquisition.series_datetime }}</td>
-                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                        <td>{{ acquisition.user.username }}</td>
-                        <td>num files</td>
-                        <td>
-                            {% if acquisition.has_report %}
-                                <a href="{{ url_for('main.reports', series_id=acquisition.id) }}">report</a>
-                            {% else %}
-                                None
-                            {% endif %}
-
-                        </td>
-                        <td>
-                            <a href="{{ url_for('main.delete', series_id=acquisition.id) }}">
-                                <img src="../../static/trash.svg">
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    {% for study in studies %}
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="panel_header">
+                <button class="accordion-button" type="button" data-coreui-toggle="collapse" data-coreui-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">{{ study.uid }}</button>
+            </h2>
+        </div>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-coreui-parent="#accordionExample">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead><tr>
+                            <th>Series Description</th>
+                            <th>Acquisition Date</th>
+                            <th>Uploaded Date</th>
+                            <th>Uploaded by</th>
+                            <!-- <th>Files</th> -->
+                            <th>Reports</th>
+                            <!-- <th>Remove</th> -->
+                        </tr></thead>
+                        <tbody>
+                            <!-- series is the db query result, essentially a list of series that are not archived -->
+                            <!-- acquisition is an instance/row of the Series table -->
+                            {% for serie in study.series %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">
+                                            {{ serie.description }}</a>
+                                    </td>
+                                    <td>{{ serie.series_datetime }}</td>
+                                    <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                                    <td>{{ serie.user.username }}</td>
+                                    <!-- <td>num files</td> -->
+                                    <td>
+                                        {% if serie.has_report %}
+                                            <a href="{{ url_for('main.reports', series_id=serie.id) }}">report</a>
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </td>
+                                    <!-- <td>
+                                        <a href="{{ url_for('main.delete', series_id=serie.id) }}">
+                                            <img src="../../static/trash.svg">
+                                        </a>
+                                    </td> -->
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+    {% endfor %}
 
+<!--
     <nav aria-label="...">
         <ul class="pagination justify-content-center">
             <li class="page-item{% if not prev_url %} disabled{% endif %}">
@@ -112,5 +122,6 @@
             </li>
         </ul>
     </nav>
+-->
 
 {% endblock %}

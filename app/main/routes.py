@@ -44,22 +44,24 @@ def workbench():
     # Save current user's ID to Session
     session['current_user_id'] = current_user.id
 
-    # Display available image Series
-    page = request.args.get('page', 1, type=int)
-    series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-
-    next_url = url_for('main.workbench', page=series.next_num) \
-        if series.has_next else None
-    prev_url = url_for('main.workbench', page=series.prev_num) \
-        if series.has_prev else None
-
     #TODO: for batch processing in the future, will need to have the list of
     # available tasks that can be performed
     tasks = Task.query.all()
-    
-    form = ImageUploadForm()
 
+    # Display available image Series, grouped by Study UID
+    studies = db.session.query(Study).order_by(Study.created_at.desc())
+    print(type(studies))
+    # page = request.args.get('page', 1, type=int)
+    series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc())
+    # .paginate(page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+    # next_url = url_for('main.workbench', page=series.next_num) \
+    #     if series.has_next else None
+    # prev_url = url_for('main.workbench', page=series.prev_num) \
+    #     if series.has_prev else None
+
+    # Create Choose file form
+    form = ImageUploadForm()
+    # Upload file functionality
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
             # Uploaded by DropZone       Uploaded by Choose File
@@ -81,7 +83,8 @@ def workbench():
         return redirect(url_for('main.workbench'))
 
     return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
-        series=series.items, next_url=next_url, prev_url=prev_url)
+        studies=studies, series=series)
+    # , next_url=next_url, prev_url=prev_url
 
 
 # Upload images one at a time and parse metadata from DICOM header
@@ -203,7 +206,7 @@ def delete(series_id=None, report_id=None):
             report.delete()
             # and update has_report field of the series
             series = Series.query.filter_by(id=report.series_id).first_or_404()
-            series.update(has_report=False)
+            series.update(has_report=False, archived=False)
         db.session.commit()
         flash(f"Report was deleted.", 'info')
 
