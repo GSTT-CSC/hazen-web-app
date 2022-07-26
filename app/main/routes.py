@@ -36,6 +36,23 @@ def index():
 class ImageExistsError(Exception): pass
 
 
+def upload_file(file):
+    filename = secure_filename(file.filename)
+    secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+    file.save(secure_path)
+
+    try:
+        filesystem_dir = ingest(secure_path)
+        permanent_path = os.path.join(filesystem_dir, filename)
+        shutil.move(secure_path, permanent_path)
+        flash(f'{filename} file has been uploaded successfully!', 'success')
+    except ImageExistsError:
+        os.remove(secure_path)
+        flash(f'{filename} file has already been uploaded!', 'danger')
+
+    return 'success'
+
+
 # Workbench
 # authenticated users can overview and perform tasks/analysis on uploaded files 
 @bp.route('/workbench/', methods=['GET', 'POST'])
@@ -60,24 +77,15 @@ def workbench():
     
     form = ImageUploadForm()
 
-    if request.method == 'POST': # form.validate_on_submit()
-        for key, file in request.files.items():
-            # Uploaded by DropZone       Uploaded by Choose File
-            if key.startswith('file') or key.startswith('image_file'):
-                filename = secure_filename(file.filename)
-                secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
-                file.save(secure_path)
+    if request.method == 'POST' and form.is_submitted():
+        print("post request")
+        # Uploaded by DropZone
+        for dropzone_file in request.files.getlist('file'):
+            upload_file(dropzone_file)
+        # Uploaded by Choose File
+        for choose_file in request.files.getlist('image_files'):
+            upload_file(choose_file)
 
-                try:
-                    filesystem_dir = ingest(secure_path)
-                except ImageExistsError:
-                    os.remove(secure_path)
-                    flash(f'{filename} file has already been uploaded!', 'danger')
-                    return redirect(url_for('main.workbench'))
-
-                permanent_path = os.path.join(filesystem_dir, filename)
-                shutil.move(secure_path, permanent_path)
-                flash('Files uploaded successfully!', 'success')
         return redirect(url_for('main.workbench'))
 
     return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
