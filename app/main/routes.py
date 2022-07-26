@@ -48,6 +48,8 @@ def workbench():
     #TODO: for batch processing in the future, will need to have the list of
     # available tasks that can be performed
     tasks = Task.query.all()
+    batch_form = BatchProcessingForm()
+    batch_form.task_name.choices = [task.name for task in Task.query.all()]
 
     # Display available image Series, grouped by Study UID
     studies = db.session.query(Study).order_by(Study.created_at.desc())
@@ -60,7 +62,7 @@ def workbench():
     #     if series.has_prev else None
 
     # Create Choose file form
-    form = ImageUploadForm()
+    upload_form = ImageUploadForm()
     # Upload file functionality
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
@@ -80,10 +82,22 @@ def workbench():
                 permanent_path = os.path.join(filesystem_dir, filename)
                 shutil.move(secure_path, permanent_path)
                 flash('Files uploaded successfully!', 'success')
+        # Check whether the batch processing form is submitted
+        if request.form['submit'] == 'Run task on selected series':
+            try:
+                task_name = request.form['task_name']
+                selected_series = request.form.getlist('many_series')
+                print("Selected task and series:")
+                print(task_name)
+                print(selected_series)
+            except Exception as e:
+                print(e)
+                raise e
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
-        studies=studies)
+    return render_template('workbench.html', title='Workbench', studies=studies,
+            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
+        )
     # , series=series, next_url=next_url, prev_url=prev_url
 
 
