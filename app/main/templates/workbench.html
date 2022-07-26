@@ -72,10 +72,11 @@
 
 <div class="accordion" id="accordionPanelsStayOpenExample">
 {% for study in studies %}
+
   <div class="accordion-item">
     <h2 class="accordion-header" id="panelsStayOpen-headingOne">
       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-        Accordion Item #1 {{ study.uid }}
+{{ study.uid }}
       </button>
     </h2>
     <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
@@ -97,38 +98,14 @@
                 <tbody>
                     <!-- series is the db query result, essentially a list of series that are not archived -->
                     <!-- acquisition is an instance/row of the Series table -->
-                {% for acquisition in series %}
-                    <tr>
-                        <td>
-                            <a href="{{ url_for('main.task_selection', series_id=acquisition.id) }}">
-                                {{ acquisition.description }}</a>
-                        </td>
-                        <td>{{ acquisition.series_datetime }}</td>
-                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                        <td>{{ acquisition.user.username }}</td>
-                        <td>{{ acquisition.series }}</td>
-                        <td>num files</td>
-                        <td>
-                            {% if acquisition.has_report %}
-                                <a href="{{ url_for('main.reports', series_id=acquisition.id) }}">report</a>
-                            {% else %}
-                                None
-                            {% endif %}
 
-                        </td>
-                        <td>
-                            <a href="{{ url_for('main.delete_acq', acquisition_uuid=acquisition.id) }}">
-                                <img src="../../static/trash.svg">
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
+                    <td>{{ study.series }}</td>
+
                 </tbody>
             </table>
         </div>
     </div>
 {% endfor %}
-
 
       </div>
     </div>

@@ -142,6 +142,7 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     uid = db.Column(db.String(64))  # DICOM Study UID (0020,000D)
     description = db.Column(db.String(100))  # DICOM Study Description (0008,1030)
 
+
     # One-to-many relationships
     series = db.relationship('Series', back_populates='studies')
 
