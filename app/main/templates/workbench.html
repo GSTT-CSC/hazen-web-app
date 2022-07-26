@@ -64,19 +64,21 @@
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead><tr>
+                            <th>Select</th>
                             <th>Series Description</th>
                             <th>Acquisition Date</th>
                             <th>Uploaded Date</th>
                             <th>Uploaded by</th>
                             <!-- <th>Files</th> -->
                             <th>Reports</th>
-                            <!-- <th>Remove</th> -->
+                            <th>Remove</th>
                         </tr></thead>
                         <tbody>
                             <!-- series is the db query result, essentially a list of series that are not archived -->
                             <!-- acquisition is an instance/row of the Series table -->
                             {% for serie in study.series %}
                                 <tr>
+                                    <td>checkbox</td>
                                     <td>
                                         <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">
                                             {{ serie.description }}</a>
@@ -92,11 +94,11 @@
                                             None
                                         {% endif %}
                                     </td>
-                                    <!-- <td>
+                                    <td>
                                         <a href="{{ url_for('main.delete', series_id=serie.id) }}">
                                             <img src="../../static/trash.svg">
                                         </a>
-                                    </td> -->
+                                    </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
