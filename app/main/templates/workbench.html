@@ -4,30 +4,16 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-<!--    <style>
+<style>
     .scrollspy-example {
         position: relative;
         /*height: 200px;*/
         overflow: auto;
     }
-    </style>
--->
-    <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-        <div class="col">
-        <!-- Task list Scrollspy -->
-            <!-- <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-        
-                <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                <h3 class="text-center pt-2">Available Tasks</h3>
-                    {% for task in tasks %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">{{ task.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div> -->
-        </div>
-    </div>
+</style>
+
+<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+    <div class="col">
     <h3 class="text-center pt-2">Upload new files</h3>
         </br>
             <div class="row">
@@ -46,12 +32,30 @@
         </br>
             <div class="row">
                 <!-- File selection -->
-                {% if form %}
-                    {{ wtf.render_form(form) }}
+                {% if upload_form %}
+                    {{ wtf.render_form(upload_form) }}
                 {% endif %}
             </div>
-    <h3 class="text-center pt-2">Available files</h3></br>
+        </br>
+    </div>
 
+    <form method="POST" action={{ url_for('main.workbench') }}>
+        <div class="col">
+        <!-- Task list Scrollspy -->
+            <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
+                <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
+                    <h3 class="text-center pt-2">Select task</h3>
+                    {% for task in batch_form.task_name.choices %}
+                        <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
+                    {% endfor %}
+                </ul>
+                </br>{{ batch_form.submit }}</br>
+            </div>
+        </div>
+</div>
+</br>
+<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+    <h3 class="text-center pt-2">Available files</h3></br>
     {% for study in studies %}
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
@@ -78,10 +82,9 @@
                             <!-- acquisition is an instance/row of the Series table -->
                             {% for serie in study.series %}
                                 <tr>
-                                    <td>checkbox</td>
+                                    <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
                                     <td>
-                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">
-                                            {{ serie.description }}</a>
+                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">{{ serie.description }}</a>
                                     </td>
                                     <td>{{ serie.series_datetime }}</td>
                                     <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
@@ -108,7 +111,8 @@
         </div>
     </div>
     {% endfor %}
-
+</div>
+</form>
 <!--
     <nav aria-label="...">
         <ul class="pagination justify-content-center">
