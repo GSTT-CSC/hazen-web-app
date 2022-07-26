@@ -98,8 +98,17 @@
                 <tbody>
                     <!-- series is the db query result, essentially a list of series that are not archived -->
                     <!-- acquisition is an instance/row of the Series table -->
-
+                    
                     <td>{{ study.series }}</td>
+
+                        </td>
+                        <td>
+                            <a href="{{ url_for('main.delete', series_id=acquisition.id) }}">
+                                <img src="../../static/trash.svg">
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
 
                 </tbody>
             </table>
