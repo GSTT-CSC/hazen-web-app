@@ -10,9 +10,10 @@ import pydicom.errors
 
 from app import db
 from app.main import bp
-from app.main.forms import ImageUploadForm, ProcessTaskForm
+from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
 from app.models import User, Image, Series, Study, Device, Institution, Task, Report
 
+hazenlib_version = version('hazen')
 
 @bp.before_request
 def before_request():
@@ -218,7 +219,6 @@ def delete(series_id=None, report_id=None):
 def task_selection(series_id):
     # Retrieve the Series that was selected
     series = Series.query.filter_by(id=series_id).first_or_404()
-    hazenlib_version = version('hazen')
 
     if request.method == 'GET':
         # Prepare the form to accept task selection
@@ -226,7 +226,7 @@ def task_selection(series_id):
         # Provide list of available tasks that can be performed
         form.task_name.choices = [(task.name, task.name) for task in Task.query.all()]
         series_files = Image.query.filter_by(series_id=series_id).count()
-        
+
         return render_template('task_selection.html', title='Select Task',
                         form=form, series=series, series_files=series_files,
                         hazenlib_version=hazenlib_version)
@@ -311,7 +311,7 @@ def reports(series_id=None):
                 'created_at': series.created_at,
                 'series_files': Image.query.filter_by(series_id=series_id).count()
             }
-            
+
         # Otherwise display all reports
         else:
             reports = db.session.query(Report).order_by(Report.created_at.desc())
