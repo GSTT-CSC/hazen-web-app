@@ -10,8 +10,8 @@ import pydicom.errors
 
 from app import db
 from app.main import bp
-from app.main.forms import ImageUploadForm, ProcessTaskForm
-from app.models import User, Image, Series, Study, Device, Institution, Task, Report
+from app.main.forms import ImageUploadForm, ProcessTaskForm, GenerateReportForm
+from app.models import Image, Series, Study, Device, Institution, Task, Report
 
 
 @bp.before_request
@@ -291,6 +291,8 @@ def result():
 @login_required
 def reports(series_id=None):
     series_dict = {}
+    form = GenerateReportForm()
+
     # Display existing reports
     if request.method == 'GET':
         # If coming from the Workbench with a series_id specified,
