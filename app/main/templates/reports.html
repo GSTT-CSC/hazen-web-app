@@ -4,27 +4,6 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-    <style>
-    .scrollspy-example {
-        position: relative;
-        /*height: 200px;*/
-        overflow: auto;
-    }
-    </style>
-
-<form method="POST" action={{ url_for('main.reports') }}>
-    <!-- Task list Scrollspy -->
-    <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-        <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                <h3 class="text-center pt-2">Available Tasks</h3>
-                {% for task in form.task_name.choices %}
-                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
-                {% endfor %}
-            </ul>
-            </br>{{ form.submit }}</br>
-        </div>
-    </div>
 
     {% if series.filtered %}
         <div class="row">
@@ -50,22 +29,24 @@
         </div>
     {% endif %}
 
+<form method="POST" action={{ url_for('main.reports') }}>
+    </br>{{ form.submit }}</br>
     <h3 class="text-center pt-2">Reports</h3>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead><tr>
-                    <th>Select</th>
-                    <th>Series Description</th>
+                    <!-- <th>Select</th> -->
+                    <th>Series description</th>
                     <th>Measurement performed</th>
-                    <th>Measurement Date</th>
+                    <th>Measurement date</th>
                     <th>Performed by</th>
-                    <th>Result</th>
+                    <th>Measurement result</th>
                     <th>Remove</th>
                 </tr></thead>
                 <tbody>
                 {% for report in reports %}
                     <tr>
-                        <td><input type="checkbox" name="many_series" value={{report.id}}></td>
+                        <!-- <td><input type="checkbox" name="many_series" value={{report.id}}></td> -->
                         <td>
                             <a href="{{ url_for('main.task_selection', series_id=report.series.id) }}">
                             {{ report.series.description }}</a>
@@ -84,7 +65,7 @@
                 </tbody>
             </table>
         </div>
-</form>
+    </form>
 
     <nav aria-label="...">
         <ul class="pagination justify-content-center">
