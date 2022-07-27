@@ -1,4 +1,5 @@
 import os
+import csv
 import shutil
 from datetime import datetime
 from importlib.metadata import version
@@ -326,7 +327,26 @@ def reports(series_id=None):
         prev_url = url_for('main.reports', page=reports_pages.prev_num) \
             if reports_pages.has_prev else None
 
-    return render_template('reports.html', title="Reports",
-        series=series_dict, reports=reports_pages.items, form=form,
-        next_url=next_url, prev_url=prev_url)
+        return render_template('reports.html', title="Reports",
+            series=series_dict, reports=reports_pages.items, form=form,
+            next_url=next_url, prev_url=prev_url)
+    
+    if request.method == 'POST' and form.is_submitted():
+        # Identify selected results (list of report.id)
+        selected_results = request.form.getlist('results')
+        results_list = []
+        
+        for result_id in selected_results:
+            report = Report.query.filter_by(id=result_id).first_or_404()
+            results_list.append({
+                "series": report.series.description, "task": report.task_name,
+                "user": report.user.username, "date": str(report.created_at),
+                "result": str(report.data)
+            })
+            with open("output.csv", 'w') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=results_list[0].keys())
+                writer.writeheader()
+                writer.writerows(results_list)
+    return str(results_list)
+
 
