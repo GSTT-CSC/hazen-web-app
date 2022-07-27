@@ -326,6 +326,7 @@ def reports(series_id=None):
         prev_url = url_for('main.reports', page=reports_pages.prev_num) \
             if reports_pages.has_prev else None
 
-    return render_template('report.html', title="Reports", series=series_dict,
-        reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
+    return render_template('reports.html', title="Reports",
+        series=series_dict, reports=reports_pages.items, form=form,
+        next_url=next_url, prev_url=prev_url)
 
