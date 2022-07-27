@@ -39,7 +39,11 @@ class ImageExistsError(Exception): pass
 def upload_file(file):
     filename = secure_filename(file.filename)
     secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
-    file.save(secure_path)
+    try:
+        file.save(secure_path)
+    except IsADirectoryError:
+        flash("No files were selected", 'info')
+        return redirect(url_for('main.workbench'))
 
     try:
         filesystem_dir = ingest(secure_path)
@@ -49,8 +53,6 @@ def upload_file(file):
     except ImageExistsError:
         os.remove(secure_path)
         flash(f'{filename} file has already been uploaded!', 'danger')
-
-    return 'success'
 
 
 # Workbench
