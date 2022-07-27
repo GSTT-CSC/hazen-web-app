@@ -12,6 +12,10 @@
     }
     </style>
 -->
+
+
+
+
     <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
         <div class="col">
         <!-- Task list Scrollspy -->
@@ -70,19 +74,21 @@
 
          <h3 class="text-center pt-2">Available files</h3>
 
+
+
+
+
 {% for study in studies %}
-<div class="accordion" id="accordionPanelsStayOpenExample">
-
-
+    <div class="accordion" id="accordionExample">
   <div class="accordion-item">
-    <h2 class="accordion-header" id="panelsStayOpen-headingOne">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="true" aria-controls="panelsStayOpen-collapseOne">
-{{ study.uid }}
+    <h2 class="accordion-header" id="heading{{ loop.index }}">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
+      {{ study.uid }}
       </button>
     </h2>
-    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse show" aria-labelledby="panelsStayOpen-headingOne">
+    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
       <div class="accordion-body">
-
+        <strong>
          <div class="row">
 
         <div class="table-responsive">
@@ -121,11 +127,9 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div></strong>
       </div>
     </div>
   </div>
-{% endfor %}
-    
-
-{% endblock %}
+        {% endfor %}
+    {% endblock %}
