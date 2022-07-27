@@ -80,7 +80,6 @@ def workbench():
     form = ImageUploadForm()
 
     if request.method == 'POST' and form.is_submitted():
-        print("post request")
         # Uploaded by DropZone
         for dropzone_file in request.files.getlist('file'):
             upload_file(dropzone_file)
