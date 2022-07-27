@@ -11,7 +11,7 @@ import pydicom.errors
 from app import db
 from app.main import bp
 from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
-from app.models import User, Image, Series, Study, Device, Institution, Task, Report
+from app.models import Image, Series, Study, Device, Institution, Task, Report
 
 hazenlib_version = version('hazen')
 
@@ -87,9 +87,8 @@ def workbench():
             try:
                 task_name = request.form['task_name']
                 selected_series = request.form.getlist('many_series')
-                print("Selected task and series:")
-                print(task_name)
-                print(selected_series)
+                celery_job_list = create_celery_jobs(user_id=current_user.id, task_name=task_name, series_ids=selected_series)
+                print(celery_job_list)
             except Exception as e:
                 print(e)
                 raise e
@@ -225,6 +224,47 @@ def delete(series_id=None, report_id=None):
         flash(f"Report was deleted.", 'info')
 
     return redirect(request.referrer)
+
+
+def locate_image_files(filesystem_key):
+    # Select files in series folder
+    folder = os.path.join(current_app.config['UPLOADED_PATH'],
+                                    filesystem_key)
+    image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+    return image_files
+
+def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=None):
+    celery_job_list = []
+    from app.tasks import produce_report
+    # Check which task is requested
+    if task_name.startswith('snr'):
+        if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
+            flash("Incorrect number of image series selected for SNR measurement", 'info')
+        else:
+            #TODO currently it is assumed that a single pair of images are selected
+            image_files = []
+            for series_id in series_ids:
+                # Identify selected series
+                series = Series.query.filter_by(id=series_id).first_or_404()
+                image_files.append(locate_image_files(series.filesystem_key))
+            current_app.logger.info(f"Performing {task_name} task on {series_ids}")
+            celery_job = produce_report.delay(
+                user_id=user_id, series_id=series_ids[0], task_name=task_name,
+                image_files=image_files)
+            celery_job_list.append(celery_job)
+    else:
+        # Set off a job per series
+        for series_id in series_ids:
+            # Identify selected series
+            series = Series.query.filter_by(id=series_id).first_or_404()
+            image_files = locate_image_files(series.filesystem_key)
+            # Set off task processing as a Celery job
+            current_app.logger.info(f"Performing {task_name} task on {series.description}")
+            celery_job = produce_report.delay(
+                user_id=user_id, series_id=series_id, task_name=task_name,
+                image_files=image_files)
+            celery_job_list.append(celery_job)
+    return celery_job_list
 
 
 # Select task to be run on (image) series
