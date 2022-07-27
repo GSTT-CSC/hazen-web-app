@@ -7,6 +7,7 @@ from importlib.metadata import version
 
 from flask import current_app, jsonify, make_response
 
+from app import db
 from app.models import Report, Series
 from hazen import worker
 
@@ -50,5 +51,8 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     # Update the has_report field of the corresponding Series
     series = Series.query.filter_by(id=series_id).first_or_404()
     series.update(has_report=True)
+    # Commit all changes to the database
+    db.session.commit()
+
     print("db updated")
     return result_dict
