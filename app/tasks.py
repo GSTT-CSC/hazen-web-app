@@ -26,23 +26,16 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     task = getattr(task_module, class_list[0].__name__)(data_paths=image_files, report=True)
     # Perform task and generate result
     if task_name == 'snr':
-        result = task.run(slice_width)
+        result_dict = task.run(slice_width)
     else:
-        result = task.run()
-    print("result")
-    print(result)
-    for key,v in result.items():
-        print(key)
-        print(v)
-        print(type(v))
-        if type(v) != dict:
-            result[key] = {}
-            if type(v) == list:
-                for i in range(len(v)):
-                    result[key][f"position {i}"] = v[i]
-            else:
-                result[key]['measurement'] = v
-    print(result)
+        result_dict = task.run()
+    for key, value in result_dict.items():
+        # ignore reports section of the output
+        if key == "reports":
+            pass
+        else:
+            # reconstruct the measurement results
+            result = {key: value}
     # Update Celery task status
     self.update_state(state='SUCCESS')
 
@@ -58,4 +51,4 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     series = Series.query.filter_by(id=series_id).first_or_404()
     series.update(has_report=True)
     print("db updated")
-    return result
+    return result_dict
