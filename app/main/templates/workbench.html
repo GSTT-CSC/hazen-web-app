@@ -49,7 +49,10 @@
                         <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
                     {% endfor %}
                 </ul>
-                </br>{{ batch_form.submit }}</br>
+            </br>
+                <label for="task_variable">Slice width for SNR measurement (optional):</label>
+                    <input type="string" name="task_variable"></p>
+                {{ batch_form.submit }}
             </div>
         </div>
 </div>

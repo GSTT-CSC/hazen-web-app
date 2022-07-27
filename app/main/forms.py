@@ -19,4 +19,5 @@ class ProcessTaskForm(FlaskForm):
 class BatchProcessingForm(FlaskForm):
     task_name = RadioField()
     many_series = SelectMultipleField()
+    task_variable = StringField('Slice width for SNR measurement')
     submit = SubmitField('Run task on selected series')

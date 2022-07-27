@@ -86,8 +86,11 @@ def workbench():
         if request.form['submit'] == 'Run task on selected series':
             try:
                 task_name = request.form['task_name']
+                task_variable = request.form['task_variable']
                 selected_series = request.form.getlist('many_series')
-                celery_job_list = create_celery_jobs(user_id=current_user.id, task_name=task_name, series_ids=selected_series)
+                celery_job_list = create_celery_jobs(
+                    user_id=current_user.id, series_ids=selected_series,
+                    task_name=task_name, task_variable=task_variable)
                 print(celery_job_list)
             except Exception as e:
                 print(e)
