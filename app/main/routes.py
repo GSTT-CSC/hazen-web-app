@@ -246,7 +246,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
             for series_id in series_ids:
                 # Identify selected series
                 series = Series.query.filter_by(id=series_id).first_or_404()
-                image_files.append(locate_image_files(series.filesystem_key))
+                image_files.extend(locate_image_files(series.filesystem_key))
             current_app.logger.info(f"Performing {task_name} task on {series_ids}")
             celery_job = produce_report.delay(
                 user_id=user_id, series_id=series_ids[0], task_name=task_name,
