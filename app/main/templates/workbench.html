@@ -56,22 +56,6 @@
 
 
 
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
-                    <span aria-hidden="true">&larr;</span> Newer acquisitions
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ next_url or '#' }}">
-                    Older acquisitions <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-
          <h3 class="text-center pt-2">Available files</h3>
 
 
@@ -132,4 +116,23 @@
     </div>
   </div>
         {% endfor %}
+
+
+  <div style = "margin-top:3em;">
+        <nav aria-label="..." >
+        <ul class="pagination justify-content-center">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
+                    <span aria-hidden="true">&larr;</span> Newer acquisitions
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ next_url or '#' }}">
+                    Older acquisitions <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
     {% endblock %}
