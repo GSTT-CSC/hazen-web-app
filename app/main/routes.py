@@ -63,10 +63,12 @@ def workbench():
     # Save current user's ID to Session
     session['current_user_id'] = current_user.id
 
+
     # Display available image Series
     page = request.args.get('page', 1, type=int)
     series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+    studies = db.session.query(Study).order_by(Study.created_at.desc())
 
     next_url = url_for('main.workbench', page=series.next_num) \
         if series.has_next else None
@@ -79,18 +81,29 @@ def workbench():
     
     form = ImageUploadForm()
 
-    if request.method == 'POST' and form.is_submitted():
-        # Uploaded by DropZone
-        for dropzone_file in request.files.getlist('file'):
-            upload_file(dropzone_file)
-        # Uploaded by Choose File
-        for choose_file in request.files.getlist('image_files'):
-            upload_file(choose_file)
+    if request.method == 'POST': # form.validate_on_submit()
+        for key, file in request.files.items():
+            # Uploaded by DropZone       Uploaded by Choose File
+            if key.startswith('file') or key.startswith('image_file'):
+                filename = secure_filename(file.filename)
+                secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+                file.save(secure_path)
+
+                try:
+                    filesystem_dir = ingest(secure_path)
+                except ImageExistsError:
+                    os.remove(secure_path)
+                    flash(f'{filename} file has already been uploaded!', 'danger')
+                    return redirect(url_for('main.workbench'))
+
+                permanent_path = os.path.join(filesystem_dir, filename)
+                shutil.move(secure_path, permanent_path)
+                flash('Files uploaded successfully!', 'success')
 
         return redirect(url_for('main.workbench'))
 
     return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
-        series=series.items, next_url=next_url, prev_url=prev_url)
+        series=series.items, next_url=next_url, prev_url=prev_url, studies=studies)
 
 
 # Upload images one at a time and parse metadata from DICOM header
