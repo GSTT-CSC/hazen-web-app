@@ -36,6 +36,25 @@ def index():
 class ImageExistsError(Exception): pass
 
 
+def upload_file(file):
+    filename = secure_filename(file.filename)
+    secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+    try:
+        file.save(secure_path)
+    except IsADirectoryError:
+        flash("No files were selected", 'info')
+        return redirect(url_for('main.workbench'))
+
+    try:
+        filesystem_dir = ingest(secure_path)
+        permanent_path = os.path.join(filesystem_dir, filename)
+        shutil.move(secure_path, permanent_path)
+        flash(f'{filename} file has been uploaded successfully!', 'success')
+    except ImageExistsError:
+        os.remove(secure_path)
+        flash(f'{filename} file has already been uploaded!', 'danger')
+
+
 # Workbench
 # authenticated users can overview and perform tasks/analysis on uploaded files 
 @bp.route('/workbench/', methods=['GET', 'POST'])
@@ -62,7 +81,6 @@ def workbench():
     
     form = ImageUploadForm()
 
-
     if request.method == 'POST': # form.validate_on_submit()
         for key, file in request.files.items():
             # Uploaded by DropZone       Uploaded by Choose File
@@ -81,6 +99,7 @@ def workbench():
                 permanent_path = os.path.join(filesystem_dir, filename)
                 shutil.move(secure_path, permanent_path)
                 flash('Files uploaded successfully!', 'success')
+                
         return redirect(url_for('main.workbench'))
 
     return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
@@ -177,7 +196,12 @@ def delete(series_id=None, report_id=None):
             # If there are no reports associated, then delete all files
             # from filesystem
             series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
-            shutil.rmtree(series_folder)
+            try:
+                shutil.rmtree(series_folder)
+            except Exception as e:
+                flash(f"Could not find files under this series_id folder")
+                print(e)
+                raise
             # from database
             images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
@@ -206,7 +230,8 @@ def delete(series_id=None, report_id=None):
             report.delete()
             # and update has_report field of the series
             series = Series.query.filter_by(id=report.series_id).first_or_404()
-            series.update(has_report=False)
+            # Reset series bool so it is displayed without a report on the workbench
+            series.update(has_report=False, archived=False)
         db.session.commit()
         flash(f"Report was deleted.", 'info')
 
@@ -327,6 +352,6 @@ def reports(series_id=None):
         prev_url = url_for('main.reports', page=reports_pages.prev_num) \
             if reports_pages.has_prev else None
 
-    return render_template('report.html', title="Reports", series=series_dict,
+    return render_template('reports.html', title="Reports", series=series_dict,
         reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
 
