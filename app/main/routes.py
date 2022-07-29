@@ -81,24 +81,13 @@ def workbench():
     
     form = ImageUploadForm()
 
-    if request.method == 'POST': # form.validate_on_submit()
-        for key, file in request.files.items():
-            # Uploaded by DropZone       Uploaded by Choose File
-            if key.startswith('file') or key.startswith('image_file'):
-                filename = secure_filename(file.filename)
-                secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
-                file.save(secure_path)
-
-                try:
-                    filesystem_dir = ingest(secure_path)
-                except ImageExistsError:
-                    os.remove(secure_path)
-                    flash(f'{filename} file has already been uploaded!', 'danger')
-                    return redirect(url_for('main.workbench'))
-
-                permanent_path = os.path.join(filesystem_dir, filename)
-                shutil.move(secure_path, permanent_path)
-                flash('Files uploaded successfully!', 'success')
+    if request.method == 'POST' and form.is_submitted():
+        # Uploaded by DropZone
+        for dropzone_file in request.files.getlist('file'):
+            upload_file(dropzone_file)
+        # Uploaded by Choose File
+        for choose_file in request.files.getlist('image_files'):
+            upload_file(choose_file)
                 
         return redirect(url_for('main.workbench'))
 
