@@ -121,8 +121,8 @@ def workbench():
     # , series=series, next_url=next_url, prev_url=prev_url
 
 
-  # Upload images one at a time and parse metadata from DICOM header
-  def ingest(file_path):
+# Upload images one at a time and parse metadata from DICOM header
+def ingest(file_path):
     try:
         # Load in the DICOM header into a pydicom Dataset
         dcm = pydicom.read_file(file_path, force=True,
@@ -216,7 +216,7 @@ def delete(series_id=None, report_id=None):
             except Exception as e:
                 flash(f"Could not find files under this series_id folder")
                 print(e)
-                raise
+                raise e
             # from database
             images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
@@ -259,6 +259,7 @@ def locate_image_files(filesystem_key):
                                     filesystem_key)
     image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
     return image_files
+
 
 def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=None):
     celery_job_list = []
@@ -333,7 +334,6 @@ def task_selection(series_id):
 
         # Set off task processing as a Celery job
         current_app.logger.info(f"Performing {task_name} task on {series.description}")
-        print("debug")
         celery_job = produce_report.delay(
             user_id=user_id, series_id=series.id, task_name=task_name,
             image_files=image_files, slice_width=task_variable)
