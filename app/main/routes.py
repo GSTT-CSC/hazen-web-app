@@ -56,68 +56,6 @@ def upload_file(file):
         flash(f'{filename} file has already been uploaded!', 'danger')
 
 
-# Workbench
-# authenticated users can overview and perform tasks/analysis on uploaded files 
-@bp.route('/workbench/', methods=['GET', 'POST'])
-@login_required
-def workbench():
-    # Save current user's ID to Session
-    session['current_user_id'] = current_user.id
-
-    # Display available image Series, grouped by Study UID
-    studies = db.session.query(Study).order_by(Study.created_at.desc())
-
-    # Create Choose file form
-    upload_form = ImageUploadForm()
-
-    # List available tasks that can be performed
-    tasks = Task.query.all()
-    batch_form = BatchProcessingForm()
-    batch_form.task_name.choices = [task.name for task in tasks]
-
-    if request.method == 'POST':
-        # Upload file functionality
-        if request.form['submit'] == 'Upload':
-            # Uploaded by DropZone
-            for dropzone_file in request.files.getlist('file'):
-                upload_file(dropzone_file)
-            # Uploaded by Choose File
-            for choose_file in request.files.getlist('image_files'):
-                upload_file(choose_file)
-
-        # Batch processing functionality
-        if request.form['submit'] == 'Run task on selected series':
-            print(request.form.keys())
-            # Initialise variables for batch processing
-            task_name = ""
-            selected_series = []
-            # Load which series were selected for which task
-            try:
-                task_name = request.form['task_name']
-                task_variable = request.form['task_variable']
-                selected_series = request.form.getlist('many_series')
-            except Exception as e:
-                flash(f'No task or image series were selected.', 'info')
-                return redirect(url_for('main.workbench'))
-
-            if len(selected_series) == 0:
-                flash(f"No image series were selected for {task_name} task.", 'info')
-                return redirect(url_for('main.workbench'))
-
-            # Create Celery jobs from batch processing request
-            celery_job_list = create_celery_jobs(
-                user_id=current_user.id, series_ids=selected_series,
-                task_name=task_name, task_variable=task_variable)
-            current_app.logger.info('The following jobs have been queued', celery_job_list)
-
-        return redirect(url_for('main.workbench'))
-
-    return render_template('workbench.html', title='Workbench', studies=studies,
-            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
-        )
-    # , series=series, next_url=next_url, prev_url=prev_url
-
-
 # Upload images one at a time and parse metadata from DICOM header
 def ingest(file_path):
     try:
@@ -248,6 +186,68 @@ def delete(series_id=None, report_id=None):
         flash(f"Report was deleted.", 'info')
 
     return redirect(request.referrer)
+
+
+# Workbench
+# authenticated users can overview and perform tasks/analysis on uploaded files 
+@bp.route('/workbench/', methods=['GET', 'POST'])
+@login_required
+def workbench():
+    # Save current user's ID to Session
+    session['current_user_id'] = current_user.id
+
+    # Display available image Series, grouped by Study UID
+    studies = db.session.query(Study).order_by(Study.created_at.desc())
+
+    # Create Choose file form
+    upload_form = ImageUploadForm()
+
+    # List available tasks that can be performed
+    tasks = Task.query.all()
+    batch_form = BatchProcessingForm()
+    batch_form.task_name.choices = [task.name for task in tasks]
+
+    if request.method == 'POST':
+        # Upload file functionality
+        if request.form['submit'] == 'Upload':
+            # Uploaded by DropZone
+            for dropzone_file in request.files.getlist('file'):
+                upload_file(dropzone_file)
+            # Uploaded by Choose File
+            for choose_file in request.files.getlist('image_files'):
+                upload_file(choose_file)
+
+        # Batch processing functionality
+        if request.form['submit'] == 'Run task on selected series':
+            print(request.form.keys())
+            # Initialise variables for batch processing
+            task_name = ""
+            selected_series = []
+            # Load which series were selected for which task
+            try:
+                task_name = request.form['task_name']
+                task_variable = request.form['task_variable']
+                selected_series = request.form.getlist('many_series')
+            except Exception as e:
+                flash(f'No task or image series were selected.', 'info')
+                return redirect(url_for('main.workbench'))
+
+            if len(selected_series) == 0:
+                flash(f"No image series were selected for {task_name} task.", 'info')
+                return redirect(url_for('main.workbench'))
+
+            # Create Celery jobs from batch processing request
+            celery_job_list = create_celery_jobs(
+                user_id=current_user.id, series_ids=selected_series,
+                task_name=task_name, task_variable=task_variable)
+            current_app.logger.info('The following jobs have been queued', celery_job_list)
+
+        return redirect(url_for('main.workbench'))
+
+    return render_template('workbench.html', title='Workbench', studies=studies,
+            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
+        )
+    # , series=series, next_url=next_url, prev_url=prev_url
 
 
 def locate_image_files(filesystem_key):
