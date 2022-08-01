@@ -39,24 +39,26 @@
         </br>
     </div>
 
-    <form method="POST" action={{ url_for('main.workbench') }}>
-        <div class="col">
+<form method="POST" action={{ url_for('main.workbench') }}>
+    <div class="col">
         <!-- Task list Scrollspy -->
-            <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-                <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                    <h3 class="text-center pt-2">Select task</h3>
-                    {% for task in batch_form.task_name.choices %}
-                        <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
-                    {% endfor %}
-                </ul>
-            </br>
-                <label for="task_variable">Slice width for SNR measurement (optional):</label>
-                    <input type="string" name="task_variable"></p>
-                {{ batch_form.submit }}
-            </div>
+        <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
+            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
+                <h3 class="text-center pt-2">Select task</h3>
+                {% for task in batch_form.task_name.choices %}
+                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
+                {% endfor %}
+            </ul>
+        </br>
+            <label for="task_variable">Slice width for SNR measurement (optional):</label>
+                <input type="string" name="task_variable"></p>
+            {{ batch_form.submit }}
         </div>
+    </div>
 </div>
+
 </br>
+
 <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
     <h3 class="text-center pt-2">Available files</h3></br>
     {% for study in studies %}
