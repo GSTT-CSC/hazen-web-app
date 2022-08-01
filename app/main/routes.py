@@ -63,10 +63,12 @@ def workbench():
     # Save current user's ID to Session
     session['current_user_id'] = current_user.id
 
+
     # Display available image Series
     page = request.args.get('page', 1, type=int)
     series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
         page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+    studies = db.session.query(Study).order_by(Study.created_at.desc())
 
     next_url = url_for('main.workbench', page=series.next_num) \
         if series.has_next else None
@@ -86,11 +88,11 @@ def workbench():
         # Uploaded by Choose File
         for choose_file in request.files.getlist('image_files'):
             upload_file(choose_file)
-
+                
         return redirect(url_for('main.workbench'))
 
     return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
-        series=series.items, next_url=next_url, prev_url=prev_url)
+        series=series.items, next_url=next_url, prev_url=prev_url, studies=studies)
 
 
 # Upload images one at a time and parse metadata from DICOM header

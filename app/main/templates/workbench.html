@@ -12,11 +12,14 @@
     }
     </style>
 -->
+
+
+
+
     <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
         <div class="col">
         <!-- Task list Scrollspy -->
             <!-- <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-        
                 <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
                 <h3 class="text-center pt-2">Available Tasks</h3>
                     {% for task in tasks %}
@@ -51,9 +54,27 @@
                 {% endif %}
             </div>
 
-    <hr>
-    <div class="row">
-    <h3 class="text-center pt-2">Available files</h3>
+
+
+         <h3 class="text-center pt-2">Available files</h3>
+
+
+
+
+
+{% for study in studies %}
+    <div class="accordion" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="heading{{ loop.index }}">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
+      {{ study.uid }}
+      </button>
+    </h2>
+    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>
+         <div class="row">
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead><tr>
@@ -68,8 +89,9 @@
                 <tbody>
                     <!-- series is the db query result, essentially a list of series that are not archived -->
                     <!-- acquisition is an instance/row of the Series table -->
-                {% for acquisition in series %}
-                    <tr>
+                    {% for acquisition in study.series %}
+
+                     <tr>
                         <td>
                             <a href="{{ url_for('main.task_selection', series_id=acquisition.id) }}">
                                 {{ acquisition.description }}</a>
@@ -85,20 +107,19 @@
                                 None
                             {% endif %}
 
-                        </td>
-                        <td>
-                            <a href="{{ url_for('main.delete', series_id=acquisition.id) }}">
-                                <img src="../../static/trash.svg">
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
+                   {% endfor %}
                 </tbody>
             </table>
         </div>
+    </div></strong>
+      </div>
     </div>
+  </div>
+        {% endfor %}
 
-    <nav aria-label="...">
+
+  <div style = "margin-top:3em;">
+        <nav aria-label="..." >
         <ul class="pagination justify-content-center">
             <li class="page-item{% if not prev_url %} disabled{% endif %}">
                 <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
@@ -112,5 +133,6 @@
             </li>
         </ul>
     </nav>
+</div>
 
-{% endblock %}
+    {% endblock %}
