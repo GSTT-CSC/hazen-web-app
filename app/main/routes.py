@@ -37,6 +37,25 @@ def index():
 class ImageExistsError(Exception): pass
 
 
+def upload_file(file):
+    filename = secure_filename(file.filename)
+    secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+    try:
+        file.save(secure_path)
+    except IsADirectoryError:
+        flash("No files were selected", 'info')
+        return redirect(url_for('main.workbench'))
+
+    try:
+        filesystem_dir = ingest(secure_path)
+        permanent_path = os.path.join(filesystem_dir, filename)
+        shutil.move(secure_path, permanent_path)
+        flash(f'{filename} file has been uploaded successfully!', 'success')
+    except ImageExistsError:
+        os.remove(secure_path)
+        flash(f'{filename} file has already been uploaded!', 'danger')
+
+
 # Workbench
 # authenticated users can overview and perform tasks/analysis on uploaded files 
 @bp.route('/workbench/', methods=['GET', 'POST'])
@@ -45,7 +64,6 @@ def workbench():
     # Save current user's ID to Session
     session['current_user_id'] = current_user.id
 
-    #TODO: for batch processing in the future, will need to have the list of
     # available tasks that can be performed
     tasks = Task.query.all()
     batch_form = BatchProcessingForm()
@@ -103,8 +121,8 @@ def workbench():
     # , series=series, next_url=next_url, prev_url=prev_url
 
 
-# Upload images one at a time and parse metadata from DICOM header
-def ingest(file_path):
+  # Upload images one at a time and parse metadata from DICOM header
+  def ingest(file_path):
     try:
         # Load in the DICOM header into a pydicom Dataset
         dcm = pydicom.read_file(file_path, force=True,
@@ -193,7 +211,12 @@ def delete(series_id=None, report_id=None):
             # If there are no reports associated, then delete all files
             # from filesystem
             series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
-            shutil.rmtree(series_folder)
+            try:
+                shutil.rmtree(series_folder)
+            except Exception as e:
+                flash(f"Could not find files under this series_id folder")
+                print(e)
+                raise
             # from database
             images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
@@ -222,6 +245,7 @@ def delete(series_id=None, report_id=None):
             report.delete()
             # and update has_report field of the series
             series = Series.query.filter_by(id=report.series_id).first_or_404()
+            # Reset series bool so it is displayed without a report on the workbench
             series.update(has_report=False, archived=False)
         db.session.commit()
         flash(f"Report was deleted.", 'info')
