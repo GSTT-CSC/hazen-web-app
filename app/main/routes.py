@@ -208,39 +208,43 @@ def workbench():
     batch_form.task_name.choices = [task.name for task in tasks]
 
     if request.method == 'POST':
-        # Upload file functionality
-        if request.form['submit'] == 'Upload':
+        if 'file' in request.files.keys():
             # Uploaded by DropZone
-            for dropzone_file in request.files.getlist('file'):
-                upload_file(dropzone_file)
-            # Uploaded by Choose File
-            for choose_file in request.files.getlist('image_files'):
-                upload_file(choose_file)
+            dropzone_file = request.files['file']
+            upload_file(dropzone_file)
+        elif 'submit' in request.form.keys():
+            # Batch processing functionality
+            if request.form['submit'] == 'Run task on selected series':
+                # Initialise variables for batch processing
+                task_name = ""
+                selected_series = []
+                # Load which series were selected for which task
+                try:
+                    task_name = request.form['task_name']
+                    task_variable = request.form['task_variable']
+                    selected_series = request.form.getlist('many_series')
+                except Exception as e:
+                    flash(f'No task or image series were selected.', 'info')
+                    return redirect(url_for('main.workbench'))
 
-        # Batch processing functionality
-        if request.form['submit'] == 'Run task on selected series':
-            print(request.form.keys())
-            # Initialise variables for batch processing
-            task_name = ""
-            selected_series = []
-            # Load which series were selected for which task
-            try:
-                task_name = request.form['task_name']
-                task_variable = request.form['task_variable']
-                selected_series = request.form.getlist('many_series')
-            except Exception as e:
-                flash(f'No task or image series were selected.', 'info')
-                return redirect(url_for('main.workbench'))
+                if len(selected_series) == 0:
+                    flash(f"No image series were selected for {task_name} task.", 'info')
+                    return redirect(url_for('main.workbench'))
 
-            if len(selected_series) == 0:
-                flash(f"No image series were selected for {task_name} task.", 'info')
-                return redirect(url_for('main.workbench'))
+                # Create Celery jobs from batch processing request
+                celery_job_list = create_celery_jobs(
+                    user_id=current_user.id, series_ids=selected_series,
+                    task_name=task_name, task_variable=task_variable)
+                job_ids = [job.id for job in celery_job_list]
+                msg = 'The following jobs have been queued: ' + ",".join(job_ids)
+                current_app.logger.info(msg)
+                flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
 
-            # Create Celery jobs from batch processing request
-            celery_job_list = create_celery_jobs(
-                user_id=current_user.id, series_ids=selected_series,
-                task_name=task_name, task_variable=task_variable)
-            current_app.logger.info('The following jobs have been queued', celery_job_list)
+            # Upload file functionality
+            else:
+                # Uploaded by Choose File
+                for choose_file in request.files.getlist('image_files'):
+                    upload_file(choose_file)
 
         return redirect(url_for('main.workbench'))
 
