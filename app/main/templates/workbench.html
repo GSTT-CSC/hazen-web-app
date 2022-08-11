@@ -4,33 +4,16 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-<!--    <style>
+<style>
     .scrollspy-example {
         position: relative;
         /*height: 200px;*/
         overflow: auto;
     }
-    </style>
--->
+</style>
 
-
-
-
-    <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-        <div class="col">
-        <!-- Task list Scrollspy -->
-            <!-- <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-                <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                <h3 class="text-center pt-2">Available Tasks</h3>
-                    {% for task in tasks %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">{{ task.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div> -->
-        </div>
-    </div>
+<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+    <div class="col">
     <h3 class="text-center pt-2">Upload new files</h3>
         </br>
             <div class="row">
@@ -49,77 +32,94 @@
         </br>
             <div class="row">
                 <!-- File selection -->
-                {% if form %}
-                    {{ wtf.render_form(form) }}
+                {% if upload_form %}
+                    {{ wtf.render_form(upload_form) }}
                 {% endif %}
             </div>
-
-
-
-         <h3 class="text-center pt-2">Available files</h3>
-
-
-
-
-
-{% for study in studies %}
-    <div class="accordion" id="accordionExample">
-  <div class="accordion-item">
-    <h2 class="accordion-header" id="heading{{ loop.index }}">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">
-      {{ study.uid }}
-      </button>
-    </h2>
-    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <strong>
-         <div class="row">
-
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead><tr>
-                    <th>Series Description</th>
-                    <th>Acquisition Date</th>
-                    <th>Uploaded Date</th>
-                    <th>Uploaded by</th>
-                    <th>Files</th>
-                    <th>Reports</th>
-                    <th>Remove</th>
-                </tr></thead>
-                <tbody>
-                    <!-- series is the db query result, essentially a list of series that are not archived -->
-                    <!-- acquisition is an instance/row of the Series table -->
-                    {% for acquisition in study.series %}
-
-                     <tr>
-                        <td>
-                            <a href="{{ url_for('main.task_selection', series_id=acquisition.id) }}">
-                                {{ acquisition.description }}</a>
-                        </td>
-                        <td>{{ acquisition.series_datetime }}</td>
-                        <td>{{ acquisition.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                        <td>{{ acquisition.user.username }}</td>
-                        <td>num files</td>
-                        <td>
-                            {% if acquisition.has_report %}
-                                <a href="{{ url_for('main.reports', series_id=acquisition.id) }}">report</a>
-                            {% else %}
-                                None
-                            {% endif %}
-
-                   {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div></strong>
-      </div>
+        </br>
     </div>
-  </div>
-        {% endfor %}
 
+<form method="POST" action={{ url_for('main.workbench') }}>
+    <div class="col">
+        <!-- Task list Scrollspy -->
+        <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
+            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
+                <h3 class="text-center pt-2">Select task</h3>
+                {% for task in batch_form.task_name.choices %}
+                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
+                {% endfor %}
+            </ul>
+        </br>
+            <label for="task_variable">Slice width for SNR measurement (optional):</label>
+                <input type="string" name="task_variable"></p>
+            {{ batch_form.submit }}
+        </div>
+    </div>
+</div>
 
-  <div style = "margin-top:3em;">
-        <nav aria-label="..." >
+</br>
+
+<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+    <h3 class="text-center pt-2">Available files</h3></br>
+    {% for study in studies %}
+    <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ loop.index }}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study.uid }}</button>
+            </h2>
+        </div>
+        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead><tr>
+                            <th>Select</th>
+                            <th>Series Description</th>
+                            <th>Acquisition Date</th>
+                            <th>Uploaded Date</th>
+                            <th>Uploaded by</th>
+                            <!-- <th>Files</th> -->
+                            <th>Reports</th>
+                            <th>Remove</th>
+                        </tr></thead>
+                        <tbody>
+                            <!-- series is the db query result, essentially a list of series that are not archived -->
+                            <!-- acquisition is an instance/row of the Series table -->
+                            {% for serie in study.series %}
+                                <tr>
+                                    <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
+                                    <td>
+                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">{{ serie.description }}</a>
+                                    </td>
+                                    <td>{{ serie.series_datetime }}</td>
+                                    <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                                    <td>{{ serie.user.username }}</td>
+                                    <!-- <td>num files</td> -->
+                                    <td>
+                                        {% if serie.has_report %}
+                                            <a href="{{ url_for('main.reports', series_id=serie.id) }}">report</a>
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('main.delete', series_id=serie.id) }}">
+                                            <img src="../../static/trash.svg">
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</form>
+<!--
+    <nav aria-label="...">
         <ul class="pagination justify-content-center">
             <li class="page-item{% if not prev_url %} disabled{% endif %}">
                 <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
@@ -133,6 +133,6 @@
             </li>
         </ul>
     </nav>
-</div>
+-->
 
-    {% endblock %}
+{% endblock %}

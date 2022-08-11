@@ -7,12 +7,13 @@ from importlib.metadata import version
 
 from flask import current_app, jsonify, make_response
 
+from app import db
 from app.models import Report, Series
 from hazen import worker
 
 
 @worker.task(bind=True)
-def produce_report(self, user_id, series_id, task_name, image_files, slice_width):
+def produce_report(self, user_id, series_id, task_name, image_files, slice_width=None):
     # import Hazen functionality
     task_module = importlib.import_module(f"hazenlib.tasks.{task_name}")
     class_list = [cls for _, cls in inspect.getmembers(sys.modules[task_module.__name__], lambda x: inspect.isclass(x) and (x.__module__ == task_module.__name__))]
@@ -50,5 +51,8 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     # Update the has_report field of the corresponding Series
     series = Series.query.filter_by(id=series_id).first_or_404()
     series.update(has_report=True)
+    # Commit all changes to the database
+    db.session.commit()
+
     print("db updated")
     return result_dict

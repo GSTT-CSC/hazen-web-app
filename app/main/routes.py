@@ -10,9 +10,10 @@ import pydicom.errors
 
 from app import db
 from app.main import bp
-from app.main.forms import ImageUploadForm, ProcessTaskForm
-from app.models import User, Image, Series, Study, Device, Institution, Task, Report
+from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
+from app.models import Image, Series, Study, Device, Institution, Task, Report
 
+hazenlib_version = version('hazen')
 
 @bp.before_request
 def before_request():
@@ -53,46 +54,6 @@ def upload_file(file):
     except ImageExistsError:
         os.remove(secure_path)
         flash(f'{filename} file has already been uploaded!', 'danger')
-
-
-# Workbench
-# authenticated users can overview and perform tasks/analysis on uploaded files 
-@bp.route('/workbench/', methods=['GET', 'POST'])
-@login_required
-def workbench():
-    # Save current user's ID to Session
-    session['current_user_id'] = current_user.id
-
-
-    # Display available image Series
-    page = request.args.get('page', 1, type=int)
-    series = db.session.query(Series).filter_by(user_id=current_user.id, archived=False).order_by(Series.created_at.desc()).paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-    studies = db.session.query(Study).order_by(Study.created_at.desc())
-
-    next_url = url_for('main.workbench', page=series.next_num) \
-        if series.has_next else None
-    prev_url = url_for('main.workbench', page=series.prev_num) \
-        if series.has_prev else None
-
-    #TODO: for batch processing in the future, will need to have the list of
-    # available tasks that can be performed
-    tasks = Task.query.all()
-    
-    form = ImageUploadForm()
-
-    if request.method == 'POST' and form.is_submitted():
-        # Uploaded by DropZone
-        for dropzone_file in request.files.getlist('file'):
-            upload_file(dropzone_file)
-        # Uploaded by Choose File
-        for choose_file in request.files.getlist('image_files'):
-            upload_file(choose_file)
-                
-        return redirect(url_for('main.workbench'))
-
-    return render_template('workbench.html', title='Workbench', form=form, # tasks=tasks,
-        series=series.items, next_url=next_url, prev_url=prev_url, studies=studies)
 
 
 # Upload images one at a time and parse metadata from DICOM header
@@ -190,7 +151,7 @@ def delete(series_id=None, report_id=None):
             except Exception as e:
                 flash(f"Could not find files under this series_id folder")
                 print(e)
-                raise
+                raise e
             # from database
             images = Image.query.filter_by(series_id=series_id).all()
             for image in images:
@@ -227,13 +188,120 @@ def delete(series_id=None, report_id=None):
     return redirect(request.referrer)
 
 
+# Workbench
+# authenticated users can overview and perform tasks/analysis on uploaded files 
+@bp.route('/workbench/', methods=['GET', 'POST'])
+@login_required
+def workbench():
+    # Save current user's ID to Session
+    session['current_user_id'] = current_user.id
+
+    # Display available image Series, grouped by Study UID
+    studies = db.session.query(Study).order_by(Study.created_at.desc())
+
+    # Create Choose file form
+    upload_form = ImageUploadForm()
+
+    # List available tasks that can be performed
+    tasks = Task.query.all()
+    batch_form = BatchProcessingForm()
+    batch_form.task_name.choices = [task.name for task in tasks]
+
+    if request.method == 'POST':
+        if 'file' in request.files.keys():
+            # Uploaded by DropZone
+            dropzone_file = request.files['file']
+            upload_file(dropzone_file)
+        elif 'submit' in request.form.keys():
+            # Batch processing functionality
+            if request.form['submit'] == 'Run task on selected series':
+                # Initialise variables for batch processing
+                task_name = ""
+                selected_series = []
+                # Load which series were selected for which task
+                try:
+                    task_name = request.form['task_name']
+                    task_variable = request.form['task_variable']
+                    selected_series = request.form.getlist('many_series')
+                except Exception as e:
+                    flash(f'No task or image series were selected.', 'info')
+                    return redirect(url_for('main.workbench'))
+
+                if len(selected_series) == 0:
+                    flash(f"No image series were selected for {task_name} task.", 'info')
+                    return redirect(url_for('main.workbench'))
+
+                # Create Celery jobs from batch processing request
+                celery_job_list = create_celery_jobs(
+                    user_id=current_user.id, series_ids=selected_series,
+                    task_name=task_name, task_variable=task_variable)
+                job_ids = [job.id for job in celery_job_list]
+                msg = 'The following jobs have been queued: ' + ",".join(job_ids)
+                current_app.logger.info(msg)
+                flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
+
+            # Upload file functionality
+            else:
+                # Uploaded by Choose File
+                for choose_file in request.files.getlist('image_files'):
+                    upload_file(choose_file)
+
+        return redirect(url_for('main.workbench'))
+
+    return render_template('workbench.html', title='Workbench', studies=studies,
+            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
+        )
+    # , series=series, next_url=next_url, prev_url=prev_url
+
+
+def locate_image_files(filesystem_key):
+    # Select files in series folder
+    folder = os.path.join(current_app.config['UPLOADED_PATH'],
+                                    filesystem_key)
+    image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+    return image_files
+
+
+def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=None):
+    celery_job_list = []
+    from app.tasks import produce_report
+    # Check which task is requested
+    if task_name.startswith('snr'):
+        if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
+            flash("Incorrect number of image series selected for SNR measurement", 'info')
+        else:
+            #TODO currently it is assumed that a single pair of images are selected
+            image_files = []
+            for series_id in series_ids:
+                # Identify selected series
+                series = Series.query.filter_by(id=series_id).first_or_404()
+                image_files.extend(locate_image_files(series.filesystem_key))
+            current_app.logger.info(f"Performing {task_name} task on {series_ids}")
+            celery_job = produce_report.delay(
+                user_id=user_id, series_id=series_ids[0], task_name=task_name,
+                image_files=image_files)
+            celery_job_list.append(celery_job)
+    else:
+        # Set off a job per series
+        for series_id in series_ids:
+            # Identify selected series
+            series = Series.query.filter_by(id=series_id).first_or_404()
+            image_files = locate_image_files(series.filesystem_key)
+            # Set off task processing as a Celery job
+            current_app.logger.info(f"Performing {task_name} task on {series.description}")
+            celery_job = produce_report.delay(
+                user_id=user_id, series_id=series_id, task_name=task_name,
+                image_files=image_files)
+            celery_job_list.append(celery_job)
+    return celery_job_list
+
+
 # Select task to be run on (image) series
 @bp.route('/task_selection/<series_id>/', methods=['GET', 'POST'])
 @login_required
 def task_selection(series_id):
     # Retrieve the Series that was selected
     series = Series.query.filter_by(id=series_id).first_or_404()
-    hazenlib_version = version('hazen')
 
     if request.method == 'GET':
         # Prepare the form to accept task selection
@@ -241,7 +309,7 @@ def task_selection(series_id):
         # Provide list of available tasks that can be performed
         form.task_name.choices = [(task.name, task.name) for task in Task.query.all()]
         series_files = Image.query.filter_by(series_id=series_id).count()
-        
+
         return render_template('task_selection.html', title='Select Task',
                         form=form, series=series, series_files=series_files,
                         hazenlib_version=hazenlib_version)
@@ -267,7 +335,6 @@ def task_selection(series_id):
 
         # Set off task processing as a Celery job
         current_app.logger.info(f"Performing {task_name} task on {series.description}")
-        print("debug")
         celery_job = produce_report.delay(
             user_id=user_id, series_id=series.id, task_name=task_name,
             image_files=image_files, slice_width=task_variable)
@@ -326,7 +393,7 @@ def reports(series_id=None):
                 'created_at': series.created_at,
                 'series_files': Image.query.filter_by(series_id=series_id).count()
             }
-            
+
         # Otherwise display all reports
         else:
             reports = db.session.query(Report).order_by(Report.created_at.desc())
