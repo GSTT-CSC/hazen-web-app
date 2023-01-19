@@ -10,9 +10,9 @@ class Config:
         on_heroku = True
 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql://localhost:5432/hazen'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'postgresql+psycopg2://root:rootpass1@hazen_db:5432/hazen'
     if on_heroku:
-        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace("://", "ql://", 1) or 'postgresql://localhost:5432/hazen'
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace("://", "ql://", 1) or 'postgresql+psycopg2://root:rootpass1@hazen_db:5432/hazen'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
@@ -34,11 +34,12 @@ class Config:
     DROPZONE_ALLOWED_FILE_CUSTOM = True
 
     # Set Celery broker (RabbitMQ on local, Redis on Heroku)
-    CELERY_BROKER_URL = 'amqp://localhost'  # for RabbitMQ
-    CELERY_RESULT_BACKEND = 'rpc://'  # for RabbitMQ
+    CELERY_BROKER_URL = 'redis://redis:6379/0'  # for RabbitMQ
+    # CELERY_RESULT_BACKEND = 'rpc://'  # for RabbitMQ
+    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'  # for RabbitMQ
 
     if on_heroku:
-        CELERY_BROKER_URL = os.environ.get('REDIS_URL')  # for Redis
-        CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')  # for Redis
-
-
+        CELERY_BROKER_URL = 'amqp://admin:mypass@rabbit//'  # for Redis
+        # CELERY_BROKER_URL = os.environ.get('REDIS_URL')  # for Redis
+        CELERY_RESULT_BACKEND = 'redis://redis:6379/0'  # for Redis
+        # CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')  # for Redis
