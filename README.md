@@ -10,6 +10,28 @@ The hazen-web-app **requires** manual installation of the following software:
 - RabbitMQ: message broker used in conjunction with Celery to communicate between the app and web browser
 - hazen-web-app (i.e.: this repo) - requires Python3.8 or above and `pip`
 
+
+## Setup using docker compose
+To start the application:
+1. Create .env file and read variables. Can reuse default.env for testing or recommend creating your own in production.
+```
+mv default.env .env
+source .env
+```
+
+2. Create data directories in users' home:
+```shell
+mkdir -p $APP_DATA_DIR/db
+mkdir -p $APP_DATA_DIR/web
+```
+
+3. Start web app
+```
+docker compose up -d --build
+```
+
+The hazen web app is then accessible on port 8080
+
 ## Setup on MacOS
 
 ### Postgres & Postico
