@@ -5,9 +5,6 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
 
     # Check if on Heroku or running locally
-    on_heroku = False
-    on_docker = False
-
     platform = 'local'
     if 'REDIS_URL' in os.environ:
         platform = 'heroku'
