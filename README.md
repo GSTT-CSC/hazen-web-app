@@ -12,6 +12,12 @@ The hazen-web-app **requires** manual installation of the following software:
 
 ## Setup on MacOS
 
+### Docker Installation 
+
+Attention, currently RabbitMQ doesn't work on Mac M1 chip. Therefore you have 2 options:
+-use Docker to run Hazen-web-app
+-run Hazen-web-app on local machine but run RabbitMQ through Docker
+
 ### Postgres & Postico
 
 Official Postgres.app installation instructions: [Postgres.app](https://postgresapp.com/). Can also be installed using Homebrew.
