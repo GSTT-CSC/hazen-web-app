@@ -14,9 +14,12 @@ __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
 def register_tasks_in_db():
     from hazenlib import tasks as hazen_tasks
     # TODO: Change to read from hazenlib classes
-    tasks = {f'{modname}': importlib.import_module(
-        f'hazenlib.tasks.{modname}') for importer, modname, ispkg in
-        pkgutil.iter_modules(hazen_tasks.__path__)}
+    tasks = {
+        f'{modname}': importlib.import_module(f'hazenlib.tasks.{modname}')
+        for importer, modname, ispkg in pkgutil.iter_modules(hazen_tasks.__path__)
+    }
+    # docs = {module.__doc__ for module in tasks.values()}
+    # print(docs)
 
     with app.app_context():
         stored_tasks = Task.query.all()
@@ -26,9 +29,13 @@ def register_tasks_in_db():
                 _ = tasks.pop(stored_task.name)
                 current_app.logger.info(f'{stored_task.name} already exists in db')
 
-        for name, obj in tasks.items():
-            tasks = Task(name=name)
-            tasks.save()
+        for module_name, module in tasks.items():
+            task = Task(name=module_name, docstring=module.__doc__)
+            task.save()
+
+# model class -> sql table
+# attributes of class -> column in table
+# objects of this class -> row in table.
 
 
 app = create_app()
@@ -41,7 +48,7 @@ register_tasks_in_db()
 def make_shell_context():
     return {'db': db, 'User': User, 'Institution': Institution,
             'Image': Image, 'Series': Series, 'Study': Study, 'Device': Device,
-            'Task': Task, 'Report': Report}
+            'Task': Task, 'Report': Report, 'doc': doc}
 
 
 if __name__ == "__main__":

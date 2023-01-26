@@ -205,7 +205,7 @@ def workbench():
     # List available tasks that can be performed
     tasks = Task.query.all()
     batch_form = BatchProcessingForm()
-    batch_form.task_name.choices = [task.name for task in tasks]
+    batch_form.task_name.choices = {task.name: task.docstring for task in tasks}
 
     if request.method == 'POST':
         if 'file' in request.files.keys():

@@ -154,7 +154,7 @@ class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTas
 
     # Column "id" is created automatically by SurrogatePK() from database.py
     name = db.Column(db.String(100), unique=True)  # TODO: Change from reading hazenlib modules to classes
-
+    docstring = db.Column(db.String(6000))
     # One-to-many relationship
     reports = db.relationship('Report', back_populates='task')
 
