@@ -33,11 +33,6 @@ def register_tasks_in_db():
             task = Task(name=module_name, docstring=module.__doc__)
             task.save()
 
-# model class -> sql table
-# attributes of class -> column in table
-# objects of this class -> row in table.
-
-
 app = create_app()
 app.secret_key = app.config['SECRET_KEY']
 worker = create_celery_app(app) # a Celery object
