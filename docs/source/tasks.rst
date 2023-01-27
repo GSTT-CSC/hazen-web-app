@@ -36,6 +36,12 @@ Therefore, the agreement between a nominal slice position and the measured slice
 `Local Otsu thresholding <https://scikit-image.org/docs/0.11.x/auto_examples/plot_local_otsu.html>`_
 Assumptions: Square voxels, no multi-frame support
 
+
+Ghosting
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In a perfect MR image, there should be a one-to-one relationship between the object being scanned and the final picture. This is often not the case in practice where the presence of noise and other artefacts degrade this relationship. One of the most common artefacts that can affect clinical images is ‘‘ghosting’’, where low intensity copies of the object appear displaced within the image.
+This script allows you to calculate ghosting in MRI images.
+
 Uniformity
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Uniformity + Ghosting & Distortion
