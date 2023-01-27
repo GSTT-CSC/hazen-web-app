@@ -19,13 +19,7 @@ mv default.env .env
 source .env
 ```
 
-2. Create data directories in users' home:
-```shell
-mkdir -p $APP_DATA_DIR/db
-mkdir -p $APP_DATA_DIR/web
-```
-
-3. Start web app
+2. Start web app
 ```
 docker compose up -d --build
 ```
