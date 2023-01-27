@@ -30,11 +30,12 @@ services:
             - POSTGRES_USER=$POSTGRES_USER
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         volumes:
-            - type: bind
-              source: $APP_DATA_DIR/db
-              target: /var/lib/postgresql/data
-              bind:
-                  create_host_path: true
+            - $APP_DATA_DIR/db:/var/lib/postgresql/data
+#            - type: bind
+#              source: $APP_DATA_DIR/db
+#              target: /var/lib/postgresql/data
+#              bind:
+#                  create_host_path: true
 
     web:
         restart: always
@@ -55,11 +56,12 @@ services:
             - frontend
             - backend
         volumes:
-            - type: bind
-              source: $APP_DATA_DIR/web
-              target: /APP/uploads
-              bind:
-                  create_host_path: true
+            - $APP_DATA_DIR/web:/APP/uploads
+#            - type: bind
+#              source: $APP_DATA_DIR/web
+#              target: /APP/uploads
+#              bind:
+#                  create_host_path: true
         ports:
             - "5001:5001"
         command: docker/hazen_app/start_app.sh
