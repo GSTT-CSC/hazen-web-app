@@ -72,7 +72,7 @@ def edit_profile():
     form.institution.data = current_user.institution
     form.username.data = current_user.username
 
-    return render_template('edit_profile.html', title='Edit Profile', form=form)
+    return render_template('edit_profile.html', title='Edit Profile', form=form, page='edit_profile')
 
 
 @bp.route('/logout')
