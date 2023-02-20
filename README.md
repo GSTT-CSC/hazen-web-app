@@ -16,14 +16,13 @@ The hazen-web-app **requires** manual installation of the following software:
 
 Official Postgres.app installation instructions: [Postgres.app](https://postgresapp.com/). Can also be installed using Homebrew.
 
-If you already installed PostgresSQL, follow this instructions to activate it https://sourabhbajaj.com/mac-setup/PostgreSQL/
-
 In Terminal:
 ```shell
 brew update
 brew install postgresql
 ```
-*Confirm PostgreSQL is running before moving onto the next step.*
+*Confirm PostgreSQL is running before moving onto the next step.* You can do this by opening the Postgres.app, 
+or if you prefer to use Terminal you can start it following the instructions [here](https://sourabhbajaj.com/mac-setup/PostgreSQL/).
 
 Download [Postico](https://eggerapps.at/postico/).
 - Create a **New Favourite** with:
