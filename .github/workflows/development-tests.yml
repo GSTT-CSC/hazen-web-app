@@ -27,19 +27,19 @@ jobs:
       - name: check hazen_nginx
         if: always()
         run: |
-          docker container inspect -f '{{.State.Running}}' hazen_nginx
+          if [ "$( docker container inspect -f '{{.State.Status}}' hazen_nginx )" == "running" ]; then echo ok; else exit 125; fi
 
       - name: check hazen_redis
         if: always()
         run: |
-          docker container inspect -f '{{.State.Running}}' hazen_redis
+          if [ "$( docker container inspect -f '{{.State.Status}}' hazen_redis )" == "running" ]; then echo ok; else exit 125; fi
 
       - name: check hazen_db
         if: always()
         run: |
-          docker container inspect -f '{{.State.Running}}' hazen_db
+          if [ "$( docker container inspect -f '{{.State.Status}}' hazen_db )" == "running" ]; then echo ok; else exit 125; fi
 
       - name: check hazen_web_app
         if: always()
-        run: |
-          docker container inspect -f '{{.State.Running}}' hazen_web_app
+        run: |   
+          if [ "$( docker container inspect -f '{{.State.Status}}' hazen_web_app )" == "running" ]; then echo ok; else exit 125; fi
