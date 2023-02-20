@@ -21,9 +21,10 @@ jobs:
         run: |
           docker compose -f docker-compose.yml up -d --build
 
-      - name: docker ps
+      - name: docker ps and wait 10s
         run: |
           docker ps
+          sleep 10
 
       - name: check hazen_nginx
         if: always()
