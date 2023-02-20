@@ -1,0 +1,45 @@
+
+name: Development testing
+
+on:
+  pull_request:
+
+jobs:
+  unit_tests:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.9' ]
+
+    steps:
+      - uses: actions/checkout@v2
+        with: # required for GitPython checks https://github.com/actions/checkout/issues/124
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: docker compose up
+        run: |
+          docker compose -f docker-compose.yml up -d --build
+          
+      - name: check hazen_nginx
+        if: always()
+        run: |
+          docker container inspect -f '{{.State.Running}}' hazen_nginx
+
+      - name: check hazen_redis
+        if: always()
+        run: |
+          docker container inspect -f '{{.State.Running}}' hazen_redis
+
+      - name: check hazen_db
+        if: always()
+        run: |
+          docker container inspect -f '{{.State.Running}}' hazen_db
+
+      - name: check hazen_web_app
+        if: always()
+        run: |
+          docker container inspect -f '{{.State.Running}}' hazen_web_app

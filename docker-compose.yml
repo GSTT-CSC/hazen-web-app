@@ -14,12 +14,14 @@ services:
 
     redis:
         image: redis:latest
+        container_name: hazen_redis
         hostname: redis
         networks:
             - backend
 
     hazen_db:
         image: postgres:13.1
+        container_name: hazen_db
         restart: always
         expose:
             - "5432"
