@@ -16,14 +16,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with: # required for GitPython checks https://github.com/actions/checkout/issues/124
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: docker compose up
         run: |
           docker compose -f docker-compose.yml up -d --build
-          
+
+      - name: docker ps
+        run: |
+          docker ps
+
       - name: check hazen_nginx
         if: always()
         run: |
