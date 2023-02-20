@@ -14,6 +14,12 @@ jobs:
         os: [ ubuntu-latest ]
         python-version: [ '3.9' ]
 
+    env:
+      POSTGRES_DB: hazen
+      POSTGRES_USER: hazen
+      POSTGRES_PASSWORD: password123
+      APP_DATA_DIR: ./hazen-data
+
     steps:
       - uses: actions/checkout@v2
 
