@@ -29,7 +29,7 @@ services:
             - backend
         environment:
             - POSTGRES_DB=$POSTGRES_DB
-            - POSTGRES_USER=$POSTGRES_USER
+            - POSTGRES_USER=$POSTGRES_USERFORCEERROR
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         volumes:
             - $APP_DATA_DIR/db:/var/lib/postgresql/data
