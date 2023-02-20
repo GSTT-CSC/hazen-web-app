@@ -37,7 +37,8 @@ In Terminal:
 brew update
 brew install postgresql
 ```
-*Confirm PostgreSQL is running before moving onto the next step.*
+*Confirm PostgreSQL is running before moving onto the next step.* You can do this by opening the Postgres.app, 
+or if you prefer to use Terminal you can start it following the instructions [here](https://sourabhbajaj.com/mac-setup/PostgreSQL/).
 
 Download [Postico](https://eggerapps.at/postico/).
 - Create a **New Favourite** with:
