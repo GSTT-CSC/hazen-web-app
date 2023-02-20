@@ -1,0 +1,57 @@
+
+name: Development testing
+
+on:
+  pull_request:
+
+jobs:
+  unit_tests:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        python-version: [ '3.9' ]
+
+    env:
+      POSTGRES_DB: hazen
+      POSTGRES_USER: hazen
+      POSTGRES_PASSWORD: password123
+      APP_DATA_DIR: ./hazen-data
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: docker compose up
+        run: |
+          docker compose -f docker-compose.yml up -d --build
+
+      - name: docker ps and wait 10s
+        run: |
+          docker ps
+          sleep 10
+
+      - name: check hazen_nginx
+        if: always()
+        run: |
+          container_name=hazen_nginx
+          if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then echo ok; else docker logs $container_name; exit 1; fi
+
+      - name: check hazen_redis
+        if: always()
+        run: |
+          container_name=hazen_redis
+          if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then echo ok; else docker logs $container_name; exit 1; fi
+
+      - name: check hazen_db
+        if: always()
+        run: |
+          container_name=hazen_db
+          if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then echo ok; else docker logs $container_name; exit 1; fi
+
+      - name: check hazen_web_app
+        if: always()
+        run: |   
+          container_name=hazen_web_app
+          if [ "$( docker container inspect -f '{{.State.Status}}' $container_name )" == "running" ]; then echo ok; else docker logs $container_name; exit 1; fi
