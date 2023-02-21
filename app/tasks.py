@@ -30,19 +30,23 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
         result_dict = task.run(slice_width)
     else:
         result_dict = task.run()
-    for key, value in result_dict.items():
-        # ignore reports section of the output
-        if key == "reports":
-            pass
-        else:
-            # reconstruct the measurement results
-            result = {key: value}
+    # import ipdb;
+    # ipdb.set_trace()
+    # print("result_dict", result_dict)
+    # for key, value in result_dict.items():
+    #     # ignore reports section of the output
+    #     if key == "reports":
+    #         # import ipdb; ipdb.set_trace()
+    #         images = result_dict['reports']
+    #     else:
+    #         # reconstruct the measurement results
+    #         result = {key: value}
     # Update Celery task status
     self.update_state(state='SUCCESS')
 
     # Store task result in the Report table
     report = Report(
-        hazen_version=version('hazen'), data=result,
+        hazen_version=version('hazen'), data=result_dict,
         user_id=user_id, series_id=series_id,
         task_name=task_name)  #  task_variable=task_variable
     # Save information to database

@@ -40,6 +40,7 @@
                 <th>Measurement date</th>
                 <th>Performed by</th>
                 <th>Measurement result</th>
+                <th>Image result</th>
                 <th>Remove</th>
             </tr></thead>
             <tbody>
@@ -54,6 +55,11 @@
                         <td>{{ report.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                         <td>{{ report.user.username }}</td>
                         <td>{{ report.data }}</td>
+                        <td>{% for img in report.data.reports %}
+                            <img src="{{ img }}" />
+                            {% endfor %}
+                            <img src="/hazen_reports/Ghosting/Ghosting_ghosting_SAG_1nsa_30_1.png">
+                        </td>
                         <td>
                             <a href="{{ url_for('main.delete', report_id=report.id) }}">
                                 <img src="../../static/trash.svg">
