@@ -52,14 +52,24 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def upload_folder():
     files = request.files.getlist('files')
-    secure_filename = os.path.join(current_app.config['UPLOADED_PATH'], filename)
 
     for file in files:
         filename = secure_filename(file.filename)
-        file.save(os.path.join(folder_path, filename))
+        secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+        file.save(secure_path)
 
-    return "Folder uploaded successfully", 200
+        try:
+            filesystem_dir = ingest(secure_path)
+            permanent_path = os.path.join(filesystem_dir, filename)
+            shutil.move(secure_path, permanent_path)
+        except ImageExistsError:
+            os.remove(secure_path)
+            flash(f'{filename} file has already been uploaded!', 'danger')
+        except Exception as e:
+            flash(f'Error processing {filename}: {str(e)}', 'danger')
 
+    flash("Folder uploaded successfully", 'success')
+    return redirect(url_for('main.workbench'))
 
 
 def upload_file(file):
