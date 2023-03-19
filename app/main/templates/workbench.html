@@ -39,6 +39,32 @@
         </br>
     </div>
 
+
+
+    <form id="upload-form">
+        <input type="file" name="folder" id="folder" webkitdirectory>
+        <button type="submit">Upload</button>
+    </form>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#upload-form').on('submit', function (e) {
+            e.preventDefault();
+            const folderInput = document.getElementById('folder');
+            const formData = new FormData();
+            for (const file of folderInput.files) {
+                formData.append('files', file);
+            }
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                console.log(response);
+            });
+        });
+    </script>
+
+
+
 <form method="POST" action={{ url_for('main.workbench') }}>
     <div class="col">
         <!-- Task list Scrollspy -->

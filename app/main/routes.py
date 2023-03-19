@@ -36,6 +36,31 @@ def index():
 
 class ImageExistsError(Exception): pass
 
+from flask import Flask, request
+import os
+
+app = Flask(__name__)
+
+from flask import Flask, request
+from werkzeug.utils import secure_filename
+import os
+
+
+UPLOAD_FOLDER = '/Users/lce21/Documents/GitHub/hazen-web-app'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+def upload_folder():
+    files = request.files.getlist('files')
+    secure_filename = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+
+    for file in files:
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(folder_path, filename))
+
+    return "Folder uploaded successfully", 200
+
+
 
 def upload_file(file):
     filename = secure_filename(file.filename)
