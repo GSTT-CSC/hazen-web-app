@@ -49,13 +49,19 @@ import os
 UPLOAD_FOLDER = '/Users/lce21/Documents/GitHub/hazen-web-app'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def update_files():
+    studies = Study.query.all()
+    # render studies and files on the webpage
+    return render_template('workbench.html', studies=studies)
+
+
 
 def upload_folder():
     files = request.files.getlist('files')
 
     for file in files:
         filename = secure_filename(file.filename)
-        secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
+        secure_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(secure_path)
 
         try:
@@ -65,12 +71,9 @@ def upload_folder():
         except ImageExistsError:
             os.remove(secure_path)
             flash(f'{filename} file has already been uploaded!', 'danger')
-        except Exception as e:
-            flash(f'Error processing {filename}: {str(e)}', 'danger')
 
-    flash("Folder uploaded successfully", 'success')
-    return redirect(url_for('main.workbench'))
-
+    # Call update_files() to render the studies and files on the webpage
+    return update_files()
 
 def upload_file(file):
     filename = secure_filename(file.filename)
@@ -89,6 +92,7 @@ def upload_file(file):
     except ImageExistsError:
         os.remove(secure_path)
         flash(f'{filename} file has already been uploaded!', 'danger')
+
 
 
 # Upload images one at a time and parse metadata from DICOM header
@@ -114,7 +118,7 @@ def ingest(file_path):
         # Save the image data into the corresponding tables:
         # 0. Device:
         #TODO parse device and manufacturer information from DICOM to db
-        
+
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
         if not study_exists:
@@ -123,7 +127,7 @@ def ingest(file_path):
         study_id = Study.query.filter_by(uid=study_uid).first().id
         #TODO remove in production
         print("study id:", study_id)
-        
+
         # 2. Series:
         series_exists = db.session.query(db.exists().where(Series.uid == series_uid)).scalar()
         if not series_exists:
@@ -243,7 +247,9 @@ def workbench():
     batch_form.task_name.choices = [task.name for task in tasks]
 
     if request.method == 'POST':
-        if 'file' in request.files.keys():
+        if 'files' in request.files.keys():
+            upload_folder()
+        elif 'file' in request.files.keys():
             # Uploaded by DropZone
             dropzone_file = request.files['file']
             upload_file(dropzone_file)
@@ -281,11 +287,28 @@ def workbench():
                 for choose_file in request.files.getlist('image_files'):
                     upload_file(choose_file)
 
+            return redirect(url_for('main.workbench'))
+
+            # Create Celery jobs from batch processing request
+            celery_job_list = create_celery_jobs(
+                user_id=current_user.id, series_ids=selected_series,
+                task_name=task_name, task_variable=task_variable)
+            job_ids = [job.id for job in celery_job_list]
+            msg = 'The following jobs have been queued: ' + ",".join(job_ids)
+            current_app.logger.info(msg)
+            flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
+
+            # Upload file functionality
+            else:
+            # Uploaded by Choose File
+            for choose_file in request.files.getlist('image_files'):
+                upload_file(choose_file)
+
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', studies=studies,
-            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
-        )
+        return render_template('workbench.html', title='Workbench', studies=studies,
+                               upload_form=upload_form, batch_form=batch_form  # , tasks=tasks,
+                               )
     # , series=series, next_url=next_url, prev_url=prev_url
 
 

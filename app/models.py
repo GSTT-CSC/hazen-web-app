@@ -125,7 +125,7 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     user = db.relationship('User', back_populates='series')
     institutions = db.relationship('Institution', back_populates='series')
     devices = db.relationship('Device', back_populates='series')
-    studies = db.relationship('Study', back_populates='series')
+    studies  = db.relationship('Study', back_populates='series')
 
     @hybrid_property
     def filesystem_key(self):
