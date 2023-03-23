@@ -1,6 +1,17 @@
 """
 Sets databases to be created.
 """
+import uuid
+
+from sqlalchemy.dialects.postgresql import UUID
+
+class SurrogatePK:
+    """
+    A mixin that adds a surrogate UUID primary key column 'id' to any
+    declarative-mapped class.
+    """
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
 from app import db, login
 from app.database import Model, SurrogatePK, CreatedTimestampMixin, JSONB
@@ -13,32 +24,12 @@ import jwt
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
-import uuid
-from sqlalchemy import types
-
-class UUID(types.TypeDecorator):
-    impl = types.String(50)
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            if not isinstance(value, uuid.UUID):
-                return str(uuid.UUID(value))
-            else:
-                return str(value)
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            return uuid.UUID(value)
-
-    @staticmethod
-    def create():
-        return str(uuid.uuid4())
 
 # to test - comment out lines 46 - 99 in __init__.py
 
 @login.user_loader
 def load_user(id):
-    return User.query.get(id)
+    return User.query.get(str(id))
 
 
 class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
@@ -111,7 +102,6 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
         return '<Acquisition {}>'.format(self.description)
 
     @hybrid_property
-
     def filesystem_key(self):
         return self.id.hex
 
@@ -146,7 +136,7 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     user = db.relationship('User', back_populates='series')
     institutions = db.relationship('Institution', back_populates='series')
     devices = db.relationship('Device', back_populates='series')
-    studies  = db.relationship('Study', back_populates='series')
+    studies = db.relationship('Study', back_populates='series')
 
     @hybrid_property
     def filesystem_key(self):
@@ -225,4 +215,3 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
     user = db.relationship('User', back_populates='reports')
     series = db.relationship('Series', back_populates='reports')
     task = db.relationship('Task', back_populates='reports')
-
