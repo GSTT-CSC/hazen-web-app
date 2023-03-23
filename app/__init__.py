@@ -20,6 +20,9 @@ from flask_dropzone import Dropzone
 from flask_heroku import Heroku
 from celery import Celery
 
+from flask import Flask
+from .config import Config
+
 
 # Alias common variables
 db = SQLAlchemy()

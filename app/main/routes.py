@@ -10,12 +10,12 @@ import pydicom.errors
 
 from app import db
 from app.main import bp
-from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
+from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm, FolderUploadForm
 from app.models import Image, Series, Study, Device, Institution, Task, Report
 
 from app.models import Image, Series, Study, Device, Institution, Task, Report
 
-from app.forms import FolderUploadForm
+
 
 hazenlib_version = version('hazen')
 

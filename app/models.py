@@ -13,12 +13,32 @@ import jwt
 from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
+import uuid
+from sqlalchemy import types
+
+class UUID(types.TypeDecorator):
+    impl = types.String(50)
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            if not isinstance(value, uuid.UUID):
+                return str(uuid.UUID(value))
+            else:
+                return str(value)
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return uuid.UUID(value)
+
+    @staticmethod
+    def create():
+        return str(uuid.uuid4())
 
 # to test - comment out lines 46 - 99 in __init__.py
 
 @login.user_loader
 def load_user(id):
-    return User.query.get(str(id))
+    return User.query.get(id)
 
 
 class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
@@ -91,6 +111,7 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
         return '<Acquisition {}>'.format(self.description)
 
     @hybrid_property
+
     def filesystem_key(self):
         return self.id.hex
 
