@@ -2,6 +2,7 @@
 Sets databases to be created.
 """
 import uuid
+from app import db
 
 from sqlalchemy.dialects.postgresql import UUID
 
