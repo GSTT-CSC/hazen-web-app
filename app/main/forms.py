@@ -9,6 +9,14 @@ class ImageUploadForm(FlaskForm):
     submit = SubmitField('Upload')
 
 
+# Upload folder
+class FolderUploadForm(FlaskForm):
+    folder = MultipleFileField(validators=[DataRequired()])
+    submit = SubmitField('Upload')
+
+
+
+
 # Select task
 class ProcessTaskForm(FlaskForm):
     task_name = SelectField('Process Task')

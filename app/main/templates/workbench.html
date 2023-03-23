@@ -1,177 +1,83 @@
 {% extends "base.html" %}
-{% import "bootstrap5/form.html" as wtf %}
 
-{% block title %}{{title}}{% endblock %}
+{% block content %}
 
-{% block app_content %}
-<style>
-    .scrollspy-example {
-        position: relative;
-        /*height: 200px;*/
-        overflow: auto;
-    }
-</style>
+  <h1 class="mt-5">Workbench</h1>
 
+  <div class="row mt-5">
+    <div class="col-md-6">
+      <h2>Available files</h2>
+      <hr>
 
-<!-- FILE UPLOAD -->
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-    <div class="col">
-        <h3 class="text-center pt-2">Upload new files</h3>
-        <!-- File upload form -->
-        {{ super() }}
-        {{ dropzone.load_css() }}
-        {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-        {{ dropzone.create(action=url_for('main.workbench'))}}
-        {{ dropzone.load_js() }}
-        {{ dropzone.config(reload='main.workbench', id='uploader') }}
-
-        <!-- Folder upload form -->
-        <div id="file-upload-container">
-            <form id="upload-form" method="POST" enctype="multipart/form-data">
-                <input type="file" name="files[]" id="files" multiple webkitdirectory>
-                <button type="submit">Upload</button>
-            </form>
-        </div>
-
-        <!-- Reload button -->
-        <div class="text-center">
-            <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-        </div>
-
-        <!-- File selection form -->
-        <div class="row">
-            {% if upload_form %}
-                {{ wtf.render_form(upload_form) }}
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-
-
-    <!-- FOLDER UPLOAD -->
-    <form id="upload-form">
-        <input type="file" name="folder" id="folder" webkitdirectory>
-        <button type="submit">Upload</button>
-    </form>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
- $('#upload-form').on('submit', function (e) {
-    e.preventDefault();
-    const folderInput = document.getElementById('folder');
-    const formData = new FormData();
-    for (const file of folderInput.files) {
-        formData.append('files', file);
-    }
-    fetch('/upload', {
-        method: 'POST',
-        body: formData
-    }).then(response => {
-        console.log(response);
-        // Reload the webpage to display the updated list of files
-        location.reload();
-    });
-});
-    </script>
-
-
-
-<form method="POST" action={{ url_for('main.workbench') }}>
-    <div class="col">
-        <!-- Task list Scrollspy -->
-        <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                <h3 class="text-center pt-2">Select task</h3>
-                {% for task in batch_form.task_name.choices %}
-                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
-                {% endfor %}
-            </ul>
-        </br>
-            <label for="task_variable">Slice width for SNR measurement (optional):</label>
-                <input type="string" name="task_variable"></p>
-            {{ batch_form.submit }}
-        </div>
-    </div>
-</div>
-
-</br>
-
-
-
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-    <h3 class="text-center pt-2">Available files</h3></br>
-    {% for study in studies %}
-    <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="heading{{ loop.index }}">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study.uid }}</button>
-            </h2>
-        </div>
-        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead><tr>
-                            <th>Select</th>
-                            <th>Series Description</th>
-                            <th>Acquisition Date</th>
-                            <th>Uploaded Date</th>
-                            <th>Uploaded by</th>
-                            <!-- <th>Files</th> -->
-                            <th>Reports</th>
-                            <th>Remove</th>
-                        </tr></thead>
-                        <tbody>
-                            <!-- series is the db query result, essentially a list of series that are not archived -->
-                            <!-- acquisition is an instance/row of the Series table -->
-                            {% for serie in study.series %}
-                                <tr>
-                                    <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
-                                    <td>
-                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">{{ serie.description }}</a>
-                                    </td>
-                                    <td>{{ serie.series_datetime }}</td>
-                                    <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                                    <td>{{ serie.user.username }}</td>
-                                    <!-- <td>num files</td> -->
-                                    <td>
-                                        {% if serie.has_report %}
-                                            <a href="{{ url_for('main.reports', series_id=serie.id) }}">report</a>
-                                        {% else %}
-                                            None
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{{ url_for('main.delete', series_id=serie.id) }}">
-                                            <img src="../../static/trash.svg">
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+      {% if studies %}
+        {% for study in studies %}
+          <h4>{{ study.description }} (UID: {{ study.uid }})</h4>
+          <div class="accordion mb-4" id="study{{ study.id }}">
+            {% for series in study.series %}
+              <div class="card">
+                <div class="card-header" id="series{{ series.id }}">
+                  <h5 class="mb-0">
+                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                            data-target="#collapse{{ series.id }}" aria-expanded="true"
+                            aria-controls="collapse{{ series.id }}">
+                      {{ series.description }}
+                    </button>
+                    <a href="{{ url_for('main.task_selection', series_id=series.id) }}" class="btn btn-primary float-right">Process</a>
+                  </h5>
                 </div>
-            </div>
-        </div>
+
+                <div id="collapse{{ series.id }}" class="collapse" aria-labelledby="series{{ series.id }}" data-parent="#study{{ study.id }}">
+                  <div class="card-body">
+                    {% if series.files %}
+                      <ul class="list-group list-group-flush">
+                        {% for file in series.files %}
+                          <li class="list-group-item">{{ file }}</li>
+                        {% endfor %}
+                      </ul>
+                    {% else %}
+                      <p>No files available.</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No files available.</p>
+      {% endif %}
     </div>
-    {% endfor %}
-</div>
-</form>
-<!--
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
-                    <span aria-hidden="true">&larr;</span> Newer acquisitions
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ next_url or '#' }}">
-                    Older acquisitions <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
--->
+
+    <div class="col-md-6">
+      <h2>Upload files or folders</h2>
+      <hr>
+
+      <form id="image-upload-form" method="post" enctype="multipart/form-data" action="{{ url_for('main.workbench') }}">
+        {{ upload_form.hidden_tag() }}
+
+        {{ upload_form.image_files.label }}
+        {{ upload_form.image_files.multiple() }}
+        {{ upload_form.folder_files.label }}
+        {{ upload_form.folder_files }}
+
+        <button type="submit" class="btn btn-primary mt-3" name="submit" value="Upload">Upload</button>
+      </form>
+
+      <h2 class="mt-5">Batch processing</h2>
+      <hr>
+
+      <form id="batch-form" method="post" action="{{ url_for('main.workbench') }}">
+        {{ batch_form.hidden_tag() }}
+
+        {{ batch_form.task_name.label }}
+        {{ batch_form.task_name }}
+
+        {{ batch_form.task_variable.label }}
+        {{ batch_form.task_variable }}
+
+        <button type="submit" class="btn btn-primary mt-3" name="submit" value="Run task on selected series">Run task on selected series</button>
+      </form>
+    </div>
+  </div>
 
 {% endblock %}

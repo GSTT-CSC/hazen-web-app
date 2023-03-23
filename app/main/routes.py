@@ -13,7 +13,12 @@ from app.main import bp
 from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
 from app.models import Image, Series, Study, Device, Institution, Task, Report
 
+from app.models import Image, Series, Study, Device, Institution, Task, Report
+
+from app.forms import FolderUploadForm
+
 hazenlib_version = version('hazen')
+
 
 @bp.before_request
 def before_request():
@@ -36,63 +41,29 @@ def index():
 
 class ImageExistsError(Exception): pass
 
-from flask import Flask, request
-import os
 
-app = Flask(__name__)
-
-from flask import Flask, request
-from werkzeug.utils import secure_filename
-import os
-
-
-UPLOAD_FOLDER = '/Users/lce21/Documents/GitHub/hazen-web-app'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def update_files():
-    studies = Study.query.all()
-    # render studies and files on the webpage
-    return render_template('workbench.html', studies=studies)
-
-
-
-def upload_folder():
-    files = request.files.getlist('files')
-
-    for file in files:
-        filename = secure_filename(file.filename)
-        secure_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(secure_path)
-
-        try:
-            filesystem_dir = ingest(secure_path)
-            permanent_path = os.path.join(filesystem_dir, filename)
-            shutil.move(secure_path, permanent_path)
-        except ImageExistsError:
-            os.remove(secure_path)
-            flash(f'{filename} file has already been uploaded!', 'danger')
-
-    # Call update_files() to render the studies and files on the webpage
-    return update_files()
 
 def upload_file(file):
-    filename = secure_filename(file.filename)
-    secure_path = os.path.join(current_app.config['UPLOADED_PATH'], filename)
-    try:
-        file.save(secure_path)
-    except IsADirectoryError:
-        flash("No files were selected", 'info')
-        return redirect(url_for('main.workbench'))
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+        flash('File uploaded successfully.')
+    else:
+        flash('Invalid file type.')
+    return redirect(request.url)
 
-    try:
-        filesystem_dir = ingest(secure_path)
-        permanent_path = os.path.join(filesystem_dir, filename)
-        shutil.move(secure_path, permanent_path)
-        flash(f'{filename} file has been uploaded successfully!', 'success')
-    except ImageExistsError:
-        os.remove(secure_path)
-        flash(f'{filename} file has already been uploaded!', 'danger')
 
+def upload_folder(folder):
+    for subdir, dirs, files in os.walk(folder):
+        for file in files:
+            file_path = os.path.join(subdir, file)
+            ingest(file_path)
+
+
+
+
+
+# Upload images one at a time and parse metadata from DICOM header
 
 
 # Upload images one at a time and parse metadata from DICOM header
@@ -100,7 +71,7 @@ def ingest(file_path):
     try:
         # Load in the DICOM header into a pydicom Dataset
         dcm = pydicom.read_file(file_path, force=True,
-                                                stop_before_pixels=True)
+                                stop_before_pixels=True)
 
         # Parse the relevant fields into variables
         series_uid = dcm.SeriesInstanceUID
@@ -117,7 +88,7 @@ def ingest(file_path):
 
         # Save the image data into the corresponding tables:
         # 0. Device:
-        #TODO parse device and manufacturer information from DICOM to db
+        # TODO parse device and manufacturer information from DICOM to db
 
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
@@ -125,25 +96,34 @@ def ingest(file_path):
             new_study = Study(uid=study_uid, description=dcm.StudyDescription)
             new_study.save()
         study_id = Study.query.filter_by(uid=study_uid).first().id
-        #TODO remove in production
-        print("study id:", study_id)
 
         # 2. Series:
         series_exists = db.session.query(db.exists().where(Series.uid == series_uid)).scalar()
         if not series_exists:
             series_time = dcm.SeriesTime.split('.')[0]
-            series_datetime = datetime.strptime("-".join([dcm.SeriesDate,series_time]), '%Y%m%d-%H%M%S')
-            new_series = Series(uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(), study_id=study_id, series_datetime=series_datetime)
+            series_datetime = datetime.strptime("-".join([dcm.SeriesDate, series_time]), '%Y%m%d-%H%M%S')
+            new_series = Series(uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(),
+                                study_id=study_id, series_datetime=series_datetime)
             new_series.save()
         series_id = Series.query.filter_by(uid=series_uid).first().id
-        #TODO remove in production
-        print("series id:", series_id)
+
+        # Add support for folder upload
+        if os.path.isdir(file_path):
+            folder_path = file_path
+            # Store folder path as filesystem_key in Series table
+            series = Series.query.filter_by(uid=series_uid).first()
+            if series:
+                series.filesystem_key = os.path.basename(folder_path)
+                series.save()
+            # Get all files in folder and ingest them
+            for file in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file)
+                if os.path.isfile(file_path) and allowed_file_extensions(file):
+                    ingest(file_path)
 
         # 3. Image:
         new_image = Image(uid=image_uid, series_id=series_id, filename=filename, header=dcm.to_json_dict())
         new_image.save()
-        #TODO remove in production
-        print("new image id:", new_image.id)
 
         # Commit all changes to the database
         db.session.commit()
@@ -211,7 +191,7 @@ def delete(series_id=None, report_id=None):
         report = Report.query.filter_by(id=report_id).first_or_404()
         # Check whether series has other reports or is this the only one
         additional_reports = Report.query.filter_by(series_id=report.series_id).count()
-        if additional_reports > 1:  # series has other reports 
+        if additional_reports > 1:  # series has other reports
             # delete selected one
             report.delete()
         else:  # series only had this report
@@ -228,7 +208,7 @@ def delete(series_id=None, report_id=None):
 
 
 # Workbench
-# authenticated users can overview and perform tasks/analysis on uploaded files 
+# authenticated users can overview and perform tasks/analysis on uploaded files
 @bp.route('/workbench/', methods=['GET', 'POST'])
 @login_required
 def workbench():
@@ -241,18 +221,23 @@ def workbench():
     # Create Choose file form
     upload_form = ImageUploadForm()
 
+    # Create Choose folder form
+    folder_form = FolderUploadForm()
+
     # List available tasks that can be performed
     tasks = Task.query.all()
     batch_form = BatchProcessingForm()
     batch_form.task_name.choices = [task.name for task in tasks]
 
     if request.method == 'POST':
-        if 'files' in request.files.keys():
-            upload_folder()
-        elif 'file' in request.files.keys():
+        if 'file' in request.files.keys():
             # Uploaded by DropZone
             dropzone_file = request.files['file']
             upload_file(dropzone_file)
+        elif 'folder' in request.files.keys():
+            # Uploaded by DropZone
+            dropzone_folder = request.files['folder']
+            upload_folder(dropzone_folder)
         elif 'submit' in request.form.keys():
             # Batch processing functionality
             if request.form['submit'] == 'Run task on selected series':
@@ -282,41 +267,45 @@ def workbench():
                 flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
 
             # Upload file functionality
-            else:
+            elif request.form['submit'] == 'Upload file':
                 # Uploaded by Choose File
                 for choose_file in request.files.getlist('image_files'):
                     upload_file(choose_file)
 
-            return redirect(url_for('main.workbench'))
-
-            # Create Celery jobs from batch processing request
-            celery_job_list = create_celery_jobs(
-                user_id=current_user.id, series_ids=selected_series,
-                task_name=task_name, task_variable=task_variable)
-            job_ids = [job.id for job in celery_job_list]
-            msg = 'The following jobs have been queued: ' + ",".join(job_ids)
-            current_app.logger.info(msg)
-            flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
-
-            # Upload file functionality
-            else:
-            # Uploaded by Choose File
-            for choose_file in request.files.getlist('image_files'):
-                upload_file(choose_file)
+            # Upload folder functionality
+            elif request.form['submit'] == 'Upload folder':
+                # Uploaded by Choose Folder
+                for choose_folder in request.files.getlist('folder'):
+                    upload_folder(choose_folder)
 
         return redirect(url_for('main.workbench'))
 
-        return render_template('workbench.html', title='Workbench', studies=studies,
-                               upload_form=upload_form, batch_form=batch_form  # , tasks=tasks,
-                               )
-    # , series=series, next_url=next_url, prev_url=prev_url
+    # get a list of files and directories in UPLOAD_FOLDER
+    files_and_folders = os.listdir(current_app.config['UPLOAD_FOLDER'])
+
+    # separate files and folders
+    files = []
+    folders = []
+    for file_or_folder in files_and_folders:
+        if os.path.isfile(os.path.join(current_app.config['UPLOAD_FOLDER'], file_or_folder)):
+            files.append(file_or_folder)
+        elif os.path.isdir(os.path.join(current_app.config['UPLOAD_FOLDER'], file_or_folder)):
+            folders.append(file_or_folder)
+
+    return render_template('workbench.html', title='Workbench', studies=studies,
+                           upload_form=upload_form, folder_form=folder_form, batch_form=batch_form, files=files, folders=folders)
+
+
 
 
 def locate_image_files(filesystem_key):
-    # Select files in series folder
-    folder = os.path.join(current_app.config['UPLOADED_PATH'],
-                                    filesystem_key)
-    image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+    image_files = []
+    if filesystem_key == 'local':
+        for dirpath, _, filenames in os.walk(current_app.config['UPLOADED_PATH']):
+            for filename in filenames:
+                if filename.lower().endswith(('.dcm', '.dicom')):
+                    file_path = os.path.join(dirpath, filename)
+                    image_files.append(file_path)
     return image_files
 
 
@@ -328,7 +317,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
         if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
             flash("Incorrect number of image series selected for SNR measurement", 'info')
         else:
-            #TODO currently it is assumed that a single pair of images are selected
+            # TODO currently it is assumed that a single pair of images are selected
             image_files = []
             for series_id in series_ids:
                 # Identify selected series
@@ -369,8 +358,8 @@ def task_selection(series_id):
         series_files = Image.query.filter_by(series_id=series_id).count()
 
         return render_template('task_selection.html', title='Select Task',
-                        form=form, series=series, series_files=series_files,
-                        hazenlib_version=hazenlib_version)
+                               form=form, series=series, series_files=series_files,
+                               hazenlib_version=hazenlib_version)
 
     if request.method == 'POST':
         # Set off task processing as a Celery job
@@ -383,7 +372,7 @@ def task_selection(series_id):
 
         # Select files to perform task on
         folder = os.path.join(current_app.config['UPLOADED_PATH'],
-                                        series.filesystem_key)
+                              series.filesystem_key)
         image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
 
         # Ensure that appropriate number of files were selected
@@ -421,14 +410,14 @@ def result():
     user_id = current_user.id
     report = Report.query.filter_by(
         user_id=user_id, series_id=series_id, task_name=task_name
-        ).first_or_404()
+    ).first_or_404()
     return render_template('result.html', title='Result', results=report.data,
-                    task=task_name, series=series, series_files=series_files)
+                           task=task_name, series=series, series_files=series_files)
 
 
 # Reports dashboard
 # Overview of reports
-#TODO: Trend monitoring dashboards
+# TODO: Trend monitoring dashboards
 @bp.route('/reports/', methods=['GET', 'POST'])
 @login_required
 def reports(series_id=None):
@@ -460,12 +449,11 @@ def reports(series_id=None):
         # Display reports in a table
         page = request.args.get('page', 1, type=int)
         reports_pages = reports.paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+            page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
         next_url = url_for('main.reports', page=reports_pages.next_num) \
             if reports_pages.has_next else None
         prev_url = url_for('main.reports', page=reports_pages.prev_num) \
             if reports_pages.has_prev else None
 
     return render_template('reports.html', title="Reports", series=series_dict,
-        reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
-
+                           reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
