@@ -39,22 +39,46 @@
                         </ul>
 
                     {% else %}
-                        <ul class="navbar-nav w-100 justify-content-start">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('main.workbench') }}">Workbench</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('main.reports') }}">Reports</a>
-                            </li>
-                        </ul>
-                        <ul class="navbar-nav w-100 justify-content-end">
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.edit_profile') }}">Edit profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
-                            </li>
-                        </ul>
+
+                       <nav class="navbar-nav w-100 justify-content-start">
+    <ul class="navbar-nav">
+
+        <li class="nav-item">
+            <a
+                class="nav-link{% if request.endpoint == 'main.workbench' %} active{% endif %}"
+                 href="{{ url_for('main.workbench') }}"
+            >Workbench</a>
+        </li>
+
+        <li class="nav-item">
+            <a
+                class="nav-link{% if request.endpoint == 'main.reports' %} active{% endif %}"
+                 href="{{ url_for('main.reports') }}"
+            >Reports</a>
+        </li>
+
+ </ul>
+
+      <nav class="navbar-nav w-100 justify-content-end">
+           <ul class="navbar-nav">
+
+        <li class="nav-item">
+            <a
+                class="nav-link{% if request.endpoint == 'auth.edit_profile' %} active{% endif %}"
+                href="{{ url_for('auth.edit_profile') }}"
+            >Edit Profile</a>
+        </li>
+
+        <li class="nav-item">
+            <a
+                    class="nav-link{% if request.endpoint == 'auth.logout' %} active{% endif %}"
+                href="{{ url_for('auth.logout') }}"
+            >Logout</a>
+        </li>
+
+    </ul>
+</nav>
+
                     {% endif %}
 
                 </div> <!-- /.navbar-collapse -->
