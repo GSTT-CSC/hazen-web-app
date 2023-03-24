@@ -39,6 +39,7 @@
                         </ul>
 
                     {% else %}
+
                        <nav class="navbar-nav w-100 justify-content-start">
     <ul class="navbar-nav">
 
@@ -55,10 +56,12 @@
                  href="{{ url_for('main.reports') }}"
             >Reports</a>
         </li>
+
  </ul>
 
       <nav class="navbar-nav w-100 justify-content-end">
            <ul class="navbar-nav">
+
         <li class="nav-item">
             <a
                 class="nav-link{% if request.endpoint == 'auth.edit_profile' %} active{% endif %}"
@@ -75,6 +78,7 @@
 
     </ul>
 </nav>
+
                     {% endif %}
 
                 </div> <!-- /.navbar-collapse -->
