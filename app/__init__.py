@@ -13,7 +13,7 @@ from flask import Flask, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
-from flask_bootstrap import Bootstrap5
+from flask_bootstrap import Bootstrap
 from flask_mail import Mail
 from flask_moment import Moment
 from flask_dropzone import Dropzone
@@ -27,7 +27,7 @@ migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
 mail = Mail()
-bootstrap = Bootstrap5()
+bootstrap = Bootstrap()
 moment = Moment()
 dropzone = Dropzone()
 heroku = Heroku()

@@ -16,7 +16,10 @@ from hazen import worker
 def produce_report(self, user_id, series_id, task_name, image_files, slice_width=None):
     # import Hazen functionality
     task_module = importlib.import_module(f"hazenlib.tasks.{task_name}")
-    class_list = [cls for _, cls in inspect.getmembers(sys.modules[task_module.__name__], lambda x: inspect.isclass(x) and (x.__module__ == task_module.__name__))]
+    class_list = [
+        cls for _, cls in inspect.getmembers(sys.modules[task_module.__name__],
+                                             lambda x: inspect.isclass(x) and (x.__module__ == task_module.__name__))
+    ]
     if len(class_list) > 1:
         raise Exception(f'Task {task_module} has multiple class definitions: {class_list}')
 
