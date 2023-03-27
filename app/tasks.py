@@ -33,7 +33,7 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
         result_dict = task.run(slice_width)
     else:
         result_dict = task.run()
-<<<<<<< Updated upstream
+
     # import ipdb;
     # ipdb.set_trace()
     # print("result_dict", result_dict)
@@ -45,7 +45,7 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     #     else:
     #         # reconstruct the measurement results
     #         result = {key: value}
-=======
+
     for key, value in result_dict.items():
         # ignore reports section of the output
         if key == "reports":
@@ -53,7 +53,7 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
         else:
             # reconstruct the measurement results
             result = {key: value}
->>>>>>> Stashed changes
+
     # Update Celery task status
     self.update_state(state='SUCCESS')
 
