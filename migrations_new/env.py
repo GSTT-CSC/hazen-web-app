@@ -1,18 +1,12 @@
 from __future__ import with_statement
-from alembic import context
-from sqlalchemy import engine_from_config, pool
-from logging.config import fileConfig
+
 import logging
-import os
-import sys
-from pathlib import Path
+from logging.config import fileConfig
 
-# Add the app directory to the PYTHONPATH
-sys.path.append(str(Path(__file__).resolve().parents[2]))
+from flask import current_app
 
-# Import the Flask app object
-from app import create_app
-app = create_app(os.getenv('FLASK_CONFIG'))
+from alembic import context
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -26,9 +20,10 @@ logger = logging.getLogger('alembic.env')
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from flask import current_app
-config.set_main_option('sqlalchemy.url', str(app.config['SQLALCHEMY_DATABASE_URI']))
-
+config.set_main_option(
+    'sqlalchemy.url',
+    str(current_app.extensions['migrate'].db.get_engine().url).replace(
+        '%', '%%'))
 target_metadata = current_app.extensions['migrate'].db.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -50,7 +45,9 @@ def run_migrations_offline():
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(url=url)
+    context.configure(
+        url=url, target_metadata=target_metadata, literal_binds=True
+    )
 
     with context.begin_transaction():
         context.run_migrations()
@@ -74,24 +71,19 @@ def run_migrations_online():
                 directives[:] = []
                 logger.info('No changes in schema detected.')
 
-    engine = engine_from_config(config.get_section(config.config_ini_section),
-                                prefix='sqlalchemy.',
-                                poolclass=pool.NullPool)
+    connectable = current_app.extensions['migrate'].db.get_engine()
 
-    connection = engine.connect()
-    context.configure(connection=connection,
-                      target_metadata=target_metadata,
-                      process_revision_directives=process_revision_directives,
-                      **current_app.extensions['migrate'].configure_args)
-    
-    try:
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives,
+            **current_app.extensions['migrate'].configure_args
+        )
+
         with context.begin_transaction():
             context.run_migrations()
-    except Exception as exception:
-        logger.error(exception)
-        raise exception
-    finally:
-        connection.close()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

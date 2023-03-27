@@ -1,37 +1,16 @@
-"""
-Sets databases to be created.
-"""
-import uuid
-from app import db
-
+from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
-
-class SurrogatePK:
-    """
-    A mixin that adds a surrogate UUID primary key column 'id' to any
-    declarative-mapped class.
-    """
-
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-
+from datetime import datetime
+from sqlalchemy.ext.hybrid import hybrid_property
 from app import db, login
 from app.database import Model, SurrogatePK, CreatedTimestampMixin, JSONB
 from flask import current_app
 from flask_login import UserMixin
-from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import datetime
-from time import time
-import jwt
-from hashlib import md5
-from werkzeug.security import generate_password_hash, check_password_hash
-
-
-# to test - comment out lines 46 - 99 in __init__.py
+import uuid
 
 @login.user_loader
 def load_user(id):
     return User.query.get(str(id))
-
 
 class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     __tablename__ = "user"
@@ -39,17 +18,15 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     def __init__(self, **kwargs):
         db.Model.__init__(self, **kwargs)
 
-    # Column "id" is created automatically by SurrogatePK() from database.py
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     firstname = db.Column(db.String(64))
     lastname = db.Column(db.String(64))
     institution = db.Column(db.String(64))
-    username = db.Column(db.String(64), index=True, unique=True)  # why do we need index?
-    email = db.Column(db.String(320), index=True, unique=True)  # why do we need index?
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(320), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # One-to-many bidirectional relationship
-    # images = db.relationship('Image', back_populates='user')
     series = db.relationship('Series', back_populates='user')
     reports = db.relationship('Report', back_populates='user')
 
@@ -82,25 +59,20 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
         return User.query.get(id)
 
 
-class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisition"
+
+
+
+class Image(Model, SurrogatePK, CreatedTimestampMixin):
     __tablename__ = "image"
 
-    def __init__(self, **kwargs):
-        db.Model.__init__(self, **kwargs)
-
-    # Column "id" is created automatically by SurrogatePK() from database.py
-    uid = db.Column(db.String(100))  # DICOM SOP Instance UID (0008,0018)
+    uid = db.Column(db.String(100))
     filename = db.Column(db.String(200))
-    header = db.Column(JSONB)  # DICOM Header
+    header = db.Column(JSONB)
     series_id = db.Column(db.ForeignKey('series.id'))
 
-    # Many-to-one relationships
-    # user = db.relationship('User', back_populates='images')
     series = db.relationship('Series', back_populates='image')
-    # studies = db.relationship('Study', back_populates='image')
 
-    def __repr__(self):
-        return '<Acquisition {}>'.format(self.description)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     @hybrid_property
     def filesystem_key(self):
@@ -113,8 +85,7 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     def __init__(self, **kwargs):
         db.Model.__init__(self, **kwargs)
 
-    # Column "id" is created automatically by SurrogatePK() from database.py
-    uid = db.Column(db.String(64))  # DICOM Series UID (0020,000E)
+    uid = db.Column(UUID(as_uuid=True), default=uuid.uuid4)  # DICOM Series UID (0020,000E)
     description = db.Column(db.String(100))  # DICOM Series Description (0008,103E)
     series_datetime = db.Column(db.DateTime)  # DICOM Series Date and Series Time
     has_report = db.Column(db.Boolean, default=False)
@@ -127,7 +98,6 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     device_id = db.Column(db.ForeignKey('device.id'))
     institution_id = db.Column(db.ForeignKey('institution.id'))
     study_id = db.Column(db.ForeignKey('study.id'))
-
 
     # One-to-many relationships # Parent to
     image = db.relationship('Image', back_populates='series')
@@ -143,7 +113,6 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     def filesystem_key(self):
         return self.id.hex
 
-
 class Study(Model, SurrogatePK, CreatedTimestampMixin):
     __tablename__ = "study"
 
@@ -151,11 +120,12 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     uid = db.Column(db.String(64))  # DICOM Study UID (0020,000D)
     description = db.Column(db.String(100))  # DICOM Study Description (0008,1030)
 
     # One-to-many relationships
-    series = db.relationship('Series', back_populates='studies')
+    series = db.relationship('Series', back_populates='study')
 
 
 class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTask"
@@ -165,6 +135,7 @@ class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTas
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(100), unique=True)  # TODO: Change from reading hazenlib modules to classes
 
     # One-to-many relationship
@@ -178,11 +149,12 @@ class Institution(Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(100), unique=True)  # DICOM Institution (0008,0080)
     # series_id = db.Column(db.ForeignKey('series.id'))
 
     # One-to-many relationship
-    series = db.relationship('Series', back_populates='institutions')
+    series = db.relationship('Series', back_populates='institution')
 
 
 class Device(Model, SurrogatePK, CreatedTimestampMixin):
@@ -190,12 +162,13 @@ class Device(Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     manufacturer = db.Column(db.String(100))  # Device Manufacturer (0008,0070)
     station_name = db.Column(db.String(100))  # Station Name (0008, 1010)
     device_model = db.Column(db.String(100))  # Device Model (0008,1090)
 
     # One-to-many relationship
-    series = db.relationship('Series', back_populates='devices')
+    series = db.relationship('Series', back_populates='device')
 
 
 class Report(Model, SurrogatePK, CreatedTimestampMixin):
@@ -205,14 +178,14 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     hazen_version = db.Column(db.String(10))  # Hazenlib version
     data = db.Column(JSONB)  # Results
 
     user_id = db.Column(db.ForeignKey('user.id'))
     series_id = db.Column(db.ForeignKey('series.id'))
-    task_name = db.Column(db.ForeignKey('task.name'))
+    task_id = db.Column(db.ForeignKey('task.id'))
 
     # Many-to-one relationships
     user = db.relationship('User', back_populates='reports')
     series = db.relationship('Series', back_populates='reports')
-    task = db.relationship('Task', back_populates='reports')

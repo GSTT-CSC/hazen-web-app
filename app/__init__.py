@@ -34,6 +34,9 @@ def create_app(config_class=Config):
     dropzone.init_app(app)
     heroku.init_app(app)
 
+    # Set SQLALCHEMY_DATABASE_URI to PostgreSQL URL string
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@localhost:5432/{os.environ['POSTGRES_DB']}"
+
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
