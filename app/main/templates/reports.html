@@ -56,10 +56,9 @@
                         <td>{{ report.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                         <td>{{ report.user.username }}</td>
                         <td>{{ report.data }}</td>
-                        <td>{% for img in report.data.reports %}
-                            <img src="{{ img }}" />
+                        <td>{% for image_data in report.data['image_data'] %}
+                            <img src="data:image/png;base64,{{ image_data }}" />
                             {% endfor %}
-                            <img src="/hazen_reports/Ghosting/Ghosting_ghosting_SAG_1nsa_30_1.png">
                         </td>
                         <td>
                             <a href="{{ url_for('main.delete', report_id=report.id) }}">
@@ -72,5 +71,6 @@
         </table>
     </div>
 </form>
+
 
 {% endblock %}
