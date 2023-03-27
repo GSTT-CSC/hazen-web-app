@@ -10,6 +10,22 @@ The hazen-web-app **requires** manual installation of the following software:
 - RabbitMQ: message broker used in conjunction with Celery to communicate between the app and web browser
 - hazen-web-app (i.e.: this repo) - requires Python3.8 or above and `pip`
 
+
+## Setup using docker compose
+To start the application:
+1. Create .env file and read variables. Can reuse default.env for testing or recommend creating your own in production.
+```
+mv default.env .env
+source .env
+```
+
+2. Start web app
+```
+docker compose up -d --build
+```
+
+The hazen web app is then accessible on port 8080
+
 ## Setup on MacOS
 
 ### Postgres & Postico
@@ -21,7 +37,8 @@ In Terminal:
 brew update
 brew install postgresql
 ```
-*Confirm PostgreSQL is running before moving onto the next step.*
+*Confirm PostgreSQL is running before moving onto the next step.* You can do this by opening the Postgres.app, 
+or if you prefer to use Terminal you can start it following the instructions [here](https://sourabhbajaj.com/mac-setup/PostgreSQL/).
 
 Download [Postico](https://eggerapps.at/postico/).
 - Create a **New Favourite** with:
