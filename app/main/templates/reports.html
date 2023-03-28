@@ -56,8 +56,11 @@
                         <td>{{ report.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                         <td>{{ report.user.username }}</td>
                         <td>{{ report.data }}</td>
-                        <td>{% for image_data in report.data['image_data'] %}
-                            <img src="data:image/png;base64,{{ image_data }}" />
+                        <td>{% for img_path in report.data.reports %}
+                            {% set img_dir = img_path.split('/')[-2] %}
+                            {% set img_name = img_path.split('/')[-1] %}
+                            path: {{ img_path }}
+                                <img src="/static/{{ img_dir }}/{{ img_name }}" />
                             {% endfor %}
                         </td>
                         <td>

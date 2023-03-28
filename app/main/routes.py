@@ -384,8 +384,8 @@ def reports(series_id=None):
             series_id = request.args['series_id']
             # Identify reports made for that series_id
             reports = db.session.query(Report).filter_by(series_id=series_id).order_by(Report.created_at.desc())
-            report = Report.query.filter_by(id=report_id).first()
-            image_data = report.data['image_data']
+            # report = Report.query.filter_by(id=report_id).first()
+
             # Store information about this series in a dict that can be passed to the html
             series = Series.query.filter_by(id=series_id).first_or_404()
             series_dict = {
@@ -413,5 +413,5 @@ def reports(series_id=None):
             if reports_pages.has_prev else None
 
     return render_template('reports.html', title="Reports", series=series_dict,
-        reports=reports_pages.items, next_url=next_url, prev_url=prev_url, report=report, image_data=image_data)
+        reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
 
