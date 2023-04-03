@@ -2,6 +2,8 @@
 
 import importlib
 import inspect
+import os
+import shutil
 import sys
 from importlib.metadata import version
 
@@ -34,18 +36,6 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     else:
         result_dict = task.run()
 
-    # import ipdb;
-    # ipdb.set_trace()
-    # print("result_dict", result_dict)
-    # for key, value in result_dict.items():
-    #     # ignore reports section of the output
-    #     if key == "reports":
-    #         # import ipdb; ipdb.set_trace()
-    #         images = result_dict['reports']
-    #     else:
-    #         # reconstruct the measurement results
-    #         result = {key: value}
-
 
     # Update Celery task status
     self.update_state(state='SUCCESS')
@@ -57,6 +47,19 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
         task_name=task_name)  #  task_variable=task_variable
     # Save information to database
     report.save()
+
+    for img_path in report.data['reports']:
+        img_dir = os.path.basename(os.path.dirname(img_path))
+        img_name = os.path.basename(img_path)
+        src_path = os.path.join(current_app.root_path, '..', 'hazen_reports', img_path)
+        dest_path = os.path.join(current_app.root_path, 'static', img_dir, img_name)
+
+        # create directory if it doesn't exist
+        if not os.path.exists(os.path.dirname(dest_path)):
+            os.makedirs(os.path.dirname(dest_path))
+        # move file from src_path to dest_path
+        shutil.move(src_path, dest_path)
+
     
     # Update the has_report field of the corresponding Series
     series = Series.query.filter_by(id=series_id).first_or_404()
