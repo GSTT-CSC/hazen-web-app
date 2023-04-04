@@ -41,4 +41,5 @@ class Config:
         CELERY_BROKER_URL = os.environ.get('REDIS_URL')  # for Redis
         CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL')  # for Redis
 
+    from flask_sqlalchemy import SQLAlchemy
 

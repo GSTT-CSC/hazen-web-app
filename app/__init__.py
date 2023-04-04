@@ -20,7 +20,6 @@ from flask_dropzone import Dropzone
 from flask_heroku import Heroku
 from celery import Celery
 
-
 # Alias common variables
 db = SQLAlchemy()
 migrate = Migrate()
