@@ -12,73 +12,71 @@
     }
 </style>
 
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+<div class="row">
     <div class="col">
-    <h3 class="text-center pt-2">Upload new files</h3>
+        <h3 class="text-center pt-2">Upload new files</h3>
         </br>
-            <div class="row">
-                <!-- DropZone -->
-                {{ super() }}
-                {{ dropzone.load_css() }}
-                {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-                {{ dropzone.create(action=url_for('main.workbench'))}}
-                {{ dropzone.load_js() }}
-                {{ dropzone.config(reload='main.workbench', id='uploader') }}
-            </div>
+        <div class="row">
+            <!-- DropZone -->
+            {{ super() }}
+            {{ dropzone.load_css() }}
+            {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
+            {{ dropzone.create(action=url_for('main.workbench'))}}
+            {{ dropzone.load_js() }}
+            {{ dropzone.config(reload='main.workbench', id='uploader') }}
+        </div>
         </br>
-            <div class="text-center">
-                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-            </div>
+        <div class="text-center">
+            <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
+        </div>
         </br>
-            <div class="row">
-                <!-- File selection -->
-                {% if upload_form %}
-                    {{ wtf.render_form(upload_form) }}
-                {% endif %}
-            </div>
+        <div class="row">
+            <!-- File selection -->
+            {% if upload_form %}
+                {{ wtf.render_form(upload_form) }}
+            {% endif %}
+        </div>
         </br>
     </div>
 
-<form method="POST" action={{ url_for('main.workbench') }}>
-    <div class="col">
-        <!-- Task list Scrollspy -->
-        <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-              <h3 class="text-center pt-2">Select Task</h3>
-        {% for task, doc in batch_form.task_name.choices %}
-            <li>
-                <input type="radio" name="task_name" value={{task}}> {{task}}
-                <p>{{doc}}</p>
-            </li>
-        {% endfor %}
-            </ul>
-        </br>
-            <label for="task_variable">Slice width for SNR measurement (optional):</label>
+    <form method="POST" action={{ url_for('main.workbench') }}>
+        <div class="col">
+            <!-- Task list Scrollspy -->
+            <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
+                <h3 class="text-center pt-2">Select Task</h3>
+                <select class="form-select" id="task_name" name="task_name">
+                    {% for task_name, task_docstring in batch_form.task_name.choices %}
+                        <option value="{{ task_name }}" data-docstring="{{ task_docstring }}">{{ task_name }}</option>
+                    {% endfor %}
+                </select>
+                <div id="docstring_container" class="mt-2"></div>
+                </br>
+                <label for="task_variable">Slice width for SNR measurement (optional):</label>
                 <input type="string" name="task_variable"></p>
-            {{ batch_form.submit }}
+                {{ batch_form.submit }}
+            </div>
         </div>
     </div>
-</div>
 
-</br>
+    </br>
 
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-    <h3 class="text-center pt-2">Available files</h3></br>
-    {% for study in studies %}
-    <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="heading{{ loop.index }}">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study.uid }}</button>
-            </h2>
-        </div>
-        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead><tr>
-                            <th>Select</th>
-                            <th>Series Description</th>
-                            <th>Acquisition Date</th>
+    <div class="row">
+        <h3 class="text-center pt-2">Available files</h3></br>
+        {% for study in studies %}
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ loop.index }}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study.uid }}</button>
+                    </h2>
+                </div>
+                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead><tr>
+                                    <th>Select</th>
+                                    <th>Series Description</th>
+                                    <th>Acquisition Date</th>
                             <th>Uploaded Date</th>
                             <th>Uploaded by</th>
                             <!-- <th>Files</th> -->
@@ -137,5 +135,13 @@
         </ul>
     </nav>
 -->
-
+{% block app_js %}
+<script>
+document.getElementById("task_name").addEventListener("change", function () {
+    let selectedOption = this.options[this.selectedIndex];
+    let docstring = selectedOption.getAttribute("data-docstring");
+    document.getElementById("docstring_container").innerHTML = docstring;
+});
+</script>
+{% endblock %}
 {% endblock %}
