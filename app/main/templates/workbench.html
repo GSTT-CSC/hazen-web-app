@@ -44,11 +44,13 @@
         <!-- Task list Scrollspy -->
         <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
             <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
-                <h3 class="text-center pt-2">Select Task</h3>
-                {% for task, doc in batch_form.task_name.choices.items() %}
-                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
-                    <p>{{doc}}</p>
-                {% endfor %}
+              <h3 class="text-center pt-2">Select Task</h3>
+        {% for task, doc in batch_form.task_name.choices %}
+            <li>
+                <input type="radio" name="task_name" value={{task}}> {{task}}
+                <p>{{doc}}</p>
+            </li>
+        {% endfor %}
             </ul>
         </br>
             <label for="task_variable">Slice width for SNR measurement (optional):</label>

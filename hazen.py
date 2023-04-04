@@ -11,31 +11,56 @@ __version__ = '0.1.dev0'
 __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
 
 
+import os
+import inspect
+
+import os
+import inspect
+import ast
+
+
 def register_tasks_in_db():
     from hazenlib import tasks as hazen_tasks
-    # TODO: Change to read from hazenlib classes
     tasks = {
         f'{modname}': importlib.import_module(f'hazenlib.tasks.{modname}')
         for importer, modname, ispkg in pkgutil.iter_modules(hazen_tasks.__path__)
     }
-    # docs = {module.__doc__ for module in tasks.values()}
-    # print(docs)
+
+    def get_module_docstring(filepath):
+        with open(filepath, 'r') as f:
+            content = f.read()
+
+        parsed_module = ast.parse(content)
+        for node in parsed_module.body:
+            if isinstance(node, ast.Expr) and isinstance(node.value, ast.Str):
+                return inspect.cleandoc(node.value.s)
+        return ''
 
     with app.app_context():
         stored_tasks = Task.query.all()
 
         for stored_task in stored_tasks:
             if stored_task.name in tasks.keys():
+                module_file = os.path.join(os.path.dirname(hazen_tasks.__file__), f"{stored_task.name}.py")
+                docstring = get_module_docstring(module_file)
+
+                # Update the task's docstring
+                stored_task.docstring = docstring
+
+                # Commit the changes to the database
+                db.session.commit()
+
+                print(f"Updated task {stored_task.name} with docstring:\n{docstring}\n")
                 _ = tasks.pop(stored_task.name)
                 current_app.logger.info(f'{stored_task.name} already exists in db')
 
-        for module_name, module in tasks.items():
-            task = Task(name=module_name, docstring=module.__doc__)
-            task.save()
+        if tasks:
+            current_app.logger.warning(f"The following tasks were not found in the database: {', '.join(tasks.keys())}")
+
 
 app = create_app()
 app.secret_key = app.config['SECRET_KEY']
-worker = create_celery_app(app) # a Celery object
+worker = create_celery_app(app)  # a Celery object
 register_tasks_in_db()
 
 
