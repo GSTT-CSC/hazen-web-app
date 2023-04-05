@@ -7,6 +7,8 @@ from app.database import Model, SurrogatePK, CreatedTimestampMixin, JSONB
 from flask import current_app
 from flask_login import UserMixin
 import uuid
+from werkzeug.security import check_password_hash
+
 
 @login.user_loader
 def load_user(id):
@@ -101,17 +103,16 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
 
     # One-to-many relationships # Parent to
     image = db.relationship('Image', back_populates='series')
-    reports = db.relationship('Report', back_populates='series', lazy='dynamic')
+    reports = db.relationship('Report', back_populates='series')
+
 
     # Many-to-one relationship # Child of
     user = db.relationship('User', back_populates='series')
-    institutions = db.relationship('Institution', back_populates='series')
-    devices = db.relationship('Device', back_populates='series')
-    studies = db.relationship('Study', back_populates='series')
+    institution = db.relationship('Institution', back_populates='series')
+    device = db.relationship('Device', back_populates='series')
+    study = db.relationship('Study', back_populates='series')
 
-    @hybrid_property
-    def filesystem_key(self):
-        return self.id.hex
+
 
 class Study(Model, SurrogatePK, CreatedTimestampMixin):
     __tablename__ = "study"
@@ -128,7 +129,7 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     series = db.relationship('Series', back_populates='study')
 
 
-class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTask"
+class Task(Model, SurrogatePK, CreatedTimestampMixin):
     __tablename__ = "task"
 
     def __init__(self, **kwargs):
@@ -140,6 +141,7 @@ class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTas
 
     # One-to-many relationship
     reports = db.relationship('Report', back_populates='task')
+
 
 
 class Institution(Model, SurrogatePK, CreatedTimestampMixin):
@@ -189,3 +191,4 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
     # Many-to-one relationships
     user = db.relationship('User', back_populates='reports')
     series = db.relationship('Series', back_populates='reports')
+    task = db.relationship('Task', back_populates='reports')

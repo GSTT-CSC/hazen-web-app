@@ -2,10 +2,15 @@ from flask_wtf import FlaskForm
 from wtforms import MultipleFileField, SelectField, SelectMultipleField, RadioField, StringField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Length
 
+from wtforms import FileField
+from flask_wtf.file import FileRequired
+
+from flask_wtf.file import FileRequired, FileAllowed
 
 # Upload files
 class ImageUploadForm(FlaskForm):
     image_files = MultipleFileField()
+    folder_files = FileField("Choose Folder", render_kw={'webkitdirectory': True, 'multiple': True}, validators=[FileRequired()])
     submit = SubmitField('Upload')
 
 

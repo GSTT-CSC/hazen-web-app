@@ -53,11 +53,33 @@ def upload_file(file):
     return redirect(request.url)
 
 
+import zipfile
+import shutil
+
 def upload_folder(folder):
-    for subdir, dirs, files in os.walk(folder):
-        for file in files:
-            file_path = os.path.join(subdir, file)
-            ingest(file_path)
+    if folder and allowed_folder(folder.filename):
+        filename = secure_filename(folder.filename)
+        folder_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        os.makedirs(folder_path, exist_ok=True)
+        folder.save(os.path.join(folder_path, filename + ".zip"))
+
+        # Extract the uploaded zip file and remove it after extraction
+        with zipfile.ZipFile(os.path.join(folder_path, filename + ".zip"), "r") as zip_ref:
+            zip_ref.extractall(folder_path)
+        os.remove(os.path.join(folder_path, filename + ".zip"))
+
+        # Process the folder
+        for subdir, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(subdir, file)
+                ingest(file_path)
+        flash('Folder uploaded successfully.')
+    else:
+        flash('Invalid folder type.')
+    return redirect(request.url)
+
+def allowed_folder(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() == 'zip'
 
 
 
@@ -132,6 +154,9 @@ def ingest(file_path):
         series_folder = Series.query.filter_by(uid=series_uid).first().filesystem_key
         directory = os.path.join(current_app.config['UPLOADED_PATH'], series_folder)
         os.makedirs(directory, exist_ok=True)
+
+        # Commit all changes to the database
+        db.session.commit()
 
         return directory
 
@@ -266,16 +291,16 @@ def workbench():
                 current_app.logger.info(msg)
                 flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
 
-            # Upload file functionality
-            elif request.form['submit'] == 'Upload file':
-                # Uploaded by Choose File
-                for choose_file in request.files.getlist('image_files'):
-                    upload_file(choose_file)
 
+            # Upload files functionality
+            if request.form['submit'] == 'Upload':
+                # Uploaded by Choose Files
+                for file in request.files.getlist('image_files'):
+                    upload_file(file)
             # Upload folder functionality
-            elif request.form['submit'] == 'Upload folder':
+            elif request.form['submit'] == 'Upload Folder':
                 # Uploaded by Choose Folder
-                for choose_folder in request.files.getlist('folder'):
+                for choose_folder in request.files.getlist('folder_files'):
                     upload_folder(choose_folder)
 
         return redirect(url_for('main.workbench'))

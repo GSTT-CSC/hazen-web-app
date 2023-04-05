@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
-from flask_bootstrap import Bootstrap
+from flask_bootstrap import Bootstrap5
 from flask_moment import Moment
 from flask_dropzone import Dropzone
 from flask_heroku import Heroku
@@ -16,14 +16,16 @@ migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
 mail = Mail()
-bootstrap = Bootstrap()
+bootstrap = Bootstrap5()
 moment = Moment()
 dropzone = Dropzone()
 heroku = Heroku()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'your-secret-key'
     app.config.from_object(config_class)
+
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -35,7 +37,8 @@ def create_app(config_class=Config):
     heroku.init_app(app)
 
     # Set SQLALCHEMY_DATABASE_URI to PostgreSQL URL string
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@localhost:5432/{os.environ['POSTGRES_DB']}"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{os.environ['POSTGRES_USER']}@localhost:5432/{os.environ['POSTGRES_DB']}"
+
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
