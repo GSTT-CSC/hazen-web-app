@@ -266,7 +266,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
     celery_job_list = []
     from app.tasks import produce_report
     # Check which task is requested
-    if task_name.startswith('snr'):
+    if task_name == 'snr':
         if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
             flash("Incorrect number of image series selected for SNR measurement", 'info')
         else:
@@ -276,7 +276,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
                 # Identify selected series
                 series = Series.query.filter_by(id=series_id).first_or_404()
                 image_files.extend(locate_image_files(series.filesystem_key))
-            current_app.logger.info(f"Performing {task_name} task on {series_ids}")
+            current_app.logger.info(f"Performing {task_name} task on all images within series {series_ids}")
             celery_job = produce_report.delay(
                 user_id=user_id, series_id=series_ids[0], task_name=task_name,
                 image_files=image_files)
@@ -288,7 +288,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
             series = Series.query.filter_by(id=series_id).first_or_404()
             image_files = locate_image_files(series.filesystem_key)
             # Set off task processing as a Celery job
-            current_app.logger.info(f"Performing {task_name} task on {series.description}")
+            current_app.logger.info(f"Performing {task_name} task on {len(image_files)} images within the {series_id} series")
             celery_job = produce_report.delay(
                 user_id=user_id, series_id=series_id, task_name=task_name,
                 image_files=image_files)
