@@ -5,7 +5,7 @@ import importlib
 from flask import current_app
 
 from app import db, create_app, create_celery_app
-from app.models import User, Image, Series, Study, Device, Institution, Task, Report
+from app.models import User, Image, Series, Study, Device, Task, Report
 
 __version__ = '0.1.dev0'
 __author__ = "mohammad_haris.shuaib@kcl.ac.uk"
