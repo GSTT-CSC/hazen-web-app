@@ -247,6 +247,10 @@ def workbench():
 
     # Display available image Series, grouped by Study UID
     studies = db.session.query(Study).order_by(Study.created_at.desc())
+    # Collect device information about studies for display
+    study_device_list = [{"study": study,
+                        "device": study.series[0].devices
+                        } for study in studies]
 
     # Create Choose file form
     upload_form = ImageUploadForm()
@@ -297,7 +301,8 @@ def workbench():
 
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', studies=studies,
+    return render_template('workbench.html', title='Workbench',
+            study_device_list=study_device_list,
             upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
         )
     # , series=series, next_url=next_url, prev_url=prev_url

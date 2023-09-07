@@ -62,11 +62,11 @@
 
 <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
     <h3 class="text-center pt-2">Available files</h3></br>
-    {% for study in studies %}
+    {% for study_device in study_device_list %}
     <div class="accordion" id="accordionExample">
         <div class="accordion-item">
             <h2 class="accordion-header" id="heading{{ loop.index }}">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study.uid }}</button>
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study_device.device.institution}} , {{ study_device.device.manufacturer }}, {{ study_device.device.device_model }}</button>
             </h2>
         </div>
         <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
@@ -86,7 +86,7 @@
                         <tbody>
                             <!-- series is the db query result, essentially a list of series that are not archived -->
                             <!-- acquisition is an instance/row of the Series table -->
-                            {% for serie in study.series %}
+                            {% for serie in study_device.study.series %}
                                 <tr>
                                     <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
                                     <td>
