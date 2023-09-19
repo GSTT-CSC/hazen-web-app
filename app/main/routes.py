@@ -127,7 +127,8 @@ def ingest(file_path):
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
         if not study_exists:
-            new_study = Study(uid=study_uid, description=dcm.StudyDescription)
+            new_study = Study(uid=study_uid, description=dcm.StudyDescription,
+                              study_date=study_date, study_time=study_time)
             new_study.save()
         study_id = Study.query.filter_by(uid=study_uid).first().id
         #TODO remove in production
