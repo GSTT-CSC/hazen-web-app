@@ -93,7 +93,6 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     uid = db.Column(db.String(100))  # DICOM SOP Instance UID (0008,0018)
     filename = db.Column(db.String(200))
     accession_number = db.Column(db.String(100))  # DICOM Accession Number (0008,0050)
-    # header = db.Column(JSONB)  # DICOM Header
     series_id = db.Column(db.ForeignKey('series.id'))
 
     # Many-to-one relationships
@@ -153,8 +152,8 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     # Column "id" is created automatically by SurrogatePK() from database.py
     uid = db.Column(db.String(64))  # DICOM Study UID (0020,000D)
     description = db.Column(db.String(100))  # DICOM Study Description (0008,1030)
-    # study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
-    # study_time = db.Column(db.String(64))  # DICOM Study time (0008,0030)
+    study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
+    study_time = db.Column(db.String(64))  # DICOM Study time (0008,0030)
 
     # One-to-many relationships
     series = db.relationship('Series', back_populates='studies')
