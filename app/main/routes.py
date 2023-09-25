@@ -11,7 +11,7 @@ import pydicom.errors
 from app import db
 from app.main import bp
 from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
-from app.models import Image, Series, Study, Device, Institution, Task, Report
+from app.models import Image, Series, Study, Device, Task, Report
 
 hazenlib_version = version('hazen')
 
@@ -64,9 +64,9 @@ def ingest(file_path):
                                                 stop_before_pixels=True)
 
         # Parse the relevant fields into variables
+        image_uid = dcm.SOPInstanceUID
         series_uid = dcm.SeriesInstanceUID
         study_uid = dcm.StudyInstanceUID
-        image_uid = dcm.SOPInstanceUID
         description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
         filename = os.path.basename(file_path)
 
@@ -76,14 +76,59 @@ def ingest(file_path):
             current_app.logger.info('Image already exists in database')
             raise ImageExistsError(f"UID: {image_uid}")
 
+        # Collect relevant pieces of information from DICOM header
+        # 0020 Study date
+        study_date = dcm.StudyDate
+        # (0008,0020)	DA	Study Date	
+        # (0008,0021)	DA	Series Date	
+        # (0008,0022)	DA	Acquisition Date
+        # 0030 study time
+        study_time = dcm.StudyTime
+        # (0008,0030)	TM	Study Time	
+        # (0008,0031)	TM	Series Time	
+        # (0008,0032)	TM	Acquisition Time
+        institution = dcm.InstitutionName
+        # 0070 manufacturer
+        manufacturer = dcm.Manufacturer
+        # (0008,1090)	LO	Manufacturer's Model Name
+        model = dcm[0x00081090].value
+        station_name = dcm.StationName
+        # 0050 accession number
+        accession_number = dcm.AccessionNumber
+        # print({"institution": institution,
+        #        "manufacturer": manufacturer,
+        #        "model": model,
+        #        "study_date": study_date,
+        #        "study_time": study_time,
+        #        "station_name": station_name,
+        #        "accession_number": accession_number
+        #        })
+
         # Save the image data into the corresponding tables:
+        
         # 0. Device:
-        #TODO parse device and manufacturer information from DICOM to db
+        device_exists = db.session.query(db.exists(
+            ).where(Device.institution == institution
+            ).where(Device.manufacturer == manufacturer
+            ).where(Device.device_model == model
+            ).where(Device.station_name == station_name)).scalar()
+        if not device_exists:
+            new_device = Device(
+                institution=institution, manufacturer=manufacturer,
+                device_model=model, station_name=station_name)
+            new_device.save()
+        device_id = Device.query.where(Device.institution == institution
+            ).where(Device.manufacturer == manufacturer
+            ).where(Device.device_model == model
+            ).where(Device.station_name == station_name).first().id
+        #TODO remove in production
+        print("device id:", device_id)
         
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
         if not study_exists:
-            new_study = Study(uid=study_uid, description=dcm.StudyDescription)
+            new_study = Study(uid=study_uid, description=dcm.StudyDescription,
+                              study_date=study_date, study_time=study_time)
             new_study.save()
         study_id = Study.query.filter_by(uid=study_uid).first().id
         #TODO remove in production
@@ -94,14 +139,19 @@ def ingest(file_path):
         if not series_exists:
             series_time = dcm.SeriesTime.split('.')[0]
             series_datetime = datetime.strptime("-".join([dcm.SeriesDate,series_time]), '%Y%m%d-%H%M%S')
-            new_series = Series(uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(), study_id=study_id, series_datetime=series_datetime)
+
+            new_series = Series(
+                uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(), device_id=device_id,
+                study_id=study_id, series_datetime=series_datetime)
             new_series.save()
         series_id = Series.query.filter_by(uid=series_uid).first().id
         #TODO remove in production
         print("series id:", series_id)
 
         # 3. Image:
-        new_image = Image(uid=image_uid, series_id=series_id, filename=filename, header=dcm.to_json_dict())
+        new_image = Image(
+            uid=image_uid, series_id=series_id, filename=filename,
+            accession_number=accession_number)
         new_image.save()
         #TODO remove in production
         print("new image id:", new_image.id)
@@ -198,6 +248,10 @@ def workbench():
 
     # Display available image Series, grouped by Study UID
     studies = db.session.query(Study).order_by(Study.created_at.desc())
+    # Collect device information about studies for display
+    study_device_list = [{"study": study,
+                        "device": study.series[0].devices
+                        } for study in studies]
 
     # Create Choose file form
     upload_form = ImageUploadForm()
@@ -248,7 +302,8 @@ def workbench():
 
         return redirect(url_for('main.workbench'))
 
-    return render_template('workbench.html', title='Workbench', studies=studies,
+    return render_template('workbench.html', title='Workbench',
+            study_device_list=study_device_list,
             upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
         )
     # , series=series, next_url=next_url, prev_url=prev_url
@@ -266,7 +321,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
     celery_job_list = []
     from app.tasks import produce_report
     # Check which task is requested
-    if task_name.startswith('snr'):
+    if task_name == 'snr':
         if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
             flash("Incorrect number of image series selected for SNR measurement", 'info')
         else:
@@ -276,7 +331,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
                 # Identify selected series
                 series = Series.query.filter_by(id=series_id).first_or_404()
                 image_files.extend(locate_image_files(series.filesystem_key))
-            current_app.logger.info(f"Performing {task_name} task on {series_ids}")
+            current_app.logger.info(f"Performing {task_name} task on all images within series {series_ids}")
             celery_job = produce_report.delay(
                 user_id=user_id, series_id=series_ids[0], task_name=task_name,
                 image_files=image_files)
@@ -288,7 +343,7 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
             series = Series.query.filter_by(id=series_id).first_or_404()
             image_files = locate_image_files(series.filesystem_key)
             # Set off task processing as a Celery job
-            current_app.logger.info(f"Performing {task_name} task on {series.description}")
+            current_app.logger.info(f"Performing {task_name} task on {len(image_files)} images within the {series_id} series")
             celery_job = produce_report.delay(
                 user_id=user_id, series_id=series_id, task_name=task_name,
                 image_files=image_files)

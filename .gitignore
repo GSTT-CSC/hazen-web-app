@@ -135,5 +135,6 @@ dmypy.json
 
 # MacOS
 **/.DS_Store
+.vscode/
 
 /hazen-data/
