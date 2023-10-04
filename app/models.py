@@ -153,8 +153,7 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     # Column "id" is created automatically by SurrogatePK() from database.py
     uid = db.Column(db.String(64))  # DICOM Study UID (0020,000D)
     description = db.Column(db.String(100))  # DICOM Study Description (0008,1030)
-    # study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
-    # study_time = db.Column(db.String(64))  # DICOM Study time (0008,0030)
+    study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
 
     # One-to-many relationships
     series = db.relationship('Series', back_populates='studies')
@@ -195,3 +194,6 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
     series = db.relationship('Series', back_populates='reports')
     task = db.relationship('Task', back_populates='reports')
 
+    @hybrid_property
+    def filesystem_key(self):
+        return self.id.hex

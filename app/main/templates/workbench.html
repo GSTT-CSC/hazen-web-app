@@ -98,7 +98,7 @@
                                     <!-- <td>num files</td> -->
                                     <td>
                                         {% if serie.has_report %}
-                                            <a href="{{ url_for('main.reports', series_id=serie.id) }}">report</a>
+                                            <a href="{{ url_for('main.series_results', series_id=serie.id) }}">result</a>
                                         {% else %}
                                             None
                                         {% endif %}

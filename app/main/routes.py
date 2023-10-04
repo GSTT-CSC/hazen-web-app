@@ -3,7 +3,8 @@ import shutil
 from datetime import datetime
 from importlib.metadata import version
 
-from flask import current_app, render_template, redirect, url_for, request, session, flash
+from flask import current_app, render_template, request, redirect
+from flask import send_from_directory, url_for, session, flash
 from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 import pydicom.errors
@@ -127,7 +128,9 @@ def ingest(file_path):
         # 1. Study:
         study_exists = db.session.query(db.exists().where(Study.uid == study_uid)).scalar()
         if not study_exists:
-            new_study = Study(uid=study_uid, description=dcm.StudyDescription)
+            new_study = Study(uid=study_uid,
+                              description=dcm.StudyDescription,
+                              study_date=study_date)
             new_study.save()
         study_id = Study.query.filter_by(uid=study_uid).first().id
         #TODO remove in production
@@ -308,11 +311,15 @@ def workbench():
     # , series=series, next_url=next_url, prev_url=prev_url
 
 
-def locate_image_files(filesystem_key):
+def locate_image_files(filesystem_key, filename=False):
     # Select files in series folder
     folder = os.path.join(current_app.config['UPLOADED_PATH'],
                                     filesystem_key)
-    image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+    if filename == True:
+        image_files = os.listdir(folder)
+    else:
+        image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
+    
     return image_files
 
 
@@ -406,20 +413,56 @@ def task_selection(series_id):
 # Select task to be run on (image) series
 @bp.route('/result/', methods=['GET', 'POST'])
 @login_required
-def result():
-    # Retrieve the Task and Series that were selected to create the report
-    task_name = session['task_name']
-    series_id = session['series_id']
-    series = Series.query.filter_by(id=series_id).first_or_404()
-    series_files = Image.query.filter_by(series_id=series.id).count()
-
-    # Retrieve the report that was created
+def series_results():
     user_id = current_user.id
-    report = Report.query.filter_by(
-        user_id=user_id, series_id=series_id, task_name=task_name
-        ).first_or_404()
-    return render_template('result.html', title='Result', results=report.data,
-                    task=task_name, series=series, series_files=series_files)
+    # If coming from the Workbench with a series_id specified,
+    # then display reports made for that series_id - RESULT
+    if 'series_id' in request.args.keys():
+        # Get series_id from URL
+        series_id = request.args['series_id']
+        # Store information about this series in a dict that can be passed to the html
+        series = Series.query.filter_by(id=series_id).first_or_404()
+        series_dict = {
+            'description': series.description,
+            'series_datetime': series.series_datetime,
+            'created_at': series.created_at,
+            'series_files': Image.query.filter_by(series_id=series_id).count(),
+            'has_report': series.has_report
+        }
+
+        # Identify reports made for that series_id
+        reports = db.session.query(Report).filter_by(
+                        series_id=series_id).order_by(Report.created_at.desc())
+        #, user_id=user_id
+        # add user restriction later
+
+        # if len(reports.all()) < 1:
+        #     print("No reports available for this user")
+        # else:
+
+        # Group results by task_name --> dict { task: [results] }
+        results_dict = {}
+        tasks = [report.task_name for report in reports]
+        for task in tasks:
+            task_result = Report.query.filter_by( #user_id=user_id,
+                                    series_id=series_id, task_name=task
+                                    ).first_or_404()
+            # Find report images for series + task
+            # directory = os.path.join(current_app.config['UPLOADED_PATH'],
+            #                             )
+            image_files = locate_image_files(task_result.filesystem_key, 
+                                                filename=True)
+            # Store values in dict to be displayed
+            results_dict[task] = {
+                "measurement": task_result.data,
+                "created": task_result.created_at,
+                "directory": task_result.filesystem_key,
+                "image_files": image_files,
+                "width": 100 / len(image_files) -1
+            }
+
+    return render_template('result.html', title='Result',
+                series=series_dict, results=results_dict)
 
 
 # Reports dashboard
@@ -427,41 +470,19 @@ def result():
 #TODO: Trend monitoring dashboards
 @bp.route('/reports/', methods=['GET', 'POST'])
 @login_required
-def reports(series_id=None):
-    series_dict = {}
+def reports():
     # Display existing reports
-    if request.method == 'GET':
-        # If coming from the Workbench with a series_id specified,
-        # then display reports made for that series_id
-        if 'series_id' in request.args.keys():
-            # Get series_id from URL
-            series_id = request.args['series_id']
-            # Identify reports made for that series_id
-            reports = db.session.query(Report).filter_by(series_id=series_id).order_by(Report.created_at.desc())
-            # Store information about this series in a dict that can be passed to the html
-            series = Series.query.filter_by(id=series_id).first_or_404()
-            series_dict = {
-                'filtered': True,
-                'description': series.description,
-                'series_datetime': series.series_datetime,
-                'created_at': series.created_at,
-                'series_files': Image.query.filter_by(series_id=series_id).count()
-            }
+    reports = db.session.query(Report).order_by(Report.created_at.desc())
 
-        # Otherwise display all reports
-        else:
-            reports = db.session.query(Report).order_by(Report.created_at.desc())
-            series_dict['filtered'] = False
+    # Display reports in a table
+    page = request.args.get('page', 1, type=int)
+    reports_pages = reports.paginate(
+    page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
+    next_url = url_for('main.reports', page=reports_pages.next_num) \
+        if reports_pages.has_next else None
+    prev_url = url_for('main.reports', page=reports_pages.prev_num) \
+        if reports_pages.has_prev else None
 
-        # Display reports in a table
-        page = request.args.get('page', 1, type=int)
-        reports_pages = reports.paginate(
-        page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-        next_url = url_for('main.reports', page=reports_pages.next_num) \
-            if reports_pages.has_next else None
-        prev_url = url_for('main.reports', page=reports_pages.prev_num) \
-            if reports_pages.has_prev else None
-
-    return render_template('reports.html', title="Reports", series=series_dict,
+    return render_template('reports.html', title="Reports",
         reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
 
