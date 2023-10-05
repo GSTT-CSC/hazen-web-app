@@ -93,7 +93,6 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     uid = db.Column(db.String(100))  # DICOM SOP Instance UID (0008,0018)
     filename = db.Column(db.String(200))
     accession_number = db.Column(db.String(100))  # DICOM Accession Number (0008,0050)
-    # header = db.Column(JSONB)  # DICOM Header
     series_id = db.Column(db.ForeignKey('series.id'))
 
     # Many-to-one relationships
