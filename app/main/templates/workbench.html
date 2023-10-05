@@ -15,34 +15,33 @@
 
 <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
     <div class="col">
-    <h3 class="text-center pt-2">Upload new files</h3>
-        </br>
-            <div class="row">
-                <!-- DropZone -->
-                {{ super() }}
-                {{ dropzone.load_css() }}
-                {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-                {{ dropzone.create(action=url_for('main.workbench'))}}
-                {{ dropzone.load_js() }}
-                {{ dropzone.config(reload='main.workbench', id='uploader') }}
-            </div>
-        </br>
-            <div class="text-center">
-                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-            </div>
-        </br>
-            <div class="row">
-                <!-- File selection -->
-                {% if upload_form %}
-                    {{ wtf.render_form(upload_form) }}
-                {% endif %}
-            </div>
-        </br>
+    <h3 class="text-center pt-2">Upload new files</h3></br>
+        <div class="row">
+            <!-- DropZone -->
+            {{ super() }}
+            {{ dropzone.load_css() }}
+            {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
+            {{ dropzone.create(action=url_for('main.workbench'))}}
+            {{ dropzone.load_js() }}
+            {{ dropzone.config(reload='main.workbench', id='uploader') }}
+        </div>
+    </br>
+        <div class="text-center">
+            <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
+        </div>
+    </br>
+        <div class="row">
+            <!-- File selection -->
+            {% if upload_form %}
+                {{ wtf.render_form(upload_form) }}
+            {% endif %}
+        </div>
+    </br>
     </div>
 
 <form method="POST" action={{ url_for('main.workbench') }}>
     <div class="col">
-        <!-- Task list Scrollspy -->
+        <!-- Task list Scrollspy TODO-->
         <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
             <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
                 <h3 class="text-center pt-2">Select task</h3>
@@ -50,9 +49,9 @@
                     <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
                 {% endfor %}
             </ul>
-        </br>
-            <label for="task_variable">Slice width for SNR measurement (optional):</label>
-                <input type="string" name="task_variable"></p>
+            </br>
+            <label for="task_variable">Slice width for SNR measurement (optional):</label><input type="string" name="task_variable"/>
+            </br>
             {{ batch_form.submit }}
         </div>
     </div>
@@ -75,9 +74,9 @@
                     <table class="table table-striped">
                         <thead><tr>
                             <th>Select</th>
-                            <th>Series Description</th>
-                            <th>Acquisition Date</th>
-                            <th>Uploaded Date</th>
+                            <th>Series description</th>
+                            <th>Acquisition date</th>
+                            <th>Uploaded date</th>
                             <th>Uploaded by</th>
                             <!-- <th>Files</th> -->
                             <th>Reports</th>

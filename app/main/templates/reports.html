@@ -11,11 +11,9 @@
     </div>
 
 <form method="POST" action="{{ url_for('main.reports') }}">
-    <h3 class="text-center pt-2">Reports</h3>
     <div class="table-responsive">
         <table class="table table-striped">
             <thead><tr>
-                <!-- <th>Select</th> -->
                 <th>Series description</th>
                 <th>Measurement performed</th>
                 <th>Measurement date</th>
@@ -46,5 +44,22 @@
         </table>
     </div>
 </form>
+<!--
+    <nav aria-label="...">
+        <ul class="pagination justify-content-center">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
+                    <span aria-hidden="true">&larr;</span> Newer results
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ next_url or '#' }}">
+                    Older results <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+-->
+
 
 {% endblock %}
