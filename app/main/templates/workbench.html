@@ -89,7 +89,7 @@
                                 <tr>
                                     <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
                                     <td>
-                                        <a href="{{ url_for('main.task_selection', series_id=serie.id) }}">{{ serie.description }}</a>
+                                        <a href="{{ url_for('main.series_view', series_id=serie.id) }}">{{ serie.description }}</a>
                                     </td>
                                     <td>{{ serie.series_datetime }}</td>
                                     <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
@@ -97,7 +97,7 @@
                                     <!-- <td>num files</td> -->
                                     <td>
                                         {% if serie.has_report %}
-                                            <a href="{{ url_for('main.series_results', series_id=serie.id) }}">result</a>
+                                            <a href="{{ url_for('main.series_view', series_id=serie.id) }}">result</a>
                                         {% else %}
                                             None
                                         {% endif %}

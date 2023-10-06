@@ -26,7 +26,7 @@
                     <tr>
                         <!-- <td><input type="checkbox" name="many_series" value={{report.id}}></td> -->
                         <td>
-                            <a href="{{ url_for('main.task_selection', series_id=report.series.id) }}">
+                            <a href="{{ url_for('main.series_view', series_id=report.series.id) }}">
                             {{ report.series.description }}</a>
                         </td>
                         <td>{{report.task.name}}</td>
