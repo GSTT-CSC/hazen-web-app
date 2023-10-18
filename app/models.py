@@ -118,6 +118,7 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     uid = db.Column(db.String(64))  # DICOM Series UID (0020,000E)
     description = db.Column(db.String(100))  # DICOM Series Description (0008,103E)
     series_datetime = db.Column(db.DateTime)  # DICOM Series Date and Series Time
+    # These 2 make no sense to store, report can be looked up, archival doesn't help
     has_report = db.Column(db.Boolean, default=False)
     archived = db.Column(db.Boolean, default=False)
 

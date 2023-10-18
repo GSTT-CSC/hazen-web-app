@@ -17,7 +17,8 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 @worker.task(bind=True)
-def produce_report(self, user_id, series_id, task_name, image_files, slice_width=None):
+def produce_report(self, user_id, series_id, task_name, image_files,
+                  **kwargs):
     logger.info("produce report")
     # import Hazen functionality
     task_module = importlib.import_module(f"hazenlib.tasks.{task_name}")
@@ -29,7 +30,7 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
     # Pass image file path and variables to Hazenlib task
     try:
         task = getattr(task_module, task_name.capitalize())(
-            input_data=image_files, report=True)  # , report_dir=report_dir
+            input_data=image_files, report=True, **kwargs)
     except:
         class_list = [cls.__name__ for _, cls in inspect.getmembers(
             sys.modules[task_module.__name__],
@@ -37,19 +38,15 @@ def produce_report(self, user_id, series_id, task_name, image_files, slice_width
             )]
         if len(class_list) == 1:
             task = getattr(task_module, class_list[0])(
-            input_data=image_files, report=True)  # , report_dir=report_dir
+            input_data=image_files, report=True, **kwargs)
             logger.info(task)
         else:
             raise Exception(
                 f'Task {task_module} has multiple class definitions: {class_list}')
 
     # Perform task and generate result
-    if task_name == 'snr':
-        logger.info(f"running SNR task")
-        result_dict = task.run(slice_width)
-    else:
-        logger.info(f"running task: {task}")
-        result_dict = task.run()
+    logger.info(f"running task: {task}")
+    result_dict = task.run()
 
     logger.info(result_dict)
     # measurement = json.dumps(result_dict['measurement'])

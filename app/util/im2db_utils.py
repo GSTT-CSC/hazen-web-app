@@ -111,7 +111,8 @@ def ingest_image(file_path):
                                     ), '%Y%m%d-%H%M%S')
 
             new_series = Series(
-                uid=series_uid, description=dcm.SeriesDescription, user_id=current_user.get_id(), device_id=device_id,
+                uid=series_uid, description=dcm.SeriesDescription,
+                user_id=current_user.get_id(), device_id=device_id,
                 study_id=study_id, series_datetime=series_datetime)
             new_series.save()
             series_id = new_series.id
