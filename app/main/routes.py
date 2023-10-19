@@ -4,13 +4,12 @@ from datetime import datetime
 from importlib.metadata import version
 
 from flask import current_app, render_template, request, redirect
-from flask import send_from_directory, url_for, session, flash
+from flask import url_for, session, flash
 from flask_login import current_user, login_required
-from werkzeug.utils import secure_filename
-import pydicom.errors
 
 from app import db
 from app.main import bp
+# make the blueprint independent of the application so that it is more portable
 from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
 from app.models import Image, Series, Study, Device, Task, Report
 from app.util.im2db_utils import upload_file, locate_image_files
@@ -55,25 +54,25 @@ def delete(series_id=None, report_id=None):
         series = Series.query.filter_by(id=series_id).first_or_404()
         # Check whether reports were made for that series_id
         if series.has_report:
-            # If series already has reports, archive series but don't delete
+            # If series already has reports, mark series as archived but don't delete
             series.update(archived=True)
             flash(f"Series {series.description} was archived as it already has reports.", 'info')
         else:
             # If there are no reports associated, then delete all files
-            # from filesystem
             series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
             try:
+                # from database
+                images = Image.query.filter_by(series_id=series_id).all()
+                for image in images:
+                    image.delete()
+                # from filesystem
                 shutil.rmtree(series_folder)
             except Exception as e:
                 flash(f"Could not find files under this series_id folder")
                 print(e)
                 raise e
-            # from database
-            images = Image.query.filter_by(series_id=series_id).all()
-            for image in images:
-                image.delete()
             # Check whether study has other series, delete if not
-            additional_series = Study.query.filter_by(id=series.study_id).count()
+            additional_series = Series.query.filter_by(study_id=series.study_id).count()
             if additional_series == 1:  # study only had this series
                 study = Study.query.filter_by(id=series.study_id).first_or_404()
                 study.delete()
@@ -109,7 +108,7 @@ def delete(series_id=None, report_id=None):
 @bp.route('/workbench/', methods=['GET', 'POST'])
 @login_required
 def workbench():
-    # Save current user's ID to Session
+    # Save current user's ID to browser session
     session['current_user_id'] = current_user.id
 
     # Display available image Series, grouped by Study UID
@@ -131,8 +130,9 @@ def workbench():
         if 'file' in request.files.keys():
             # Uploaded by DropZone
             dropzone_file = request.files.get('file')
-            if dropzone_file.filename.split(".")[-1].lower() not in current_app.config['ALLOWED_EXTENSIONS']:
-                return 'incorrect file type', 400
+            # Most files in example dataset DO NOT HAVE an extension, can't check
+            # if dropzone_file.filename.split(".")[-1].lower() not in current_app.config['ALLOWED_EXTENSIONS']:
+            #     return 'incorrect file type', 400
             upload_file(dropzone_file)
 
         elif 'submit' in request.form.keys():
@@ -301,11 +301,6 @@ def series_view(series_id):
         session['series_id'] = series_id
 
         return redirect(url_for('main.series_view', series_id=series_id))
-
-
-    return render_template('result.html', title='Result',
-                form=form,
-                series=series_dict, results=results_dict)
 
 
 # Reports dashboard
