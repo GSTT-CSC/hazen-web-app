@@ -66,7 +66,10 @@ def delete(series_id=None, report_id=None):
                 for image in images:
                     image.delete()
                 # from filesystem
-                shutil.rmtree(series_folder)
+                try:
+                    shutil.rmtree(series_folder)
+                except FileNotFoundError:
+                    flash(f"No files under this series_id folder")
             except Exception as e:
                 flash(f"Could not find files under this series_id folder")
                 print(e)
