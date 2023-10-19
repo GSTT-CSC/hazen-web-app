@@ -1,7 +1,6 @@
 """Main script to set up the web app
 
 """
-# Import necessary packages, modules and scripts
 import os
 import logging
 from logging.handlers import SMTPHandler
@@ -21,7 +20,6 @@ from flask_heroku import Heroku
 from celery import Celery
 
 
-# Alias common variables
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
@@ -35,8 +33,8 @@ heroku = Heroku()
 
 # Set up a Flask app
 def create_app(config_class=Config):
+    # Create a Flask app with specified config
     app = Flask(__name__)
-    # with information specified in the config.py
     app.config.from_object(config_class)
     # connect to the database
     db.init_app(app)
@@ -50,18 +48,23 @@ def create_app(config_class=Config):
     dropzone.init_app(app)
     heroku.init_app(app)
 
-    # Add project-specific functionality
-    # Main page - Dashboard
-    from app.main import bp as main_bp
-    app.register_blueprint(main_bp)
-    # Upload directory to hold files
-    os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
-
-    from app.errors import bp as errors_bp
-    app.register_blueprint(errors_bp)
-    # Authentication pages to login, logout, change password
+    # register Authentication pages to app
+    # register, login, logout, change password, edit profile
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    # register Error handling pages to app
+    # internal_error, not_found_error
+    from app.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
+
+    # register Main pages to app
+    # workbench, series_view, reports
+    from app.main import bp as main_bp
+    app.register_blueprint(main_bp)
+
+    # Create directory to hold uploaded files
+    os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
 
     # Actions in production mode
     if not app.debug:
