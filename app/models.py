@@ -100,9 +100,6 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     series = db.relationship('Series', back_populates='image')
     # studies = db.relationship('Study', back_populates='image')
 
-    def __repr__(self):
-        return '<Acquisition {}>'.format(self.description)
-
     @hybrid_property
     def filesystem_key(self):
         return self.id.hex
