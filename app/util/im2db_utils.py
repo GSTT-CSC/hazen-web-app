@@ -1,10 +1,10 @@
 import os
 import shutil
 import pydicom
-import datetime
+from datetime import datetime
 
 from app import db
-from app.models import Image, Series, Study, Device, Task, Report
+from app.models import Image, Series, Study, Device
 from flask_login import current_user
 from flask import current_app, flash, url_for, redirect
 from werkzeug.utils import secure_filename
@@ -50,7 +50,11 @@ def ingest_image(file_path):
         # Collect relevant pieces of information from DICOM header
         series_uid = dcm.SeriesInstanceUID
         study_uid = dcm.StudyInstanceUID
-        description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
+        # description = f"{dcm.StudyDescription}: {dcm.SeriesDescription}"
+        try:
+            study_description = dcm.StudyDescription
+        except AttributeError:
+            study_description = "Not available"
         filename = os.path.basename(file_path)
 
         # 0020 Study date
@@ -86,6 +90,7 @@ def ingest_image(file_path):
                 institution=institution, manufacturer=manufacturer,
                 device_model=model, station_name=station_name)
             new_device.save()
+            db.session.add(new_device)
             device_id = new_device.id
         #TODO remove in production
         print("device id:", device_id)
@@ -95,9 +100,10 @@ def ingest_image(file_path):
             study_id = Study.query.filter_by(uid=study_uid).first().id
         except:
             new_study = Study(uid=study_uid,
-                              description=dcm.StudyDescription,
+                              description=study_description,
                               study_date=study_date)
             new_study.save()
+            db.session.add(new_study)
             study_id = new_study.id
         #TODO remove in production
         print("study id:", study_id)
@@ -115,6 +121,7 @@ def ingest_image(file_path):
                 user_id=current_user.get_id(), device_id=device_id,
                 study_id=study_id, series_datetime=series_datetime)
             new_series.save()
+            db.session.add(new_series)
             series_id = new_series.id
         #TODO remove in production
         print("series id:", series_id)
@@ -124,6 +131,7 @@ def ingest_image(file_path):
             uid=image_uid, series_id=series_id, filename=filename,
             accession_number=accession_number)
         new_image.save()
+        db.session.add(new_image)
         #TODO remove in production
         print("new image id:", new_image.id)
 
