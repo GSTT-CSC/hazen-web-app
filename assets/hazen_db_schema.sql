@@ -27,9 +27,10 @@ SET default_table_access_method = heap;
 CREATE TABLE public.device (
     id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
+    institution character varying(100),
     manufacturer character varying(100),
-    station_name character varying(100),
-    device_model character varying(100)
+    device_model character varying(100),
+    station_name character varying(100)
 );
 
 
@@ -44,25 +45,12 @@ CREATE TABLE public.image (
     created_at timestamp without time zone NOT NULL,
     uid character varying(100),
     filename character varying(200),
-    header jsonb,
+    accession_number character varying(100),
     series_id uuid
 );
 
 
 ALTER TABLE public.image OWNER TO sophieratkai;
-
---
--- Name: institution; Type: TABLE; Schema: public; Owner: sophieratkai
---
-
-CREATE TABLE public.institution (
-    id uuid NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    name character varying(100)
-);
-
-
-ALTER TABLE public.institution OWNER TO sophieratkai;
 
 --
 -- Name: report; Type: TABLE; Schema: public; Owner: sophieratkai
@@ -95,7 +83,6 @@ CREATE TABLE public.series (
     archived boolean,
     user_id uuid,
     device_id uuid,
-    institution_id uuid,
     study_id uuid
 );
 
@@ -110,7 +97,8 @@ CREATE TABLE public.study (
     id uuid NOT NULL,
     created_at timestamp without time zone NOT NULL,
     uid character varying(64),
-    description character varying(100)
+    description character varying(100),
+    study_date character varying(64)
 );
 
 
@@ -162,22 +150,6 @@ ALTER TABLE ONLY public.device
 
 ALTER TABLE ONLY public.image
     ADD CONSTRAINT image_pkey PRIMARY KEY (id);
-
-
---
--- Name: institution institution_name_key; Type: CONSTRAINT; Schema: public; Owner: sophieratkai
---
-
-ALTER TABLE ONLY public.institution
-    ADD CONSTRAINT institution_name_key UNIQUE (name);
-
-
---
--- Name: institution institution_pkey; Type: CONSTRAINT; Schema: public; Owner: sophieratkai
---
-
-ALTER TABLE ONLY public.institution
-    ADD CONSTRAINT institution_pkey PRIMARY KEY (id);
 
 
 --
@@ -280,14 +252,6 @@ ALTER TABLE ONLY public.report
 
 ALTER TABLE ONLY public.series
     ADD CONSTRAINT series_device_id_fkey FOREIGN KEY (device_id) REFERENCES public.device(id);
-
-
---
--- Name: series series_institution_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: sophieratkai
---
-
-ALTER TABLE ONLY public.series
-    ADD CONSTRAINT series_institution_id_fkey FOREIGN KEY (institution_id) REFERENCES public.institution(id);
 
 
 --
