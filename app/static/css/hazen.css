@@ -3,15 +3,44 @@ body, html {
     background-color: #005EB8;
 }
 
-.navbar-custom {
-    background-color: #fff;
+.logo-tab {
+    background-color: white;
+    padding-left: 5%;
+    margin-right: 1%;
+}
+
+.container-fluid {
+    padding-left: 0;  /* Ensure tab always touches left of screen */
 }
 
 .hazen-brand {
     font-family: Monda, sans-serif;
+    font-size: xx-large;
+    color: #FFF;
 }
 
 .btn-primary {
-    background-color: #005EB8;
-    border-color: #005EB8;
+    background-color: #41B6E6;
+    border-color: #41B6E6;
+}
+
+.nav-link {
+    font-family: Inter, sans-serif;
+    color: #FFF;
+}
+
+.navbar-offset {
+  width: 20%;
+  height: 20px;
+  background: red;
+  background-color: red;
+  /*opacity: 1;*/
+  /*position: absolute;*/
+  /*top: 532px;*/
+  /*left: 309px;*/
+  /*border-top-left-radius: 10px;*/
+  /*border-top-right-radius: 10px;*/
+  /*border-bottom-left-radius: 10px;*/
+  /*border-bottom-right-radius: 10px;*/
+  /*overflow: hidden;*/
 }
