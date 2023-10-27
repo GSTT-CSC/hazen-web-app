@@ -50,10 +50,10 @@ class Config:
     UPLOADED_PATH = os.path.join(basedir, 'uploads')
     ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'ima', 'dcm'}
 
-    DROPZONE_MAX_FILE_SIZE = 3
-    DROPZONE_PARALLEL_UPLOADS = 2
+    DROPZONE_MAX_FILE_SIZE = 5
+    DROPZONE_PARALLEL_UPLOADS = 1
     DROPZONE_MAX_FILES = 100
     DROPZONE_UPLOAD_ON_CLICK = True
-    DROPZONE_ALLOWED_FILE_TYPE = 'application/dicom, .IMA'
+    DROPZONE_ALLOWED_FILE_TYPE = 'application/dicom, .IMA, .dcm'
     DROPZONE_ALLOWED_FILE_CUSTOM = True
 
