@@ -5,158 +5,157 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-<style>
-    .scrollspy-example {
-        position: relative;
-        /*height: 200px;*/
-        overflow: auto;
-    }
-</style>
 
-
-<form method="POST" action={{ url_for('main.workbench') }}>
-    <div class="container-fluid">
-
-    <!-- Task list Scrollspy -->
-    <div class="row">
-        <div class="col-md-4 col-lg-4 pb-3 pt-5">
-            <div id="scrollspy1" style="background-color: #BBC3C9" class="sticky-top">
-                <div class="p-3">
-                    <h3 class="text-center pt-2" style="font-family: Monda, sans-serif; color: #FFF">Task Selector</h3>
-                    <ul class="nav flex-column nav-pills menu-sidebar p-2" id="tasks">
-                        {% for task in batch_form.task_name.choices %}
-                            <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
-                        {% endfor %}
-                    </ul>
-                        <label for="task_variable">Enter optional hazen arguments: </label>
-                        <input type="string" name="task_variable"/>
-                        <p> For example "--measured_slice_width=3" for the SNR task </p>
-                        {{ batch_form.submit }}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8 col-lg-8">
-            <div class="tab-content">
-
-
-        <div class="container py-5">
-            <div class="row">
-                <h1 class="h1 text-center justify-content-center">Workbench</h1>
-            </div>
-        </div>
-
-        <!-- File upload area -->
-        <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-            <div class="col">
-                <h4 class="text-center pt-2">Upload new files</h4></br>
-                    <div class="row">
-                        <!-- DropZone -->
-                        {{ super() }}
-                        {{ dropzone.load_css() }}
-                        {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-                        {{ dropzone.create(action=url_for('main.workbench'))}}
-                        {{ dropzone.load_js() }}
-                        {{ dropzone.config(reload='main.workbench', id='uploader') }}
-                    </div>
-                </br>
-                    <div class="text-center">
-                        <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-                    </div>
-                </br>
-                    <div class="row">
-                        <!-- File selection -->
-                        {% if upload_form %}
-                            {{ wtf.render_form(upload_form) }}
-                        {% endif %}
-                    </div>
-                </br>
-            </div>
-        </div>
-
-                    <h4 class="text-center pt-2">Select images</h4></br>
-                    {% for study_device in study_device_list %}
-                    <div class="accordion" id="accordionExample">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="heading{{ loop.index }}">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}">{{ study_device.device.institution}} , {{ study_device.device.manufacturer }}, {{ study_device.device.device_model }}</button>
-                            </h2>
-                        </div>
-                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped">
-                                        <thead><tr>
-                                            <th>Select</th>
-                                            <th>Series description</th>
-                                            <th>Acquisition date</th>
-                                            <th>Uploaded date</th>
-                                            <th>Uploaded by</th>
-                                            <!-- <th>Files</th> -->
-                                            <th>Reports</th>
-                                            <th>Remove</th>
-                                        </tr></thead>
-                                        <tbody>
-                                            <!-- series is the db query result, essentially a list of series that are not archived -->
-                                            <!-- acquisition is an instance/row of the Series table -->
-                                            {% for serie in study_device.study.series %}
-                                                <tr>
-                                                    <td><input type="checkbox" name="many_series" value={{serie.id}}></td>
-                                                    <td>
-                                                        <a href="{{ url_for('main.series_view', series_id=serie.id) }}">{{ serie.description }}</a>
-                                                    </td>
-                                                    <td>{{ serie.series_datetime }}</td>
-                                                    <td>{{ serie.created_at.format('YYYY-MM-DD HH:mm') }}</td>
-                                                    <td>{{ serie.user.username }}</td>
-                                                    <!-- <td>num files</td> -->
-                                                    <td>
-                                                        {% if serie.has_report %}
-                                                            <a href="{{ url_for('main.series_view', series_id=serie.id) }}">result</a>
-                                                        {% else %}
-                                                            None
-                                                        {% endif %}
-                                                    </td>
-                                                    <td>
-                                                        <a href="{{ url_for('main.delete', series_id=serie.id) }}">
-                                                            <img src="../../static/trash.svg">
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+    <div class="container py-5">
+        <div class="row">
+            <h1 class="h1 text-center justify-content-center">HAZEN Workbench</h1>
         </div>
     </div>
 
-</br>
+    <div class="hazen-dotted-horizontal-line mb-3"></div>
+
+    <!-- File upload area -->
+    <div class="row justify-content-center"> <!-- col-md-4 col-lg-3 pb-3 -->
+        <div class="col-md-4 col-lg-4">
+            <h4 class="h4 text-center pt-2">Upload DICOM files</h4></br>
+            <div class="row mb-3">
+                <!-- DropZone -->
+                {{ super() }}
+                {{ dropzone.load_css() }}
+                {{ dropzone.style(
+                    'color: #768692; border: 2px dotted white; margin: auto; min-height: 100px; max-width: 700px'
+                    ) }}
+                {{ dropzone.create(action=url_for('main.workbench'))}}
+                {{ dropzone.load_js() }}
+                {{ dropzone.config(reload='main.workbench', id='uploader') }}
+            </div>
+            <div class="text-center mb-4">
+                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
+            </div>
+            {#            <div class="row justify-content-center">#}
+            {#                <!-- File selection -->#}
+            {#                {% if upload_form %}#}
+            {#                    {{ wtf.render_form(upload_form) }}#}
+            {#                {% endif %}#}
+            {#            </div>#}
+        </div>
+    </div>
+
+    <div class="hazen-dotted-horizontal-line mb-3"></div>
+
+    <form method="POST" action={{ url_for('main.workbench') }}>
+        <div class="container-fluid">
 
 
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+            <!-- Task list Scrollspy -->
+            <div class="row pt-5">
+                <div class="col-md-3 col-lg-3 pb-3">
+                    <div id="scrollspy1" style="background-color: #D2D7DB" class="sticky-top">
+                        <div class="p-3 pb-4">
+                            <h4 class="text-center" style="font-family: Monda, sans-serif; color: #000">Task Selector</h4>
+                            <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
+                                {% for task in batch_form.task_name.choices %}
+                                    <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
+                                {% endfor %}
+                            </ul>
 
-</div>
-</form>
-<!--
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
-            <li class="page-item{% if not prev_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
-                    <span aria-hidden="true">&larr;</span> Newer acquisitions
-                </a>
-            </li>
-            <li class="page-item{% if not next_url %} disabled{% endif %}">
-                <a class= "page-link" href="{{ next_url or '#' }}">
-                    Older acquisitions <span aria-hidden="true">&rarr;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
--->
+                            <label class="pt-3" for="task_variable" style="font-weight: bold">
+                                Enter optional hazen arguments:
+                            </label>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="task_variable"></span>
+                                <input type="text" class="form-control" placeholder="--measured_slice_width=3"
+                                       aria-label="Username" aria-describedby="task_variable">
+                            </div>
+                            {{ batch_form.submit }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9 col-lg-9">
+                    <div class="tab-content">
+
+                        <!-- DICOM Studies Table -->
+                        <h4 class="h4 text-center pt-2 pb-3">DICOM Studies</h4>
+                        {% for study_device in study_device_list %}
+                            <div class="accordion accordion-flush" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="h2 accordion-header" id="heading{{ loop.index }}">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapse{{ loop.index }}" aria-expanded="true"
+                                                aria-controls="collapse{{ loop.index }}">
+                                            {% if study_device.device.institution %}
+                                                {{ study_device.device.institution }},
+                                            {% endif %}
+                                            {% if study_device.device.manufacturer %}
+                                                {{ study_device.device.manufacturer }},
+                                            {% endif %}
+                                            {% if study_device.device.device_model %}
+                                                {{ study_device.device.device_model }}
+                                            {% endif %}
+                                        </button>
+                                    </h2>
+                                </div>
+                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show"
+                                     aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+                                    <div class="accordion">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead><tr>
+                                                    <th class="hazen-accordion-centre">Select</th>
+                                                    <th>Series Description</th>
+                                                    <th>Acq. Date</th>
+                                                    <th>Upload Date</th>
+                                                    <th>Uploader</th>
+                                                    <!-- <th>Files</th> -->
+                                                    <th>Reports</th>
+                                                    <th>Remove</th>
+                                                </tr></thead>
+                                                <tbody>
+                                                <!-- series is the db query result, essentially a list of series that are not archived -->
+                                                <!-- acquisition is an instance/row of the Series table -->
+                                                {% for current_series in study_device.study.series %}
+                                                    <tr>
+                                                        <td class="hazen-accordion-centre"><input type="checkbox" name="many_series" value={{current_series.id}}></td>
+                                                        <td>
+                                                            <a href="{{ url_for('main.series_view', series_id=current_series.id) }}">{{ current_series.description }}</a>
+                                                        </td>
+                                                        <td>{{ current_series.series_datetime }}</td>
+                                                        <td>{{ current_series.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+                                                        <td class="hazen-accordion-centre">{{ current_series.user.username }}</td>
+                                                        <!-- <td>num files</td> -->
+                                                        <td class="hazen-accordion-centre">
+                                                            {% if current_series.has_report %}
+                                                                <a href="{{ url_for('main.series_view', series_id=current_series.id) }}">result</a>
+                                                            {% else %}
+                                                                None
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="hazen-accordion-centre">
+                                                            <a href="{{ url_for('main.delete', series_id=current_series.id) }}">
+                                                                <img src="../../static/trash.svg">
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {#                    </div>#}
+                    </div>
+                </div>
+            </div>
+
+            </br>
+
+
+            <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+
+            </div>
+    </form>
 
 {% endblock %}

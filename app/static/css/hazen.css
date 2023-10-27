@@ -28,7 +28,15 @@ body, html {
     color: #FFF;
 }
 
-.h1 {
+.hazen-accordion-centre {
+    text-align: center;
+}
+
+.hazen-dotted-horizontal-line {
+    border-bottom: 2px dotted #fff;
+}
+
+.h1, .h2, .h3, .h4 {
     font-family: Monda, sans-serif;
     color: #FFF;
 }
