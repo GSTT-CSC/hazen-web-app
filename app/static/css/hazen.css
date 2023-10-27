@@ -1,7 +1,17 @@
 body, html {
+    font-family: Inter, sans-serif;
     background-color: #005EB8;
 }
 
 .navbar-custom {
+    background-color: #fff;
+}
+
+.hazen-brand {
+    font-family: Monda, sans-serif;
+}
+
+.btn-primary {
     background-color: #005EB8;
+    border-color: #005EB8;
 }
