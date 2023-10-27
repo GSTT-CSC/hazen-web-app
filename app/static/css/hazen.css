@@ -27,3 +27,8 @@ body, html {
 .nav-link {
     color: #FFF;
 }
+
+.h1 {
+    font-family: Monda, sans-serif;
+    color: #FFF;
+}

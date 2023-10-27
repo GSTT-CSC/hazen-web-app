@@ -13,56 +13,67 @@
     }
 </style>
 
-<!-- File upload area -->
-<div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-    <div class="col">
-        <h4 class="text-center pt-2">Upload new files</h4></br>
-            <div class="row">
-                <!-- DropZone -->
-                {{ super() }}
-                {{ dropzone.load_css() }}
-                {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
-                {{ dropzone.create(action=url_for('main.workbench'))}}
-                {{ dropzone.load_js() }}
-                {{ dropzone.config(reload='main.workbench', id='uploader') }}
-            </div>
-        </br>
-            <div class="text-center">
-                <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
-            </div>
-        </br>
-            <div class="row">
-                <!-- File selection -->
-                {% if upload_form %}
-                    {{ wtf.render_form(upload_form) }}
-                {% endif %}
-            </div>
-        </br>
-    </div>
-</div>
 
-<!-- Task list Scrollspy -->
 <form method="POST" action={{ url_for('main.workbench') }}>
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-4 col-lg-4 pb-3">
-                <div id="scrollspy1" style="background-color: #eee" class="sticky-top">
-                    <h4 class="text-center pt-2">Select task</h4>
-                    <ul class="nav flex-column nav-pills menu-sidebar" id="tasks">
+
+    <!-- Task list Scrollspy -->
+    <div class="row">
+        <div class="col-md-4 col-lg-4 pb-3 pt-5">
+            <div id="scrollspy1" style="background-color: #BBC3C9" class="sticky-top">
+                <div class="p-3">
+                    <h3 class="text-center pt-2" style="font-family: Monda, sans-serif; color: #FFF">Task Selector</h3>
+                    <ul class="nav flex-column nav-pills menu-sidebar p-2" id="tasks">
                         {% for task in batch_form.task_name.choices %}
                             <li><input type="radio" name="task_name" value={{task}}> {{task}}</li>
                         {% endfor %}
                     </ul>
-                    </br>
-                    <label for="task_variable">optional command arguments: </label><input type="string" name="task_variable"/>
-                    </br>
-                    <p>For example "--measured_slice_width=3" for the SNR task</p>
-                    </br>
-                    {{ batch_form.submit }}
+                        <label for="task_variable">Enter optional hazen arguments: </label>
+                        <input type="string" name="task_variable"/>
+                        <p> For example "--measured_slice_width=3" for the SNR task </p>
+                        {{ batch_form.submit }}
                 </div>
             </div>
-            <div class="col-md-8 col-lg-8">
-                <div class="tab-content">
+        </div>
+
+        <div class="col-md-8 col-lg-8">
+            <div class="tab-content">
+
+
+        <div class="container py-5">
+            <div class="row">
+                <h1 class="h1 text-center justify-content-center">Workbench</h1>
+            </div>
+        </div>
+
+        <!-- File upload area -->
+        <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
+            <div class="col">
+                <h4 class="text-center pt-2">Upload new files</h4></br>
+                    <div class="row">
+                        <!-- DropZone -->
+                        {{ super() }}
+                        {{ dropzone.load_css() }}
+                        {{ dropzone.style('border: 5px dashed gray; margin: auto; min-height: 100px; max-width: 700px') }}
+                        {{ dropzone.create(action=url_for('main.workbench'))}}
+                        {{ dropzone.load_js() }}
+                        {{ dropzone.config(reload='main.workbench', id='uploader') }}
+                    </div>
+                </br>
+                    <div class="text-center">
+                        <button onClick="window.location.reload()" id="upload" class="btn btn-primary">Upload</button>
+                    </div>
+                </br>
+                    <div class="row">
+                        <!-- File selection -->
+                        {% if upload_form %}
+                            {{ wtf.render_form(upload_form) }}
+                        {% endif %}
+                    </div>
+                </br>
+            </div>
+        </div>
+
                     <h4 class="text-center pt-2">Select images</h4></br>
                     {% for study_device in study_device_list %}
                     <div class="accordion" id="accordionExample">
