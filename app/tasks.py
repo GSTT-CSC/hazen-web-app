@@ -56,7 +56,7 @@ def produce_report(self, user_id, series_id, task_name, image_files,
 
     # Store task result in the Report table
     report = Report(
-        hazen_version=version('hazen')[:10], data=result_dict['measurement'],
+        hazen_version=version('hazen'), data=result_dict['measurement'],
         user_id=user_id, series_id=series_id,
         task_name=task_name)  #  task_variable=task_variable
     # Save information to database
