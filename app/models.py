@@ -100,9 +100,6 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     series = db.relationship('Series', back_populates='image')
     # studies = db.relationship('Study', back_populates='image')
 
-    def __repr__(self):
-        return '<Acquisition {}>'.format(self.description)
-
     @hybrid_property
     def filesystem_key(self):
         return self.id.hex
@@ -118,6 +115,7 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     uid = db.Column(db.String(64))  # DICOM Series UID (0020,000E)
     description = db.Column(db.String(100))  # DICOM Series Description (0008,103E)
     series_datetime = db.Column(db.DateTime)  # DICOM Series Date and Series Time
+    # These 2 make no sense to store, report can be looked up, archival doesn't help
     has_report = db.Column(db.Boolean, default=False)
     archived = db.Column(db.Boolean, default=False)
 
@@ -153,7 +151,6 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     uid = db.Column(db.String(64))  # DICOM Study UID (0020,000D)
     description = db.Column(db.String(100))  # DICOM Study Description (0008,1030)
     study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
-    study_time = db.Column(db.String(64))  # DICOM Study time (0008,0030)
 
     # One-to-many relationships
     series = db.relationship('Series', back_populates='studies')
@@ -194,3 +191,6 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
     series = db.relationship('Series', back_populates='reports')
     task = db.relationship('Task', back_populates='reports')
 
+    @hybrid_property
+    def filesystem_key(self):
+        return self.id.hex

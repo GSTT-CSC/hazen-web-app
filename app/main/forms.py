@@ -12,12 +12,13 @@ class ImageUploadForm(FlaskForm):
 # Select task
 class ProcessTaskForm(FlaskForm):
     task_name = SelectField('Process Task')
-    task_variable = StringField('Slice width for SNR measurement')
+    task_variable = StringField('optional command arguments')
     submit = SubmitField('Run task')
 
 # Select multiple Series and a Task
 class BatchProcessingForm(FlaskForm):
     task_name = RadioField()
     many_series = SelectMultipleField()
-    task_variable = StringField('Slice width for SNR measurement')
+    task_variable = StringField('optional command arguments',
+                                default="eg --measured_slice_width=3")
     submit = SubmitField('Run task on selected series')

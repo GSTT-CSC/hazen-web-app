@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% import "bootstrap5/form.html" as wtf %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block app_content %}
+    <!-- Series description -->
+    <div class="row">
+        <h2 class="text-center">DICOM series overview</h2>
+        <table class="table table-striped"> <!-- Series information -->
+            <tr>
+                <th>Series description</th>
+                <td>{{ series.description }}</td>
+            </tr>
+            <tr>
+                <th>Acquisition date</th>
+                <td>{{ series.series_datetime }}</td>
+            </tr>
+            <tr>
+                <th>Uploaded date</th>
+                <td>{{ series.created_at.format('YYYY-MM-DD HH:mm') }}</td>
+            </tr>
+            <tr>
+                <th>Files in series</th>
+                <td>{{ series.series_files }}</td>
+            </tr>
+            <tr>
+                <th>Reports made</th>
+                <td>{{ series.has_report }}</td>
+            </tr>
+        </table>
+        </br>
+    </div>
+
+    <!-- Select new process -->
+    <div class="row">
+        <h4 class="text-left">Select measurement to be performed</h4>
+        <p>Hazenlib version: {{ hazenlib_version }}</p></br>
+        {% if form %}
+            {{ wtf.render_form(form) }}
+        {% endif %}
+    </div>
+
+    <!-- Series results by task -->
+    <div class="row">
+        <h3 class="text-center pt-2">Measurement results</h3></br>
+        {% for task, data in results.items()%}
+        <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}"><b>{{ task }}</b>, {{ data.created.format('YYYY-MM-DD HH:mm') }}</button>
+                </h2>
+            </div>
+            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Measurement</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody><!-- Display measurement values for results per task performed on series -->
+                            {% for measurement, value in data.measurement.items() %}
+                                <tr>
+                                    <td>{{ measurement }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div>
+                            {% for img_name in data.image_files %}
+                                <img src="/static//{{data.directory}}/{{img_name}}" width="{{data.width}}%"  height="50%">
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
