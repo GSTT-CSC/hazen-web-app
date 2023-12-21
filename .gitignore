@@ -138,7 +138,6 @@ dmypy.json
 .vscode/
 
 /hazen-data/
-static/
 
 # PyCharm
 .idea/
