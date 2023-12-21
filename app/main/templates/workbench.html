@@ -45,11 +45,9 @@
 
     <form method="POST" action={{ url_for('main.workbench') }}>
         <div class="container-fluid">
-
-
-            <!-- Task list Scrollspy -->
             <div class="row pt-5">
                 <div class="col-md-3 col-lg-3 pb-3">
+                    <!-- Task list Scrollspy -->
                     <div id="scrollspy1" style="background-color: #D2D7DB" class="sticky-top">
                         <div class="p-3 pb-4">
                             <h4 class="text-center" style="font-family: Monda, sans-serif; color: #000">Task Selector</h4>
@@ -73,9 +71,8 @@
                 </div>
 
                 <div class="col-md-9 col-lg-9">
+                    <!-- DICOM Studies Table -->
                     <div class="tab-content">
-
-                        <!-- DICOM Studies Table -->
                         <h4 class="h4 text-center pt-2 pb-3">DICOM Studies</h4>
                         {% for study_device in study_device_list %}
                             <div class="accordion accordion-flush" id="accordionExample">
@@ -96,8 +93,7 @@
                                         </button>
                                     </h2>
                                 </div>
-                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show"
-                                     aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+                                <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
                                     <div class="accordion">
                                         <div class="table-responsive">
                                             <table class="table table-striped">
@@ -145,17 +141,29 @@
                                 </div>
                             </div>
                         {% endfor %}
-                        {#                    </div>#}
                     </div>
                 </div>
             </div>
 
             </br>
-
-
-            <div class="row"> <!-- col-md-4 col-lg-3 pb-3 -->
-
-            </div>
+        </div>
     </form>
+
+    <!--
+    <nav aria-label="...">
+        <ul class="pagination justify-content-center">
+            <li class="page-item{% if not prev_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ prev_url or '#' }}" tabindex="-1">
+                    <span aria-hidden="true">&larr;</span> Newer acquisitions
+                </a>
+            </li>
+            <li class="page-item{% if not next_url %} disabled{% endif %}">
+                <a class= "page-link" href="{{ next_url or '#' }}">
+                    Older acquisitions <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    -->
 
 {% endblock %}
