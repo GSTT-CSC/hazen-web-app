@@ -2,15 +2,15 @@ version: '3.7'
 
 services:
     nginx:
-        restart: always
+        container_name: hazen_nginx
         build:
             context: .
             dockerfile: docker/nginx/Dockerfile
-        container_name: hazen_nginx
-        ports:
-          - "8080:8080"
         networks:
-          - frontend
+            - frontend
+        ports:
+            - "8080:8080"
+        restart: always
 
     redis:
         image: redis:latest
@@ -20,27 +20,26 @@ services:
             - backend
 
     hazen_db:
-        image: postgres:13.1
         container_name: hazen_db
-        restart: always
-        expose:
-            - "5432"
+        image: postgres:13.1
         networks:
             - backend
+        expose:
+            - "5432"
         environment:
             - POSTGRES_DB=$POSTGRES_DB
             - POSTGRES_USER=$POSTGRES_USER
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         volumes:
             - $APP_DATA_DIR/db:/var/lib/postgresql/data
+        restart: always
 
     web:
-        restart: always
+        container_name: hazen_web_app
+        image: hazen_app
         build:
             context: .
             dockerfile: docker/hazen_app/Dockerfile
-        image: hazen_app
-        container_name: hazen_web_app
         depends_on:
             - hazen_db
             - redis
@@ -49,14 +48,15 @@ services:
             - POSTGRES_USER=$POSTGRES_USER
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
             - RUNNING_ON_DOCKER=true
+        volumes:
+            - $APP_DATA_DIR/web:/APP/uploads
         networks:
             - frontend
             - backend
-        volumes:
-            - $APP_DATA_DIR/web:/APP/uploads
         ports:
             - "5001:5001"
         command: docker/hazen_app/start_app.sh
+        restart: always
 
 networks:
     backend:
