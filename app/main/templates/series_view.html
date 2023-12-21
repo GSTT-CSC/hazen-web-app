@@ -13,9 +13,19 @@
 
     <div class="hazen-dotted-horizontal-line mb-3"></div>
 
-    <!-- Series Overview Table -->
-    <div class="container">
-        <div class="row pt-3">
+    <div class="row pt-5">
+        <!-- Select New Task -->
+        <div class="col-md-4 col-lg-4 mx-auto" style="background-color: #D2D7DB">
+        <h4 class="text-center" style="font-family: Monda, sans-serif; color: #000">Task Selector</h4>
+            <p>hazenlib version: {{ hazenlib_version }}</p>
+            {% if form %}
+                {{ wtf.render_form(form) }}
+            {% endif %}
+            </br>
+        </div>
+        <!-- Series Overview Table -->
+        <div class="col-md-8 col-lg-8">
+            <h4 class="h4 text-center">Series description</h4></br>
             <table class="table table-striped"> <!-- Series information -->
                 <tr>
                     <th>Series description</th>
@@ -41,17 +51,7 @@
         </div>
     </div>
 
-    <!-- Select New Process -->
-    <div class="row py-5">
-        <div class="col-md-6 center-block mx-auto">
-            <h4 class="h4">Select HAZEN task to perform:</h4>
-            <p class="p-front-page">hazenlib version: {{ hazenlib_version }}</p>
-            {% if form %}
-                {{ wtf.render_form(form) }}
-            {% endif %}
-        </div>
-    </div>
-
+    </br>
     <div class="hazen-dotted-horizontal-line mb-3"></div>
 
     <!-- Measurement Results -->
