@@ -3,117 +3,115 @@
 
 {% block app_content %}
 
-<style>
+    <div class="container pt-5">
 
-    h1 {
-      text-align: center;
-      padding: 64px;
-      background: linear-gradient(to right, hsl(0, 0%, 30%) 0, hsl(0, 0%, 100%) 10%, hsl(0, 0%, 30%) 20%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine 3s linear;
-    }
+        <!-- Title & Subheading -->
+        <section class="text-center pb-5">
+            <div class="row">
+                <h1 class="h1 py-3">HAZEN</h1>
+                <h3 class="h3 pb-3">
+                    Quality assurance platform for MRI test objects
+                </h3>
+            </div>
 
-    body {
-      text-align: center;
-      
-      }
+            <div class="hazen-dotted-horizontal-line py-3"></div>
+        </section>
 
-</style>
+        <!-- Introductory Text -->
+        <section class="pb-5">
+            <div class="row">
+                <p class="p-front-page lead">
+                    <span class="hazen-within-p">HAZEN</span> is a software framework for performing automated analysis of magnetic resonance imaging (MRI)
+                    quality assurance data. Hazen consists of multiple image processing Tasks which perform
+                    quantitative analysis of MRI phantom data.
+                </p>
+                <p class="p-front-page lead">
+                    Hazen currently supports the ACR Large MRI Phantom and the MagNET Test Objects collection of phantoms.
+                </p>
+            </div>
 
-<body style="background: #FFFFFF" text-align="center">
+            <div class="hazen-dotted-horizontal-line py-3"></div>
+        </section>
 
-  <h1 data-text="Welcome to Hazen" >Welcome to Hazen, automated QA</h1>
-  <p style="font-size:150%">Hazen is an automated quality assurance and analytics tool for the purpose of assessing performance of MRI systems and their related hardware and software.</p>
+        <!-- Task List -->
+        <section>
+            <div class="row">
+                <h2 class="h2 pb-3">HAZEN Tasks</h2>
+                <p class="p-front-page lead">
+                    Hazen provides the following measurements of MRI test objects:
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Signal-to-noise ratio (SNR)</li>
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Spatial resolution</li>
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Slice position</li>
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Slice width</li>
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Uniformity</li>
+                    <li style="padding-inline-start: 2.5rem" class="p-front-page lead">Ghosting</li>
+                </p>
+            </div>
 
-  <div class="container ">
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'uniformity.jpg') }}" class="card-img-top" alt="uniformity">
-          <div class="card-body">
-            <h5 class="card-title">Uniformity</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://hazen.readthedocs.io/en/latest/tasks.html#uniformity" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
+        </section>
+
+        <!-- Example Images -->
+        <section class="pb-5">
+            <div class="row py-3">
+                <div class="col">
+                    <img src="{{url_for('static', filename = 'images/sp_res.jpg') }}" class="card-img-top">
+                    <p class="p-front-page pt-2">Spatial Resolution Task</p>
+                </div>
+                <div class="col">
+                    <img src="{{url_for('static', filename = 'images/uniformity.jpg') }}" class="card-img-top">
+                    <p class="p-front-page pt-2">Uniformity Task</p>
+                </div>
+                <div class="col">
+                    <img src="{{url_for('static', filename = 'images/ghost.jpg') }}" class="card-img-top">
+                    <p class="p-front-page pt-2">Ghosting Task</p>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'snr.jpg') }}" class="card-img-top">
-          <div class="card-body">
-            <h5 class="card-title">SNR</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://hazen.readthedocs.io/en/latest/tasks.html#signal-to-noise-ratio-snr" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
+
+            <div class="hazen-dotted-horizontal-line py-3"></div>
+        </section>
+
+        <!-- Hazen Developers -->
+        <section class="pb-5">
+            <div class="row">
+                <h2 class="h2 pb-3">HAZEN Developers</h2>
+                <p class="p-front-page lead">
+                    Hazen is developed at Guy’s and St Thomas’ NHS Foundation Trust by healthcare scientists in the
+                    Clinical Scientific Computing department in collaboration with the MR Physics team.
+                </p>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'ghost.jpg') }}" class="card-img-top">
-          <div class="card-body">
-            <h5 class="card-title">Ghosting</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://hazen.readthedocs.io/en/latest/tasks.html#ghosting" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
+
+            <div class="hazen-dotted-horizontal-line py-3"></div>
+        </section>
+
+        <!-- Contact Us -->
+        <section class="pb-5">
+            <div class="row">
+                <h2 class="h2 pb-3">Contact Us</h2>
+                    <div class="row py-3">
+                        <p class="p-front-page lead"> Hazen has two GitHub repositories:</p>
+                        <div class="col">
+                            <p class="p-front-page lead text-center">
+                                <a class="link-light" href="https://github.com/GSTT-CSC/hazen">Hazen</a>
+                            </p>
+                            <p class="p-front-page lead">
+                                Please use this repository to raise issues about the underlying Hazen Tasks, such as unexpected results, DICOM issues, etc.
+                            </p>
+                        </div>
+                        <div class="col">
+                            <p class="p-front-page lead text-center">
+                                <a class="link-light" href="https://github.com/GSTT-CSC/hazen-web-app">Hazen-web-app</a>
+                            </p>
+                            <p class="p-front-page lead">
+                                Please use this repository to raise issues about this website, such as login problems, any errors in your browser, etc.
+                            </p>
+                        </div>
+                    </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'sp_res.jpg') }}" class="card-img-top">
-          <div class="card-body">
-            <h5 class="card-title">Spatial Resolution</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://hazen.readthedocs.io/en/latest/tasks.html#spatial-resolution" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'geometric_d.png') }}" class="card-img-top">
-          <div class="card-body">
-            <h5 class="card-title">Geometric Distortion</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://readthedocs.org/projects/hazen/" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card" style="width: 18rem;">
-          <img src="{{url_for('static', filename = 'slice_par.jpg') }}" class="card-img-top">
-          <div class="card-body">
-            <h5 class="card-title">Slice Parameters</h5>
-            <h6 class="card-subtitle mb-2 text-muted"></h6>
-            <p class="card-text"></p>
-            <div class="card-footer">
-              <a href="https://hazen.readthedocs.io/en/latest/tasks.html#slice-position-and-width" class="btn mr-2"><i class="fas fa-link"></i>Docs</a>
-              <a href="https://github.com/GSTT-CSC/hazen-web-app" class="btn"><i class="fab fa-github"></i>GitHub</a>
-            </div>
-          </div>
-        </div>
-      </div>
+
+            <div class="hazen-dotted-horizontal-line py-3"></div>
+        </section>
+
     </div>
-  </div>
 
-</body>
+
 {% endblock %}

@@ -5,11 +5,21 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block app_content %}
-    <h1>Edit Profile</h1>
-    <div class="row">
-        <div class="col-md-4">
-            {{ wtf.render_form(form) }}
+
+    <div class="container py-5">
+        <div class="row">
+            <h1 class="h1 text-center justify-content-center">Edit Profile</h1>
         </div>
     </div>
 
+    <div class="hazen-dotted-horizontal-line mb-3"></div>
+
+    <div class="container">
+        <div class="row pt-3">
+            <div class="col-md-4 center-block mx-auto">
+                {{ wtf.render_form(form, render_kw={'class': 'btn btn-alert btn-md'}) }}
+            </div>
+        </div>
+    </div>
+    
 {% endblock %}
