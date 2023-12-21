@@ -63,7 +63,7 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ loop.index }}">
                             <button class="accordion-button"
-                                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" aria-controls="collapse{{ loop.index }}"><b>{{ task }}</b>, {{ data.created.format('YYYY-MM-DD HH:mm') }}</button>
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}"><b>{{ task }}</b>, {{ data.created.format('YYYY-MM-DD HH:mm') }}</button>
                         </h2>
                     </div>
                     <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
