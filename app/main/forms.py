@@ -27,7 +27,7 @@ class ProcessTaskForm(FlaskForm):
 class BatchProcessingForm(FlaskForm):
     task_name = RadioField()
     many_series = SelectMultipleField()
-    task_variable = StringField(
-        "optional command arguments", default="eg --measured_slice_width=3"
-    )
+    # task_variable = StringField(
+    #     "optional command arguments", default="eg --measured_slice_width=3"
+    # )
     submit = SubmitField("Run task on selected series")

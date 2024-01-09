@@ -157,7 +157,7 @@ def workbench():
                 # Load which series were selected for which task
                 try:
                     task_name = request.form["task_name"]
-                    task_variable = request.form["task_variable"]
+                    # task_variable = request.form["task_variable"]
                     selected_series = request.form.getlist("many_series")
                 except Exception as e:
                     flash(f"No task or image series were selected.", "info")
