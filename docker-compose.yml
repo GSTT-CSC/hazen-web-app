@@ -1,5 +1,9 @@
 version: '3.7'
 
+volumes:
+    postgres-data:
+
+
 services:
     nginx:
         container_name: hazen_nginx
@@ -31,7 +35,7 @@ services:
             - POSTGRES_USER=$POSTGRES_USER
             - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
         volumes:
-            - $APP_DATA_DIR/db:/var/lib/postgresql/data
+            - postgres-data:/var/lib/postgresql/data
         restart: always
 
     web:

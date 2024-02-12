@@ -9,12 +9,14 @@ from flask_login import current_user, login_required
 
 from app import db
 from app.main import bp
+
 # make the blueprint independent of the application so that it is more portable
 from app.main.forms import ImageUploadForm, ProcessTaskForm, BatchProcessingForm
 from app.models import Image, Series, Study, Device, Task, Report
 from app.util.im2db_utils import upload_file, locate_image_files
 
-hazenlib_version = version('hazen')
+hazenlib_version = version("hazen")
+
 
 @bp.before_request
 def before_request():
@@ -25,18 +27,18 @@ def before_request():
 
 # Homepage
 # Overview of process tasks that can be performed
-@bp.route('/', methods=['GET', 'POST'])
-@bp.route('/index', methods=['GET', 'POST'])
+@bp.route("/", methods=["GET", "POST"])
+@bp.route("/index", methods=["GET", "POST"])
 # @login_required
 def index():
     # list available tasks that can be performed
     tasks = Task.query.all()
 
-    return render_template('index.html', title='Home', tasks=tasks)
+    return render_template("index.html", title="Home", tasks=tasks)
 
 
 # Delete or archive series, delete reports
-@bp.route('/delete/')
+@bp.route("/delete/")
 @login_required
 def delete(series_id=None, report_id=None):
     """Generic delete function
@@ -48,18 +50,23 @@ def delete(series_id=None, report_id=None):
     Returns:
         updates database table to reflect deletion
     """
-    if 'series_id' in request.args.keys():
+    if "series_id" in request.args.keys():
         # Get series_id from URL, find series in Table
-        series_id = request.args['series_id']
+        series_id = request.args["series_id"]
         series = Series.query.filter_by(id=series_id).first_or_404()
         # Check whether reports were made for that series_id
         if series.has_report:
             # If series already has reports, mark series as archived but don't delete
             series.update(archived=True)
-            flash(f"Series {series.description} was archived as it already has reports.", 'info')
+            flash(
+                f"Series {series.description} was archived as it already has reports.",
+                "info",
+            )
         else:
             # If there are no reports associated, then delete all files
-            series_folder = os.path.join(current_app.config['UPLOADED_PATH'], series.filesystem_key)
+            series_folder = os.path.join(
+                current_app.config["UPLOADED_PATH"], series.filesystem_key
+            )
             try:
                 # from database
                 images = Image.query.filter_by(series_id=series_id).all()
@@ -81,16 +88,19 @@ def delete(series_id=None, report_id=None):
                 study.delete()
             # Lastly, delete the series itself from the DB
             series.delete()
-            flash(f"All files in series {series.description} were deleted as it has no reports.", 'info')
+            flash(
+                f"All files in series {series.description} were deleted as it has no reports.",
+                "info",
+            )
         db.session.commit()
 
-    if 'report_id' in request.args.keys():
+    if "report_id" in request.args.keys():
         # Get report_id from URL, find report in Table
-        report_id = request.args['report_id']
+        report_id = request.args["report_id"]
         report = Report.query.filter_by(id=report_id).first_or_404()
         # Check whether series has other reports or is this the only one
         additional_reports = Report.query.filter_by(series_id=report.series_id).count()
-        if additional_reports > 1:  # series has other reports 
+        if additional_reports > 1:  # series has other reports
             # delete selected one
             report.delete()
         else:  # series only had this report
@@ -101,25 +111,25 @@ def delete(series_id=None, report_id=None):
             # Reset series bool so it is displayed without a report on the workbench
             series.update(has_report=False, archived=False)
         db.session.commit()
-        flash(f"Report was deleted.", 'info')
+        flash(f"Report was deleted.", "info")
 
     return redirect(request.referrer)
 
 
 # Workbench
-# authenticated users can overview and perform tasks/analysis on uploaded files 
-@bp.route('/workbench/', methods=['GET', 'POST'])
+# authenticated users can overview and perform tasks/analysis on uploaded files
+@bp.route("/workbench/", methods=["GET", "POST"])
 @login_required
 def workbench():
     # Save current user's ID to browser session
-    session['current_user_id'] = current_user.id
+    session["current_user_id"] = current_user.id
 
     # Display available image Series, grouped by Study UID
     studies = db.session.query(Study).order_by(Study.created_at.desc())
     # Collect device information about studies for display
-    study_device_list = [{"study": study,
-                        "device": study.series[0].devices
-                        } for study in studies]
+    study_device_list = [
+        {"study": study, "device": study.series[0].devices} for study in studies
+    ]
 
     # Create Choose file form
     upload_form = ImageUploadForm()
@@ -129,76 +139,94 @@ def workbench():
     batch_form = BatchProcessingForm()
     batch_form.task_name.choices = [task.name for task in tasks]
 
-    if request.method == 'POST':
-        if 'file' in request.files.keys():
+    if request.method == "POST":
+        if "file" in request.files.keys():
             # Uploaded by DropZone
-            dropzone_file = request.files.get('file')
+            dropzone_file = request.files.get("file")
             # Most files in example dataset DO NOT HAVE an extension, can't check
             # if dropzone_file.filename.split(".")[-1].lower() not in current_app.config['ALLOWED_EXTENSIONS']:
             #     return 'incorrect file type', 400
             upload_file(dropzone_file)
 
-        elif 'submit' in request.form.keys():
+        elif "submit" in request.form.keys():
             # Batch processing functionality
-            if request.form['submit'] == 'Run task on selected series':
+            if request.form["submit"] == "Run task on selected series":
                 # Initialise variables for batch processing
                 task_name = ""
                 selected_series = []
                 # Load which series were selected for which task
                 try:
-                    task_name = request.form['task_name']
-                    task_variable = request.form['task_variable']
-                    selected_series = request.form.getlist('many_series')
+                    task_name = request.form["task_name"]
+                    # task_variable = request.form["task_variable"]
+                    selected_series = request.form.getlist("many_series")
                 except Exception as e:
-                    flash(f'No task or image series were selected.', 'info')
-                    return redirect(url_for('main.workbench'))
+                    flash(f"No task or image series were selected.", "info")
+                    return redirect(url_for("main.workbench"))
 
                 if len(selected_series) == 0:
-                    flash(f"No image series were selected for {task_name} task.", 'info')
-                    return redirect(url_for('main.workbench'))
+                    flash(
+                        f"No image series were selected for {task_name} task.", "info"
+                    )
+                    return redirect(url_for("main.workbench"))
 
                 # Create Celery jobs from batch processing request
                 celery_job_list = create_celery_jobs(
-                    user_id=current_user.id, series_ids=selected_series,
-                    task_name=task_name, task_variable=task_variable)
+                    user_id=current_user.id,
+                    series_ids=selected_series,
+                    task_name=task_name,
+                    # task_variable=task_variable,
+                )
                 job_ids = [job.id for job in celery_job_list]
-                msg = 'The following jobs have been queued: ' + ",".join(job_ids)
+                msg = "The following jobs have been queued: " + ",".join(job_ids)
                 current_app.logger.info(msg)
-                flash(f"Processing of the {task_name} task has begun for {len(selected_series)} series", "success")
+                flash(
+                    f"Processing of the {task_name} task has begun for {len(selected_series)} series",
+                    "success",
+                )
 
             # Upload file functionality
             else:
                 # Uploaded by Choose File
-                for choose_file in request.files.getlist('image_files'):
+                for choose_file in request.files.getlist("image_files"):
                     upload_file(choose_file)
 
-        return redirect(url_for('main.workbench'))
+        return redirect(url_for("main.workbench"))
 
-    return render_template('workbench.html', title='Workbench',
-            study_device_list=study_device_list,
-            upload_form=upload_form, batch_form=batch_form # , tasks=tasks,
-        )
+    return render_template(
+        "workbench.html",
+        title="Workbench",
+        study_device_list=study_device_list,
+        batch_form=batch_form,  # , tasks=tasks,
+    )
     # , series=series, next_url=next_url, prev_url=prev_url
 
 
 def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=None):
     celery_job_list = []
     from app.tasks import produce_report
+
     # Check which task is requested
-    if task_name == 'snr':
+    if task_name == "snr":
         if len(series_ids) < 2 or (len(series_ids) % 2) != 0:
-            flash("Incorrect number of image series selected for SNR measurement", 'info')
+            flash(
+                "Incorrect number of image series selected for SNR measurement", "info"
+            )
         else:
-            #TODO currently it is assumed that a single pair of images are selected
+            # TODO currently it is assumed that a single pair of images are selected
             image_files = []
             for series_id in series_ids:
                 # Identify selected series
                 series = Series.query.filter_by(id=series_id).first_or_404()
                 image_files.extend(locate_image_files(series.filesystem_key))
-            current_app.logger.info(f"Performing {task_name} task on all images within series {series_ids}")
+            current_app.logger.info(
+                f"Performing {task_name} task on all images within series {series_ids}"
+            )
             celery_job = produce_report.delay(
-                user_id=user_id, series_id=series_ids[0], task_name=task_name,
-                image_files=image_files)
+                user_id=user_id,
+                series_id=series_ids[0],
+                task_name=task_name,
+                image_files=image_files,
+            )
             celery_job_list.append(celery_job)
     else:
         # Set off a job per series
@@ -207,23 +235,29 @@ def create_celery_jobs(user_id, task_name: str, series_ids: list, task_variable=
             series = Series.query.filter_by(id=series_id).first_or_404()
             image_files = locate_image_files(series.filesystem_key)
             # Set off task processing as a Celery job
-            current_app.logger.info(f"Performing {task_name} task on {len(image_files)} images within the {series_id} series")
+            current_app.logger.info(
+                f"Performing {task_name} task on {len(image_files)} images within the {series_id} series"
+            )
             celery_job = produce_report.delay(
-                user_id=user_id, series_id=series_id, task_name=task_name,
-                image_files=image_files)
+                user_id=user_id,
+                series_id=series_id,
+                task_name=task_name,
+                image_files=image_files,
+            )
             celery_job_list.append(celery_job)
     return celery_job_list
 
+
 # Series overview
 # Description, existing reports and run new tasks
-@bp.route('/series/<series_id>', methods=['GET', 'POST'])
+@bp.route("/series/<series_id>", methods=["GET", "POST"])
 @login_required
 def series_view(series_id):
     user_id = current_user.id
     # Retrieve the Series that was selected
     series = Series.query.filter_by(id=series_id).first_or_404()
 
-    if request.method == 'GET':
+    if request.method == "GET":
         # Prepare the form to accept task selection
         form = ProcessTaskForm()
         # Provide list of available tasks that can be performed
@@ -232,17 +266,20 @@ def series_view(series_id):
 
         # Store information about this series in a dict that can be passed to the html
         series_dict = {
-            'description': series.description,
-            'series_datetime': series.series_datetime,
-            'created_at': series.created_at,
-            'series_files': Image.query.filter_by(series_id=series_id).count(),
-            'has_report': series.has_report
+            "description": series.description,
+            "series_datetime": series.series_datetime,
+            "created_at": series.created_at,
+            "series_files": Image.query.filter_by(series_id=series_id).count(),
+            "has_report": series.has_report,
         }
 
         # Identify reports made for that series_id
-        reports = db.session.query(Report).filter_by(
-                        series_id=series_id).order_by(Report.created_at.desc())
-        #, user_id=user_id
+        reports = (
+            db.session.query(Report)
+            .filter_by(series_id=series_id)
+            .order_by(Report.created_at.desc())
+        )
+        # , user_id=user_id
         # TODO: add user restriction later
 
         # if len(reports.all()) < 1:
@@ -253,77 +290,96 @@ def series_view(series_id):
         results_dict = {}
         tasks = [report.task_name for report in reports]
         for task in tasks:
-            task_result = Report.query.filter_by( #user_id=user_id,
-                                    series_id=series_id, task_name=task
-                                    ).first_or_404()
+            task_result = Report.query.filter_by(  # user_id=user_id,
+                series_id=series_id, task_name=task
+            ).first_or_404()
             # Find report images for series + task
             # directory = os.path.join(current_app.config['UPLOADED_PATH'],
             #                             )
-            image_files = locate_image_files(
-                            task_result.filesystem_key, filename=True)
+            image_files = locate_image_files(task_result.filesystem_key, filename=True)
             # Store values in dict to be displayed
             results_dict[task] = {
                 "measurement": task_result.data,
                 "created": task_result.created_at,
                 "directory": task_result.filesystem_key,
                 "image_files": image_files,
-                "width": 100 / len(image_files) -1
+                "width": 100 / len(image_files) - 1,
             }
 
-        return render_template('series_view.html', title='Series overview',
-                        form=form, series=series_dict, results=results_dict,
-                        hazenlib_version=hazenlib_version)
+        return render_template(
+            "series_view.html",
+            title="Series overview",
+            form=form,
+            series=series_dict,
+            results=results_dict,
+            hazenlib_version=hazenlib_version,
+        )
 
-    if request.method == 'POST':
+    if request.method == "POST":
         # Set off task processing as a Celery job
         # Unpack variables from session
-        task_name = request.form['task_name']
-        task_variable = request.form['task_variable']
-        user_id = session['current_user_id']
+        task_name = request.form["task_name"]
+        task_variable = request.form["task_variable"]
+        user_id = session["current_user_id"]
         # Select files to perform task on
-        folder = os.path.join(current_app.config['UPLOADED_PATH'],
-                                        series.filesystem_key)
+        folder = os.path.join(
+            current_app.config["UPLOADED_PATH"], series.filesystem_key
+        )
         image_files = [os.path.join(folder, file) for file in os.listdir(folder)]
 
         # Ensure that appropriate number of files were selected
         series_files = Image.query.filter_by(series_id=series.id).count()
         if len(image_files) != series_files:
-            raise Exception('Number of files in directory is not equal to expected!')
+            raise Exception("Number of files in directory is not equal to expected!")
 
         # Create Celery jobs from processing request
         current_app.logger.info(f"Performing {task_name} task on {series.description}")
         celery_job_list = create_celery_jobs(
-            user_id=current_user.id, series_ids=[series.id],
-            task_name=task_name, task_variable=task_variable)
+            user_id=current_user.id,
+            series_ids=[series.id],
+            task_name=task_name,
+            task_variable=task_variable,
+        )
 
         current_app.logger.info(f"Task performed successfully! \n")
-        flash(f'Completed {task_name} measurement!', 'info')
+        flash(f"Completed {task_name} measurement!", "info")
 
         # Passing task and series information to next page via Session dict
-        session['task_name'] = task_name
-        session['series_id'] = series_id
+        session["task_name"] = task_name
+        session["series_id"] = series_id
 
-        return redirect(url_for('main.series_view', series_id=series_id))
+        return redirect(url_for("main.series_view", series_id=series_id))
 
 
 # Reports dashboard
 # Overview of reports
-#TODO: Trend monitoring dashboards
-@bp.route('/reports/', methods=['GET', 'POST'])
+# TODO: Trend monitoring dashboards
+@bp.route("/reports/", methods=["GET", "POST"])
 @login_required
 def reports():
     # Display existing reports
     reports = db.session.query(Report).order_by(Report.created_at.desc())
 
     # Display reports in a table
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
     reports_pages = reports.paginate(
-    page, current_app.config['ACQUISITIONS_PER_PAGE'], False)
-    next_url = url_for('main.reports', page=reports_pages.next_num) \
-        if reports_pages.has_next else None
-    prev_url = url_for('main.reports', page=reports_pages.prev_num) \
-        if reports_pages.has_prev else None
+        page, current_app.config["ACQUISITIONS_PER_PAGE"], False
+    )
+    next_url = (
+        url_for("main.reports", page=reports_pages.next_num)
+        if reports_pages.has_next
+        else None
+    )
+    prev_url = (
+        url_for("main.reports", page=reports_pages.prev_num)
+        if reports_pages.has_prev
+        else None
+    )
 
-    return render_template('reports.html', title="Reports",
-        reports=reports_pages.items, next_url=next_url, prev_url=prev_url)
-
+    return render_template(
+        "reports.html",
+        title="Reports",
+        reports=reports_pages.items,
+        next_url=next_url,
+        prev_url=prev_url,
+    )
