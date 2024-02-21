@@ -257,10 +257,6 @@ def series_view(series_id):
     # Retrieve the Series that was selected
     series = Series.query.filter_by(id=series_id).first_or_404()
     study_id = series.study_id
-    study = Study.query.filter_by(id=study_id).one_or_none()
-
-
-
     device_id=series.device_id
     study = Study.query.filter_by(id=study_id).one_or_none()
     device = Device.query.filter_by(id=device_id).first()
@@ -280,7 +276,9 @@ def series_view(series_id):
             "series_files": Image.query.filter_by(series_id=series_id).count(),
             "has_report": series.has_report,
             "study_description": study.description,
-            "manufacturer": device.manufacturer
+            "manufacturer": device.manufacturer,
+            "device_name": device.device_model
+
 
         }
 
