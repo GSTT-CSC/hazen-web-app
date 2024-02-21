@@ -28,12 +28,20 @@
             <h4 class="h4 text-center">Series description</h4></br>
             <table class="table table-striped"> <!-- Series information -->
                 <tr>
-                    <th>Series description</th>
-                    <td>{{ series.description }}</td>
+                    <th>Acquisition date</th>
+                    <td>{{ series.series_datetime.strftime('%Y-%m-%d') }}</td>
                 </tr>
                 <tr>
-                    <th>Acquisition date</th>
-                    <td>{{ series.series_datetime }}</td>
+                     <th>Study Description</th>
+                     <td>{{ series.study_description }}</td>
+                 </tr>
+                <tr>
+                    <th>Manufacturer</th>
+                    <td>{{ series.manufacturer }}</td>
+                </tr>
+                <tr>
+                    <th>Series description</th>
+                    <td>{{ series.description }}</td>
                 </tr>
                 <tr>
                     <th>Uploaded date</th>
