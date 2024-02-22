@@ -28,7 +28,7 @@
             <h4 class="h4 text-center">Series description</h4></br>
             <table class="table table-striped"> <!-- Series information -->
                 <tr>
-                    <th>Acquisition date</th>
+                    <th>Acquisition Date</th>
                     <td>{{ series.series_datetime.strftime('%Y-%m-%d') }}</td>
                 </tr>
                 <tr>
@@ -44,24 +44,20 @@
                     <td>{{ series.device_name }}</td>
                 </tr>
                 <tr>
-                    <th>Series description</th>
+                    <th>Series Description</th>
                     <td>{{ series.description }}</td>
                 </tr>
                 <tr>
-                    <th>Files in series</th>
+                    <th>Files in Series</th>
                     <td>{{ series.series_files }}</td>
                 </tr>
                 <tr>
-                    <th>Uploaded date</th>
+                    <th>Uploaded Date</th>
                     <td>{{ series.created_at.format('YYYY-MM-DD HH:mm') }}</td>
                 </tr>
                 <tr>
-                    <th>Reports made</th>
+                    <th>Has Reports</th>
                     <td>{{ series.has_report }}</td>
-                </tr>
-                <tr>
-                    <th>Study Description</th>
-                    <td>{{ series.study_description }}</td>
                 </tr>
             </table>
         </div>
