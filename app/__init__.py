@@ -36,10 +36,11 @@ def create_app(config_class=Config):
     # Create a Flask app with specified config
     app = Flask(__name__)
     app.config.from_object(config_class)
-    # connect to the database
-    db.init_app(app)
-    migrate.init_app(app, db)
-    db.create_all(app=app)
+    with app.app_context():
+        # connect to the database
+        db.init_app(app)
+        migrate.init_app(app, db)
+        db.create_all(app=app)
     # Initialise additional functionality
     login.init_app(app)
     mail.init_app(app)
