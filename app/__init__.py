@@ -23,7 +23,7 @@ from celery import Celery
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
-login.login_view = 'auth.login'
+login.login_view = "auth.login"
 mail = Mail()
 bootstrap = Bootstrap5()
 moment = Moment()
@@ -51,58 +51,73 @@ def create_app(config_class=Config):
     # register Authentication pages to app
     # register, login, logout, change password, edit profile
     from app.auth import bp as auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
+
+    app.register_blueprint(auth_bp, url_prefix="/auth")
 
     # register Error handling pages to app
     # internal_error, not_found_error
     from app.errors import bp as errors_bp
+
     app.register_blueprint(errors_bp)
 
     # register Main pages to app
     # workbench, series_view, reports
     from app.main import bp as main_bp
+
     app.register_blueprint(main_bp)
 
     # Create directory to hold uploaded files
-    os.makedirs(app.config['UPLOADED_PATH'], exist_ok=True)
+    os.makedirs(app.config["UPLOADED_PATH"], exist_ok=True)
 
     # Actions in production mode
     if not app.debug:
         # Set up the mail server
-        if app.config['MAIL_SERVER']:
+        if app.config["MAIL_SERVER"]:
             auth = None
-            if app.config['MAIL_USERNAME'] or app.config['MAIL_PASSWORD']:
-                auth = (app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+            if app.config["MAIL_USERNAME"] or app.config["MAIL_PASSWORD"]:
+                auth = (app.config["MAIL_USERNAME"], app.config["MAIL_PASSWORD"])
             secure = None
-            if app.config['MAIL_USE_TLS']:
+            if app.config["MAIL_USE_TLS"]:
                 secure = ()
             mail_handler = SMTPHandler(
-                mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
-                fromaddr='no-reply@' + app.config['MAIL_SERVER'],
-                toaddrs=app.config['ADMINS'], subject='Microblog Failure',
-                credentials=auth, secure=secure)
+                mailhost=(app.config["MAIL_SERVER"], app.config["MAIL_PORT"]),
+                fromaddr="no-reply@" + app.config["MAIL_SERVER"],
+                toaddrs=app.config["ADMINS"],
+                subject="Microblog Failure",
+                credentials=auth,
+                secure=secure,
+            )
             mail_handler.setLevel(logging.ERROR)
             app.logger.addHandler(mail_handler)
 
         # Set up logging
-        if not os.path.exists('logs'):
-            os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/hazen.log', maxBytes=10240,
-                                            backupCount=10)
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        if not os.path.exists("logs"):
+            os.mkdir("logs")
+        file_handler = RotatingFileHandler(
+            "logs/hazen.log", maxBytes=10240, backupCount=10
+        )
+        file_handler.setFormatter(
+            logging.Formatter(
+                "%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]"
+            )
+        )
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
 
         app.logger.setLevel(logging.INFO)
-        app.logger.info('Hazen startup')
+        app.logger.info("Hazen startup")
 
     return app
 
 
 def create_celery_app(app=None):
     app = app or create_app()
-    celery = Celery(__name__, broker=app.config['CELERY_BROKER_URL'], backend=app.config['CELERY_RESULT_BACKEND'], include=['app.tasks'])
+    celery = Celery(
+        __name__,
+        broker=app.config["CELERY_BROKER_URL"],
+        backend=app.config["CELERY_RESULT_BACKEND"],
+        include=["app.tasks"],
+    )
     celery.conf.update(app.config)
     TaskBase = celery.Task
 
