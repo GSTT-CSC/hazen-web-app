@@ -241,9 +241,11 @@ celery -A hazen.worker worker -l INFO -P solo
 ```
 
 ### 3) Start hazen-web-app
-Open a new terminal window. Ensure you are running your `hazen-web-app` venv and run:
+Open a new terminal window within the `hazen-web-app` folder, activate the venv and run:
 ```shell 
 python hazen.py
+# alternatively use (if there is a .flaskenv file present in the folder)
+flask run
 ```
 
 Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000](http://localhost:5000).
