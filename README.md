@@ -12,11 +12,14 @@ The hazen-web-app **requires** manual installation of the following software:
 
 
 ## Table of Contents
-- Setting up for the first time
+- Installing required software
   - [on MacOs](#setup-on-macos)
   - [on Linux](#setup-on-linux-ubuntu)
-- Running locally
+  - [on Windows](#setup-on-windows)
+- Cloning the repository and [setting up the environment](#setup-the-hazen-web-app)
+- Local development
   - [how to make and test code changes](#how-to-make-and-test-code-changes)
+- Deployment (local or in production)
   - [using docker compose](#setup-using-docker-compose)
 - Contributing to development and documentation
   - [process for contributing](#process-for-contributing)
@@ -55,6 +58,8 @@ Download [Postico](https://eggerapps.at/postico/) or any other graphical interfa
 - Press **Connect**
 - Create a new database called `hazen`
 
+You should be able to use Postico to view a PostgresSQL database called `hazen`.
+
 ### Message broker - RabbitMQ
 Official MacOS installation instructions using Homebrew can be found [here](https://www.rabbitmq.com/install-homebrew.html).
 
@@ -89,23 +94,6 @@ export PATH=$PATH:/usr/local/sbin
 source ~/.bashrc
 ```
 
-### hazen-web-app
-
-Clone this repository, create new virtual environment and install dependencies:
-```shell
-# clone repo
-git clone https://github.com/GSTT-CSC/hazen-web-app.git
-
-# create new venv
-# you may choose any folder to store files for the virtual environment
-python -m venv hazen-web-app
-source hazen-web-app/bin/activate
-
-# install dependencies
-cd hazen-web-app
-pip install -r requirements.txt
-```
-
 ## Setup on Linux (Ubuntu)
 
 ### Database - Postgres & Beekeeper Studio
@@ -122,18 +110,146 @@ Official RabbitMQ installation instructions for Ubuntu-based Linux distros: [Rab
 Essentially the following command is sufficient:
 `sudo apt-get install rabbitmq-server`
 
-### hazen-web-app
-
-Follow instructions above to clone the hazen-web-app repo and install the required Python packages.
-
 #### Troubleshooting tips
 On Linux, the `psycopg2` package should be renamed to `psycopg2-binary` to be installed.
 If any of the required packages error out, try installing the problematic packages one by one.
 The username and password for the Postgres user created at installation may need to be added to the config.py on L7 in the following format: `postgresql://username:password@localhost:5432/hazen`
 
 
+## Setup on Windows 
+
+### Database - Postgres & DBeaver
+
+Official Postgres instalation instructions for Windows can be found [here](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads).
+
+An interactive database manager available for Windows is [DBeaver](https://alternativeto.net/software/dbeaver/about/), although it is not essential for working with the hazen web-app.
+
+Create a database called hazen, ensure it is on port 5432. You may be asked to create a user and password for the database - take note of it for later, as it needs to be added to the database connection configuration.
+In the `config.py` on line 33 add the Postgres user details created at installation in the following format: `postgresql://username:password@localhost:5432/hazen`
+
+
+### Message broker - RabbitMQ
+
+For Windows, ERLANG must be downloaded before RabbitMQ. This can be done following official instructions [here](https://www.erlang.org/downloads).
+
+RabbitMQ can then be installed following official instructions [here](https://www.rabbitmq.com/docs/install-windows)
+
+Using **PowerShell with admin privileges** go to path where RabbitMQ is installed (for example `C:\\Program Files\RabbitMQ Server\rabbitmq_server-3.12.12\sbin`). 
+
+```Shell
+#example:
+cd C:\\Program Files\RabbitMQ Server\rabbitmq_server-3.12.12\sbin
+```
+Make sure that RabbitMQ is running by checking for it in Task Manager. If it is not then run the following command at the above location:
+
+```shell 
+.\rabbitmq-server start
+```
+
+Open the browser and navigate to [http://localhost:15672](http://localhost:15672).
+Using the standard username and password, log in to the Rabbit MQ admin page to access the dashboards:
+- Username = guest
+- Password = guest
+
+#### Troubleshooting:
+
+**RabbitMQ:**
+If the following message: `ERLANG_HOME not set correctly` is displayed when trying to enable RabbitMQ Management Plugins please type following on PowerShell (using the version numbers of your installation):
+
+```shell
+$env:ERLANG_HOME = "$env:ProgramFiles\Erlang OTP"
+$env:ERTS_HOME = "$env:ProgramFiles\Erlang OTP\erts-13.2.2"
+$env:RABBITMQ_HOME = "$env:Program Files\RabbitMQ Server\rabbitmq_server-3.12.12"
+$env:PATH += ";$env:ERLANG_HOME\bin;$env:ERTS_HOME\bin;$env:RABBITMQ_HOME\sbin"
+```
+
+Open another terminal and navigate to the RabbitMQ location (see above). Run the following code to restart RabbitMQ:
+
+```shell
+.\rabbitmq-service stop 
+.\rabbitmq-service remove
+.\rabbitmq-plugins enable rabbitmq_management --offline
+.\rabbitmq-service install
+.\rabbitmq-service start
+```
+
+**Make sure to replace the file paths in the commands with the ones matching your computer environment.**
+
+Further guidance can be found [here](https://gateway.sdl.com/apex/communityknowledge?articleName=000019802).
+
+**Celery:**
+
+Sometimes the celery logging runs into Windows permission issues displayed on the terminal as `Logging error` due to `Permission errors`.
+
+One way arround this is to remove celery logging by deletting (commenting out) lines 92-97 in `init.py`.
+
+
+## Setup the hazen-web-app
+
+Clone this repository, create new virtual environment and install dependencies:
+```shell
+# Create a dedicated folder for hazen web-app development
+mkdir hazen-dev
+cd hazen-dev
+
+# clone repo
+git clone https://github.com/GSTT-CSC/hazen-web-app.git
+# this creates a folder called hazen-web-app
+
+# create new venv
+# you may choose any folder to store files for the virtual environment
+python -m venv hazen-web-app-venv
+# this creates a folder called hazen-web-app-venv
+
+# activate the virtual environment
+# on Linux and Mac:
+source hazen-web-app-venv/bin/activate
+# on Windows:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Global
+.\hazen-web-app-venv\Scripts\Activate
+
+# install dependencies
+pip install -r hazen-web-app/requirements.txt
+```
+
+
+## How to make and test code changes
+
+The following instructions explain how to run hazen-web-app locally for development and testing purposes.
+
+### 1) Start the database and message broker services
+Running hazen-web-app requires multiple Terminal windows, all with an activated virtual environment.
+- Ensure that the postgresql database service is running and is available.
+- Ensure that the rabbitmq service is running and is available:
+
+Check RabbitMQ is running in your web browser: [http://localhost:15672/](http://localhost:15672/). Default RabbitMQ credentials should be:
+- Username = guest
+- Password = guest
+
+Start the service if needed:
+```shell
+# start RabbitMQ:
+rabbitmq-server start
+```
+
+### 2) Start Celery
+Open a new terminal, activate the virtual environment and run:
+
+```shell
+# start Celery:
+celery -A hazen.worker worker -l INFO -P solo
+```
+
+### 3) Start hazen-web-app
+Open a new terminal window. Ensure you are running your `hazen-web-app` venv and run:
+```shell 
+python hazen.py
+```
+
+Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000](http://localhost:5000).
+
 ## Setup using docker compose
-Make sure that Docker and `docker compose` are installed and set up correctly.
+Make sure that Docker and `docker compose` are installed and set up correctly, see official [installation guidance](https://docs.docker.com/desktop/install/mac-install/).
 
 Clone the repo, create an .env file with config variables and start the web-app:
 1. Create .env file and read variables. Can reuse default.env for testing or recommend creating your own in production.
@@ -149,46 +265,6 @@ docker compose up -d --build
 
 The hazen web app is then accessible on port 8080.
 
-## How to make and test code changes
-
-The following instructions explain how to run hazen-web-app locally for development and testing purposes.
-
-Running hazen-web-app requires multiple Terminal windows.
-
-### Open Postgres database & view using Postico
-In the Applications folder on MacOS:
-- Open Postgres.app
-- Open Postico
-
-You should be able to use Postico to view a PostgresSQL database called `hazen`.
-
-### Start RabbitMQ
-Open a new terminal window and run:
-
-```shell
-# start RabbitMQ:
-rabbitmq-server start
-```
-
-Check RabbitMQ is running in your web browser: [http://localhost:15672/](http://localhost:15672/). Default RabbitMQ credentials should be:
-- Username = guest
-- Password = guest
-
-### Start Celery
-Open a new terminal window and run:
-
-```shell
-# start Celery:
-celery -A hazen.worker worker
-```
-
-### Run hazen-web-app
-Open a new terminal window. Ensure you are running your `hazen-web-app` venv and run:
-```shell 
-python hazen.py
-```
-
-Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000](http://localhost:5000).
 
 ## Process for contributing
 
@@ -237,152 +313,3 @@ make html  -f Makefile
      <img width="663" alt="image" src="https://user-images.githubusercontent.com/67117138/167840022-25d838b9-950d-44cd-a30b-a916bd3c7eb0.png">
 </p>
 
-
-## Deployment on Heroku
-
-- Instructions TBC
-
-## Setup on Windows 
-
-### Postgres
-
-Official Postgres instalation instructions for Windows can be found here:  [https://www.enterprisedb.com/downloads/postgres-postgresql-downloads](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
-
-Unfortunately Postico doesn't work for Windows. An alternative is **DBeaver** [https://alternativeto.net/software/dbeaver/about/](https://alternativeto.net/software/dbeaver/about/)  although it is not essential for working with the app.
-
-Open pgAdmin and create a database called hazen, ensure it is on port 5432. You may be asked to create a password. 
-
-#### Troubleshooting tips:
-The username and password for the Postgres user created at installation may need to be added to the `config.py` on L33 in the following format: `postgresql://username:password@localhost:5432/hazen`
-
-### RabbitMQ
-
-For windows, ERLANG must be downloaded before RabbitMQ, this can be done using the following link: [https://www.erlang.org/downloads](https://www.erlang.org/downloads).
-
-RabbitMQ can then be installed using this link: [https://www.rabbitmq.com/docs/install-windows](https://www.rabbitmq.com/docs/install-windows)
-
-Using powershell with admin privileges go to path where RabbitMQ is installed ( example C:\Program Files\RabbitMQ Server\rabbitmq_server-3.12.12\sbin). 
-
-```Shell
-#example:
-cd\
-cd 'Program Files'
-cd 'RabbitMQ Server'
-cd  rabbitmq_server-3.12.12\sbin 
-```
-Make sure that RabbitMQ is running Type in Task Manager, if it is not then run the following
-
-```shell 
- .\rabbitmq-server start
-```
-
-Open the browser and navigate to [http://localhost:15672](http://localhost:15672).
-Use the standard user and password:
-- Username = guest
-- Password = guest
-
-#### Troubleshooting:
-
-If the following message: `ERLANG_HOME not set correctly` is displayed when trying to enable RabbitMQ Management Plugins please type following on powershell:
-
-```shell
-$env:ERLANG_HOME = "$env:ProgramFiles\Erlang OTP"
-$env:ERTS_HOME = "$env:ProgramFiles\Erlang OTP\erts-13.2.2"
-$env:RABBITMQ_HOME = "$env:Program Files\RabbitMQ Server\rabbitmq_server-3.12.12"
-$env:PATH += ";$env:ERLANG_HOME\bin;$env:ERTS_HOME\bin;$env:RABBITMQ_HOME\sbin"
-```
-
-Open another terminal and navigate to the RabbitMQ location. Run the following code to restart RabbitMQ:
-
-```shell
-.\rabbitmq-service stop 
-.\rabbitmq-service remove
-.\rabbitmq-plugins enable rabbitmq_management --offline
-.\rabbitmq-service install
-.\rabbitmq-service start
-```
-
-**Make sure to replace the file locations with the ones matching your ones.**
-
-Further guidance can be found here: [https://gateway.sdl.com/apex/communityknowledge?articleName=000019802](https://gateway.sdl.com/apex/communityknowledge?articleName=000019802).
-
-### Clone and Run hazen-web-app
-Clone this repository, create new venv and install:
-
-Suggestion: For simplicuty and the following code to work without modifying paths:
-1. Create a folder called Hazen-app 
-2. Run the following. The following code creates a folder called `hazen-web-app` with the cloned repository and another folder called `hazen-web-app-venv` with the virtual environment.
-
-**You might need to create a copy of `requirements.txt` in the virtual environment folder (in this case `hazen-web-app-venv`) depending on how your paths are defined.**
-
-```shell
-cd Hazen-app
-git clone https://github.com/GSTT-CSC/hazen-web-app.git 
-
-# create new venv
-
-python -m venv hazen-web-app-venv
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.\hazen-web-app-venv\Scripts\Activate
-
-# install hazen-web-app requirements 
-cd hazen-web-app-venv #must dowload the packages in the virtual environment
-pip install -r requirements.txt
-```
-
-*Note: For troubleshooting look here: [https://github.com/GSTT-CSC/hazen/blob/main/CONTRIBUTING.md](https://github.com/GSTT-CSC/hazen/blob/main/CONTRIBUTING.md).* 
-
-
-## Run app on Windows
-
-1. Ensure **RabbitMQ** is running. To check:
-
-- Open the browser and navigate to [http://localhost:15672]
-- Open Task Manager and check
-
-2. Open a terminal, **run the hazen-app**, make sure the virtual environment is active
-
-```shell 
-#you should be in Hazen-app folder
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.\hazen-web-app-venv\Scripts\Activate
-cd hazen-web-app
-python hazen.py
-
-```
-
-Open a web browser and use the hazen-web-app at the provided address, typically: [http://localhost:5000].
-You can now create new log-in/ registration details.
-
-Note: This code assummes that you have created the folders as reccomended below. If this is not the case instead use:
-```shell
-
- Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
- .\full_path_to_vitual_environment_folder\Scripts\Activate
- cd full_path_to_cloned_repository_folder
- python hazen.py
- ```
-
-3. Open another terminal - keep the python one open - and run Celery 
-
-```Shell
-#you should be in Hazen-app folder
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-.\hazen-web-app-venv\Scripts\Activate
-cd hazen-web-app
-celery -A hazen.worker worker -l INFO -P solo
- ```
-
-Note: This code assummes that you have created the folders as reccomended below. If this is not the case instead use:
-```shell
-
- Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
- .\full_path_to_vitual_environment_folder\Scripts\Activate
- cd full_path_to_cloned_repository_folder
- celery -A hazen.worker worker -l INFO -P solo
- 
- ```
- #### Celery Troubleshooting:
-
- Sometimes the celery logging will get confused with the hazen log and won't allow tasks to be performed in the app `Logging error` due to `Permission errors`.
- One way arround this is to remove celery logging by deletting L92-97 in `init.py`.
