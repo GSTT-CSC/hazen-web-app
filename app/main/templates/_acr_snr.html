@@ -1,0 +1,9 @@
+<tr>
+    <td colspan="2" style="text-align:center">{{ measurement }}</td>
+</tr>
+{% for key in value %}
+    <tr>
+        <td>{{ key }}</td>
+        <td>{{ value.get(key) }}</td>
+    </tr>
+{% endfor %}
