@@ -362,8 +362,11 @@ def series_view(series_id):
 @bp.route("/reports/", methods=["GET", "POST"])
 @login_required
 def reports():
+
+    current_user_id = current_user.id
+
     # Display existing reports
-    reports = db.session.query(Report).order_by(Report.created_at.desc())
+    reports = db.session.query(Report).filter_by(user_id=current_user_id).order_by(Report.created_at.desc())
 
     # Display reports in a table
     page = request.args.get("page", 1, type=int)
