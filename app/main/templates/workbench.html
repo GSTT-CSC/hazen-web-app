@@ -23,7 +23,7 @@
                 {{ super() }}
                 {{ dropzone.load_css() }}
                 {{ dropzone.style(
-                    'color: #768692; border: 2px dotted white; margin: auto; min-height: 100px; max-width: 700px'
+                    'background-color: #768692; color: #FFFFFF; border: 2px solid white; border-radius: 10px; margin: auto; min-height: 100px; max-width: 700px'
                     ) }}
                 {{ dropzone.create(action=url_for('main.workbench'))}}
                 {{ dropzone.load_js() }}
