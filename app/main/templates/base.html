@@ -74,21 +74,21 @@
 
                                 <li class="nav-item px-3">
                                     <a class="nav-link {% if request.endpoint == 'main.reports' %} active {% endif %}"
-                                       href="{{ url_for('main.reports') }}">
+                                       href="{{ url_for('main.reports') }}" style="color: #330072;">
                                         Reports
                                     </a>
                                 </li>
 
                                 <li class="nav-item px-3">
                                     <a class="nav-link {% if request.endpoint == 'auth.edit_profile' %} active {% endif %}"
-                                       href="{{ url_for('auth.edit_profile') }}">
+                                       href="{{ url_for('auth.edit_profile') }}" style="color: #7C2855;">
                                         Edit Profile
                                     </a>
                                 </li>
 
                                 <li class="nav-item px-3">
                                     <a class="nav-link {% if request.endpoint == 'auth.logout' %} active {% endif %}"
-                                        href="{{ url_for('auth.logout') }}">
+                                        href="{{ url_for('auth.logout') }}" style="color: #AE2573;">
                                         Logout
                                     </a>
                                 </li>
