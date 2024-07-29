@@ -21,8 +21,13 @@ body, html {
 }
 
 .btn-primary {
-    background-color: #41B6E6;
-    border-color: #41B6E6;
+    background-color: #005EB8;
+    border-color: #005EB8;
+}
+
+.btn-secondary {
+    background-color: #768692;
+    border-color: #768692;
 }
 
 .nav-link {
