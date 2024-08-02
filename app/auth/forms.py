@@ -8,6 +8,7 @@ from app.models import User
 class RegistrationForm(FlaskForm):
     firstname = StringField('First name', validators=[DataRequired()])
     lastname = StringField('Last name', validators=[DataRequired()])
+    #TODO: change this line to dropdown menu connected to database:
     institution = StringField('Institution', validators=[DataRequired()])
 
     username = StringField('Username', validators=[DataRequired()])
