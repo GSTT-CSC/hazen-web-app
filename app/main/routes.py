@@ -123,9 +123,14 @@ def delete(series_id=None, report_id=None):
 def workbench():
     # Save current user's ID to browser session
     session["current_user_id"] = current_user.id
+    current_user_id = current_user.id
 
-    # Display available image Series, grouped by Study UID
-    studies = db.session.query(Study).order_by(Study.created_at.desc())
+    # Obtain available image Series for current user ID
+    series = db.session.query(Series).filter_by(user_id=current_user_id).all()
+    # Obtain study IDs from each series uploaded by current user
+    study_ids = {series.study_id for series in series}
+    # Filter studies to those uploaded by current user, sort by creation date 
+    studies = db.session.query(Study).filter(Study.id.in_(study_ids)).order_by(Study.created_at.desc()).all()
     # Collect device information about studies for display
     study_device_list = [
         {"study": study, "device": study.series[0].devices} for study in studies
@@ -366,8 +371,11 @@ def series_view(series_id):
 @bp.route("/reports/", methods=["GET", "POST"])
 @login_required
 def reports():
+
+    current_user_id = current_user.id
+
     # Display existing reports
-    reports = db.session.query(Report).order_by(Report.created_at.desc())
+    reports = db.session.query(Report).filter_by(user_id=current_user_id).order_by(Report.created_at.desc())
 
     # Display reports in a table
     page = request.args.get("page", 1, type=int)
