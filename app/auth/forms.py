@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, BooleanField, SubmitField, StringField, TextAreaField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Length, Email, EqualTo
-
+from sqlalchemy import distinct
 from app.models import User
 
 
@@ -18,6 +18,10 @@ class RegistrationForm(FlaskForm):
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
+    def __init__(self, *args, **kwargs):
+        super(RegistrationForm, self).__init__(*args, **kwargs)
+        institutions = User.query.with_entities(distinct(User.institution)).all()
+        self.institution.choices = [(inst[0], inst[0]) for inst in institutions]
 
     def validate_username(self, username):
         user = User.query.filter_by(username=username.data).first()
