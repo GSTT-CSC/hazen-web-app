@@ -1,6 +1,6 @@
 body, html {
-    font-family: Inter, sans-serif;
-    background-color: #005EB8;
+    font-family: 'Frutiger', sans-serif;
+    background-color: #FFF;
 }
 
 .logo-tab {
@@ -14,18 +14,27 @@ body, html {
 }
 
 .hazen-brand {
-    font-family: Monda, sans-serif;
+    font-family: 'Frutiger', sans-serif;
+    font-weight: bold;
     font-size: xx-large;
-    color: #FFF;
+    color: #005EB8;
 }
 
 .btn-primary {
-    background-color: #41B6E6;
-    border-color: #41B6E6;
+    background-color: #005EB8;
+    border-color: #005EB8;
+    color: white;
+    box-shadow: none;
+    border: 2px solid #005EB8
+}
+
+.btn-secondary {
+    background-color: #768692;
+    border-color: #768692;
 }
 
 .nav-link {
-    color: #FFF;
+    color: #005EB8;
 }
 
 .hazen-accordion-centre {
@@ -33,19 +42,32 @@ body, html {
 }
 
 .hazen-dotted-horizontal-line {
-    border-bottom: 2px dotted #fff;
+    border-bottom: 2px dotted #425563;
 }
 
-.h1, .h2, .h3, .h4 {
-    font-family: Monda, sans-serif;
-    color: #FFF;
+.h1 {
+    font-family: 'Frutiger', sans-serif;
+    font-weight: bold;
+    color: #005EB8;
+}
+
+.h2, .h3, .h4 {
+    font-family: 'Frutiger', sans-serif;
+    color: #005EB8;
 }
 
 .p-front-page {
-    color: #FFF;
+    color: #231f20;
 }
 
 .hazen-within-p {
-    font-family: Monda, sans-serif;
+    font-family: 'Frutiger', sans-serif;
     font-size: 125%;
+    color: #005EB8;
 }
+.link-light {
+    font-family: 'Frutiger', sans-serif;
+    font-size: 125%;
+    color: #005EB8 !important;
+}
+/*test*/
