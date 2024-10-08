@@ -14,8 +14,6 @@ from hashlib import md5
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-# to test - comment out lines 46 - 99 in __init__.py
-
 @login.user_loader
 def load_user(id):
     return User.query.get(str(id))
@@ -31,20 +29,22 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     firstname = db.Column(db.String(64))
     lastname = db.Column(db.String(64))
     institution = db.Column(db.String(64))
-    username = db.Column(db.String(64), index=True, unique=True)  # why do we need index?
-    email = db.Column(db.String(320), index=True, unique=True)  # why do we need index?
+    # why do we need index?
+    username = db.Column(db.String(64), index=True, unique=True)
+    email = db.Column(db.String(320), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # One-to-many bidirectional relationship
     # images = db.relationship('Image', back_populates='user')
-    series = db.relationship('Series', back_populates='user')
-    reports = db.relationship('Report', back_populates='user')
+    series = db.relationship("Series", back_populates="user")
+    reports = db.relationship("Report", back_populates="user")
 
     def avatar(self, size):
-        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-            digest, size)
+        digest = md5(self.email.lower().encode("utf-8")).hexdigest()
+        return "https://www.gravatar.com/avatar/{}?d=identicon&s={}".format(
+            digest, size
+        )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -53,18 +53,21 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return "<User {}>".format(self.username)
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
-            {'reset_password': str(self.id), 'exp': time() + expires_in},
-            str(current_app.config['SECRET_KEY']), algorithm='HS256').decode('utf-8')
+            {"reset_password": str(self.id), "exp": time() + expires_in},
+            str(current_app.config["SECRET_KEY"]),
+            algorithm="HS256",
+        ).decode("utf-8")
 
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, current_app.config['SECRET_KEY'],
-                            algorithms=['HS256'])['reset_password']
+            id = jwt.decode(
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+            )["reset_password"]
         except:
             return
         return User.query.get(id)
@@ -77,10 +80,11 @@ class Task(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "ProcessTas
         db.Model.__init__(self, **kwargs)
 
     # Column "id" is created automatically by SurrogatePK() from database.py
-    name = db.Column(db.String(100), unique=True)  # TODO: Change from reading hazenlib modules to classes
+    name = db.Column(db.String(100), unique=True)
+    # TODO: Change from reading hazenlib modules to classes
 
     # One-to-many relationship
-    reports = db.relationship('Report', back_populates='task')
+    reports = db.relationship("Report", back_populates="task")
 
 
 class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisition"
@@ -93,11 +97,11 @@ class Image(Model, SurrogatePK, CreatedTimestampMixin):  # Previously "Acquisiti
     uid = db.Column(db.String(100))  # DICOM SOP Instance UID (0008,0018)
     filename = db.Column(db.String(200))
     accession_number = db.Column(db.String(100))  # DICOM Accession Number (0008,0050)
-    series_id = db.Column(db.ForeignKey('series.id'))
+    series_id = db.Column(db.ForeignKey("series.id"))
 
     # Many-to-one relationships
     # user = db.relationship('User', back_populates='images')
-    series = db.relationship('Series', back_populates='image')
+    series = db.relationship("Series", back_populates="image")
     # studies = db.relationship('Study', back_populates='image')
 
     @hybrid_property
@@ -122,19 +126,18 @@ class Series(Model, SurrogatePK, CreatedTimestampMixin):
     """
     (0018, 1030) Protocol Name
     """
-    user_id = db.Column(db.ForeignKey('user.id'))
-    device_id = db.Column(db.ForeignKey('device.id'))
-    study_id = db.Column(db.ForeignKey('study.id'))
-
+    user_id = db.Column(db.ForeignKey("user.id"))
+    device_id = db.Column(db.ForeignKey("device.id"))
+    study_id = db.Column(db.ForeignKey("study.id"))
 
     # One-to-many relationships # Parent to
-    image = db.relationship('Image', back_populates='series')
-    reports = db.relationship('Report', back_populates='series', lazy='dynamic')
+    image = db.relationship("Image", back_populates="series")
+    reports = db.relationship("Report", back_populates="series", lazy="dynamic")
 
     # Many-to-one relationship # Child of
-    user = db.relationship('User', back_populates='series')
-    devices = db.relationship('Device', back_populates='series')
-    studies = db.relationship('Study', back_populates='series')
+    user = db.relationship("User", back_populates="series")
+    devices = db.relationship("Device", back_populates="series")
+    studies = db.relationship("Study", back_populates="series")
 
     @hybrid_property
     def filesystem_key(self):
@@ -153,11 +156,11 @@ class Study(Model, SurrogatePK, CreatedTimestampMixin):
     study_date = db.Column(db.String(64))  # DICOM Study date (0008,0020)
 
     # One-to-many relationships
-    series = db.relationship('Series', back_populates='studies')
+    series = db.relationship("Series", back_populates="studies")
 
 
 class Device(Model, SurrogatePK, CreatedTimestampMixin):
-    __tablename__ = 'device'
+    __tablename__ = "device"
 
     def __init__(self, **kwargs):
         db.Model.__init__(self, **kwargs)
@@ -169,7 +172,7 @@ class Device(Model, SurrogatePK, CreatedTimestampMixin):
     station_name = db.Column(db.String(100))  # Station Name (0008, 1010)
 
     # One-to-many relationship
-    series = db.relationship('Series', back_populates='devices')
+    series = db.relationship("Series", back_populates="devices")
 
 
 class Report(Model, SurrogatePK, CreatedTimestampMixin):
@@ -182,14 +185,14 @@ class Report(Model, SurrogatePK, CreatedTimestampMixin):
     hazen_version = db.Column(db.String(10))  # Hazenlib version
     data = db.Column(JSONB)  # Results
 
-    user_id = db.Column(db.ForeignKey('user.id'))
-    series_id = db.Column(db.ForeignKey('series.id'))
-    task_name = db.Column(db.ForeignKey('task.name'))
+    user_id = db.Column(db.ForeignKey("user.id"))
+    series_id = db.Column(db.ForeignKey("series.id"))
+    task_name = db.Column(db.ForeignKey("task.name"))
 
     # Many-to-one relationships
-    user = db.relationship('User', back_populates='reports')
-    series = db.relationship('Series', back_populates='reports')
-    task = db.relationship('Task', back_populates='reports')
+    user = db.relationship("User", back_populates="reports")
+    series = db.relationship("Series", back_populates="reports")
+    task = db.relationship("Task", back_populates="reports")
 
     @hybrid_property
     def filesystem_key(self):
