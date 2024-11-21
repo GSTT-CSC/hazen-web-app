@@ -1,0 +1,9 @@
+<tr>
+    <td colspan="2" style="text-align:center">{{ measurement }}</td>
+</tr>
+{% for nested_key, nested_value in value.items() %}
+    <tr>
+        <td>{{ nested_key }}</td>
+        <td>{{ nested_value }}</td>
+    </tr>
+{% endfor %}
