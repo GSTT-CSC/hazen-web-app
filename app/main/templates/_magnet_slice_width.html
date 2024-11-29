@@ -1,0 +1,24 @@
+{% if value is mapping %}
+    <tr>
+        <td colspan="2" style="text-align:left"> <i> {{ measurement|capitalize }} </i> </td>
+    </tr>
+    {% for nested_key, nested_value in value.items() %}
+        <tr>
+            <td style="text-indent:50px">{{ nested_key|capitalize }}</td>
+            <td>{{ nested_value }}</td>
+        </tr>
+    {% endfor %}
+{% elif value is iterable %}
+    {% if value|length > 1 %}
+        <tr>
+            <td>{{ measurement|capitalize }}</td>
+            <td>{{ value[0] }}, {{ value[1] }}, {{ value[2] }}</td>
+        </tr>
+    {% endif %}
+{% else %}
+    <tr>
+        <td>{{ measurement|capitalize }}</td>
+        <td>{{ value }}</td>
+    </tr>
+{% endif %}
+

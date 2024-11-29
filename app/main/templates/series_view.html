@@ -95,10 +95,10 @@
                                             {% include '_acr_geom.html' %}
                                         {% elif task == 'acr_snr' %}
                                             {% include '_acr_snr.html' %}
-                                        {% elif task =='acr_slice_position' %}
+                                        {% elif task == 'acr_slice_position' %}
                                             {% include '_acr_slice_position.html' %}
-                                        {% elif task == 'slice_position' %}
-                                            {% include '_MagNET_slice_position.html' %}
+                                        {% elif task == 'slice_width' %}
+                                            {% include '_magnet_slice_width.html' %}
                                         {% else %}
                                             <tr>
                                                 <td>{{ measurement }}</td>
