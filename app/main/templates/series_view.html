@@ -99,6 +99,8 @@
                                             {% include '_acr_slice_position.html' %}
                                         {% elif task == 'slice_width' %}
                                             {% include '_magnet_slice_width.html' %}
+                                        {% elif task == 'snr' %}
+                                            {% include '_magnet_snr.html' %}
                                         {% else %}
                                             <tr>
                                                 <td>{{ measurement }}</td>

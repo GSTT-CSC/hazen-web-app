@@ -1,0 +1,20 @@
+{% if value is mapping %}
+    <tr>
+        <td colspan="2" style="text-align:left"> <i> {{ measurement.split(' ')[0] | upper }} {{ measurement.split(' ', 1)[1] }} </i> </td>
+    </tr>
+    {% for nested_key, nested_value in value.items() %}
+        {% if nested_value is mapping %}
+            {% for nested_nested_key, nested_nested_value in nested_value.items() %}
+                <tr>
+                    <td style="text-indent:50px"> {{ nested_nested_key|capitalize }} ({{ nested_key }})</td>
+                    <td>{{ nested_nested_value }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+        <tr>
+            <td style="text-indent:50px">{{ nested_key|capitalize }}</td>
+            <td>{{ nested_value }}</td>
+        </tr>
+        {% endif %}
+    {% endfor %}
+{% endif %}
