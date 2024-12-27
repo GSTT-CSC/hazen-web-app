@@ -1,0 +1,9 @@
+<tr>
+    <td colspan="2" style="text-align:left"><i>{{ measurement|capitalize }}</i></td>
+</tr>
+{% for key in value %}
+    <tr>
+        <td>{{ key|capitalize }}</td>
+        <td>{{ value.get(key) }}</td>
+    </tr>
+{% endfor %}
