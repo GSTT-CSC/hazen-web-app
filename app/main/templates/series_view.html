@@ -103,7 +103,7 @@
                                             {% include '_magnet_snr.html' %}
                                         {% else %}
                                             <tr>
-                                                <td>{{ measurement }}</td>
+                                                <td>{{ measurement|capitalize }}</td>
                                                 <td>{{ value }}</td>
                                             </tr>
                                         {% endif %}
