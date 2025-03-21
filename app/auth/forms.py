@@ -11,7 +11,7 @@ class RegistrationForm(FlaskForm):
     institution = StringField('Institution', validators=[DataRequired()])
 
     username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    email = StringField('Email Address (@gstt.nhs.uk or @nhs.net)', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(), EqualTo('password')])

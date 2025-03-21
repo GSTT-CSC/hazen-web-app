@@ -14,6 +14,7 @@ from app.models import User
 from app.auth.email import send_password_reset_email
 from app.auth.email import validate_nhs_email
 from app.auth.email import verify_email_auth_token
+import re
 
 
 
@@ -33,6 +34,10 @@ def register():
             email=form.email.data,
             email_authenticated=False
         )
+        if not re.match(r'.+@(nhs\.net|gstt\.nhs\.uk)$', user.email):
+            flash('Invalid email. Please use @gstt.nhs.uk or @nhs.net.', 'danger')
+            return redirect(url_for('auth.register'))
+
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
