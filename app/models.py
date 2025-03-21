@@ -59,7 +59,7 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': str(self.id), 'exp': time() + expires_in},
-            str(current_app.config['SECRET_KEY']), algorithm='HS256').decode('utf-8')
+            str(current_app.config['SECRET_KEY']), algorithm='HS256')
 
     @staticmethod
     def verify_reset_password_token(token):
