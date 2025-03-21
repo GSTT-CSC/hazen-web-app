@@ -131,6 +131,7 @@ CREATE TABLE public."user" (
     email character varying(320),
     password_hash character varying(128),
     last_seen timestamp without time zone
+    email_authenticated boolean
 );
 
 

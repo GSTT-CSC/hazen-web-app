@@ -66,6 +66,7 @@ Table "user" {
   "email" "character varying(320)"
   "password_hash" "character varying(128)"
   "last_seen" timestamp
+  "email_authenticated" boolean
 
 Indexes {
   email [type: btree, unique, name: "ix_user_email"]

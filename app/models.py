@@ -35,6 +35,7 @@ class User(UserMixin, Model, SurrogatePK, CreatedTimestampMixin):
     email = db.Column(db.String(320), index=True, unique=True)  # why do we need index?
     password_hash = db.Column(db.String(128))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    email_authenticated = db.Column(db.Boolean, default=False, nullable=False)
 
     # One-to-many bidirectional relationship
     # images = db.relationship('Image', back_populates='user')
