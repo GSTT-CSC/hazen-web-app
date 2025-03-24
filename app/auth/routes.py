@@ -3,7 +3,7 @@ Set of functions which dictate the behaviour of the admin functionality, e.g. re
 Utilises the functions in the app.auth.forms module.
 """
 
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, current_app, jsonify, Flask
 from werkzeug.urls import url_parse
 from flask_login import login_user, login_required, logout_user, current_user
 
@@ -12,21 +12,56 @@ from app.auth import bp
 from app.auth.forms import RegistrationForm, LoginForm, EditProfileForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.models import User
 from app.auth.email import send_password_reset_email
+from app.auth.email import validate_nhs_email
+from app.auth.email import verify_email_auth_token
+import re
+
 
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(firstname=form.firstname.data, lastname=form.lastname.data, institution=form.institution.data, username=form.username.data, email=form.email.data)
+        #create new user
+        user = User(
+            firstname=form.firstname.data,
+            lastname=form.lastname.data,
+            institution=form.institution.data,
+            username=form.username.data,
+            email=form.email.data,
+            email_authenticated=False
+        )
+        if not re.match(r'.+@(nhs\.net|gstt\.nhs\.uk)$', user.email):
+            flash('Invalid email. Please use @gstt.nhs.uk or @nhs.net.', 'danger')
+            return redirect(url_for('auth.register'))
+
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!', 'success')
+
+        #send email verification
+        validate_nhs_email(user)
+
+        flash('Please check your email for the verification link. The link will expire in 10 minutes.', 'info')
         return redirect(url_for('auth.login'))
+
     return render_template('register.html', title='Register', form=form)
+
+@bp.route('/confirm_email/<token>', methods=['GET', 'POST'])
+def confirm_email(token):
+    current_app.logger.info(f"Received token: {token}")
+    user = verify_email_auth_token(token)
+    if not user:
+        flash('Invalid or expired token.', 'danger')
+        return redirect(url_for('auth.register'))
+
+    flash('Email confirmed successfully! You can now log in.', 'success')
+    return redirect(url_for('auth.login'))
+
+
 
 
 @bp.route('/login', methods=['GET', 'POST'])
@@ -40,6 +75,10 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password', 'danger')
+            return redirect(url_for('auth.login'))
+
+        if not user.email_authenticated:
+            flash('Please verify your email address first.', 'warning')
             return redirect(url_for('auth.login'))
 
         login_user(user, remember=form.remember_me.data)

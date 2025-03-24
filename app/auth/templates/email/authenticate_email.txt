@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+To authenticate your email, paste the following link into your browser's address bar:
+
+{{ url_for('auth.confirm_email', token=token, _external=True) }}
+
+You will be redirected to the login page, please log in using your credentials.
+
+The link will expire in 10 minutes.
+
+Sincerely,
+
+The Hazen Team
